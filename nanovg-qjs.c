@@ -139,6 +139,22 @@ FUNC(DeleteGL3) {
 }
 #endif
 
+FUNC(BeginFrame) {
+  double w, h, ratio;
+
+  JS_ToFloat64(ctx, &w, argv[0]);
+  JS_ToFloat64(ctx, &h, argv[1]);
+  JS_ToFloat64(ctx, &ratio, argv[2]);
+
+  nvgBeginFrame(g_NVGcontext, w, h, ratio);
+  return JS_UNDEFINED;
+}
+
+FUNC(EndFrame) {
+  nvgEndFrame(g_NVGcontext);
+  return JS_UNDEFINED;
+}
+
 FUNC(Save) {
   nvgSave(g_NVGcontext);
   return JS_UNDEFINED;
@@ -418,6 +434,8 @@ static const JSCFunctionListEntry js_nanovg_funcs[] = {
 #ifdef NANOVG_GL3
     _JS_CFUNC_DEF(CreateGL3, 1),
 #endif
+    _JS_CFUNC_DEF(BeginFrame, 3),
+    _JS_CFUNC_DEF(EndFrame, 0),
     _JS_CFUNC_DEF(Save, 0),
     _JS_CFUNC_DEF(Restore, 0),
     _JS_CFUNC_DEF(BeginPath, 0),
