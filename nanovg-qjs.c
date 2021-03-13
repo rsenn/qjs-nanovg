@@ -595,6 +595,18 @@ FUNC(CreateImage) {
   return JS_NewInt32(ctx, nvgCreateImage(g_NVGcontext, file, flags));
 }
 
+FUNC(CreateImageRGBA) {
+  const char* file = JS_ToCString(ctx, argv[0]);
+  int32_t width, height, flags;
+  uint8_t* ptr;
+  size_t len;
+  JS_ToInt32(ctx, &width, argv[0]);
+  JS_ToInt32(ctx, &height, argv[1]);
+  JS_ToInt32(ctx, &flags, argv[2]);
+  ptr = JS_GetArrayBuffer(ctx, &len, argv[3]);
+  return JS_NewInt32(ctx, nvgCreateImageRGBA(g_NVGcontext, width, height, flags, (const unsigned char*)ptr));
+}
+
 FUNC(ImageSize) {
   int32_t id = 0;
   int width, height;
@@ -840,6 +852,7 @@ static const JSCFunctionListEntry js_nanovg_funcs[] = {
     _JS_CFUNC_DEF(HSL, 3),
     _JS_CFUNC_DEF(HSLA, 4),
     _JS_CFUNC_DEF(CreateImage, 2),
+    _JS_CFUNC_DEF(CreateImageRGBA, 4),
     _JS_CFUNC_DEF(ImageSize, 1),
     _JS_CFUNC_DEF(DeleteImage, 1),
     _JS_CFUNC_DEF(ResetTransform, 0),
