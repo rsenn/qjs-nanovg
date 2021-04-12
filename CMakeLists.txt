@@ -15,4 +15,6 @@ target_include_directories(qjs-nanovg
 target_link_libraries(qjs-nanovg PRIVATE GLEW GL)
 target_compile_definitions(qjs-nanovg PRIVATE JS_SHARED_LIBRARY=1 NANOVG_GLEW=1
                                               NANOVG_GL3_IMPLEMENTATION=1)
-install(TARGETS qjs-nanovg DESTINATION lib/quickjs)
+install(TARGETS qjs-nanovg DESTINATION lib/quickjs
+          PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ
+                      WORLD_EXECUTE)
