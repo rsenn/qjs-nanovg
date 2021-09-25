@@ -1,4 +1,4 @@
 [submodule "nanovg"]
 	path = nanovg
-	url = https://github.com/rsenn/nanovg.git
+	url = git@github.com:rsenn/nanovg.git
 	branch = main
