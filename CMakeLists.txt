@@ -2,9 +2,10 @@ project(qjs-nanovg C)
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindQuickJS.cmake)
 include(FindOpenGL)
-include(FindGLEW)
+#include(FindGLEW)
 include(FindPkgConfig)
 
+pkg_search_module(GLEW glew)
 pkg_search_module(GLFW glfw3)
 message(STATUS "GLFW_LIBRARY: ${GLFW_LIBRARY}")
 
@@ -17,7 +18,7 @@ add_library(
 set_target_properties(qjs-nanovg PROPERTIES OUTPUT_NAME nanovg PREFIX "")
 
 target_include_directories(qjs-nanovg PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/nanovg/src ${QUICKJS_INCLUDE_DIR})
-target_link_libraries(qjs-nanovg PRIVATE ${GLFW_LIBRARY} OpenGL::GL ${QUICKJS_LIBRARY})
+target_link_libraries(qjs-nanovg PRIVATE ${GLFW_LIBRARY} ${GLEW_LIBRARY} OpenGL::GL ${QUICKJS_LIBRARY})
 target_compile_definitions(qjs-nanovg PRIVATE JS_SHARED_LIBRARY=1 NANOVG_GLEW=1 NANOVG_GL3_IMPLEMENTATION=1)
 install(TARGETS qjs-nanovg DESTINATION lib/quickjs PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ
                                                                GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
