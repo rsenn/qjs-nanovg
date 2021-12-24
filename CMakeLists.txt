@@ -4,6 +4,13 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindQuickJS.cmake)
 include(FindOpenGL)
 #include(FindGLEW)
 include(FindPkgConfig)
+include(CheckCCompilerFlag)
+
+
+check_c_compiler_flag("-fvisibility=hidden" VISIBILITY_HIDDEN)
+if(VISIBILITY_HIDDEN)
+  set(MODULE_COMPILE_FLAGS ${MODULE_COMPILE_FLAGS} "-fvisibility=hidden")
+endif(VISIBILITY_HIDDEN)
 
 pkg_search_module(GLEW glew)
 pkg_search_module(GLFW glfw3)
@@ -18,7 +25,7 @@ add_library(
   qjs-nanovg SHARED nanovg-qjs.c nanovg-qjs.h ${CMAKE_CURRENT_SOURCE_DIR}/nanovg/src/nanovg.c
                     ${CMAKE_CURRENT_SOURCE_DIR}/nanovg/src/nanovg.h ${CMAKE_CURRENT_SOURCE_DIR}/nanovg/src/nanovg_gl.h)
 
-set_target_properties(qjs-nanovg PROPERTIES OUTPUT_NAME nanovg PREFIX "")
+set_target_properties(qjs-nanovg PROPERTIES OUTPUT_NAME nanovg PREFIX "" COMPILE_FLAGS "${MODULE_COMPILE_FLAGS}")
 
 target_include_directories(qjs-nanovg PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/nanovg/src ${QUICKJS_INCLUDE_DIR})
 target_link_libraries(qjs-nanovg PRIVATE ${GLFW_LIBRARY} ${GLEW_LIBRARY} OpenGL::GL ${QUICKJS_LIBRARY})
