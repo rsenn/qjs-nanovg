@@ -17,6 +17,7 @@ find_glew()
 find_glfw()
 
 find_quickjs()
+configure_quickjs()
 
 add_library(
   qjs-nanovg SHARED nanovg-qjs.c nanovg-qjs.h ${CMAKE_CURRENT_SOURCE_DIR}/nanovg/src/nanovg.c
