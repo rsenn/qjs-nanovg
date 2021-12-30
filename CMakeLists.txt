@@ -1,24 +1,26 @@
 project(qjs-nanovg C)
 
-include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindQuickJS.cmake)
 include(FindOpenGL)
-#include(FindGLEW)
 include(FindPkgConfig)
 include(CheckCCompilerFlag)
-
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindQuickJS.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindGLEW.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindGLFW.cmake)
 
 check_c_compiler_flag("-fvisibility=hidden" VISIBILITY_HIDDEN)
 if(VISIBILITY_HIDDEN)
   set(MODULE_COMPILE_FLAGS ${MODULE_COMPILE_FLAGS} "-fvisibility=hidden")
 endif(VISIBILITY_HIDDEN)
 
-pkg_search_module(GLEW glew)
+find_glew()
+find_glfw()
+#[[pkg_search_module(GLEW glew)
 pkg_search_module(GLFW glfw3)
 set(GLEW_LIBRARY "${pkgcfg_lib_GLEW_glew32}")
 set(GLFW_LIBRARY "${pkgcfg_lib_GLFW_glfw3}")
 message(STATUS "GLEW_LIBRARY: ${GLEW_LIBRARY}")
 message(STATUS "GLFW_LIBRARY: ${GLFW_LIBRARY}")
-
+]]
 find_quickjs()
 
 add_library(
