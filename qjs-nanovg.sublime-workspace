@@ -515,6 +515,580 @@
 	},
 	"buffers":
 	[
+		{
+			"file": "qjs-nanovg.sublime-project",
+			"settings":
+			{
+				"buffer_size": 47,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "nanovg-qjs.c",
+			"settings":
+			{
+				"buffer_size": 25353,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"contents": "project(qjs-nanovg C)\n\ninclude(FindOpenGL)\ninclude(FindPkgConfig)\ninclude(CheckCCompilerFlag)\ninclude(${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindQuickJS.cmake)\ninclude(${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindGLEW.cmake)\ninclude(${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindGLFW.cmake)\n\ncheck_c_compiler_flag(\"-fvisibility=hidden\" VISIBILITY_HIDDEN)\nif(VISIBILITY_HIDDEN)\n  set(MODULE_COMPILE_FLAGS ${MODULE_COMPILE_FLAGS} \"-fvisibility=hidden\")\nendif(VISIBILITY_HIDDEN)\ninclude(${CMAKE_CURRENT_SOURCE_DIR}/cmake/UseMultiArch.cmake)\n\nfind_glew()\nfind_glfw()\n\nfind_quickjs()\n\nadd_library(\n  qjs-nanovg SHARED nanovg-qjs.c nanovg-qjs.h ${CMAKE_CURRENT_SOURCE_DIR}/nanovg/src/nanovg.c\n                    ${CMAKE_CURRENT_SOURCE_DIR}/nanovg/src/nanovg.h ${CMAKE_CURRENT_SOURCE_DIR}/nanovg/src/nanovg_gl.h)\n\nset_target_properties(qjs-nanovg PROPERTIES OUTPUT_NAME nanovg PREFIX \"\" COMPILE_FLAGS \"${MODULE_COMPILE_FLAGS}\")\n\ntarget_include_directories(qjs-nanovg PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/nanovg/src ${QUICKJS_INCLUDE_DIR})\ntarget_link_libraries(qjs-nanovg PRIVATE ${GLFW_LIBRARY} ${GLEW_LIBRARY} OpenGL::GL ${QUICKJS_LIBRARY})\ntarget_compile_definitions(qjs-nanovg PRIVATE JS_SHARED_LIBRARY=1 NANOVG_GLEW=1 NANOVG_GL3_IMPLEMENTATION=1)\n\n\nif(NOT CMAKE_INSTALL_LIBDIR)\n  set(CMAKE_INSTALL_LIBDIR lib)\nendif(NOT CMAKE_INSTALL_LIBDIR)\nif(NOT QUICKJS_C_MODULE_DIR)\n  set(QUICKJS_C_MODULE_DIR \"${CMAKE_INSTALL_LIBDIR}/quickjs\")\nendif(NOT QUICKJS_C_MODULE_DIR)\n\nmessage(\"QUICKJS_C_MODULE_DIR: ${QUICKJS_C_MODULE_DIR}\")\n\n\ninstall(TARGETS qjs-nanovg DESTINATION \"${QUICKJS_C_MODULE_DIR}\" PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ\n                                                               GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)\n",
+			"file": "CMakeLists.txt",
+			"file_size": 1731,
+			"file_write_time": 132853167044262212,
+			"settings":
+			{
+				"buffer_size": 1731,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			},
+			"undo_stack":
+			[
+				[
+					1,
+					1,
+					"revert",
+					null,
+					"AgAAAAAAAAAAAAAAAAAAAAAAAADfBQAAcHJvamVjdChxanMtbmFub3ZnIEMpCgppbmNsdWRlKCR7Q01BS0VfQ1VSUkVOVF9TT1VSQ0VfRElSfS9jbWFrZS9GaW5kUXVpY2tKUy5jbWFrZSkKaW5jbHVkZShGaW5kT3BlbkdMKQojaW5jbHVkZShGaW5kR0xFVykKaW5jbHVkZShGaW5kUGtnQ29uZmlnKQppbmNsdWRlKENoZWNrQ0NvbXBpbGVyRmxhZykKCgpjaGVja19jX2NvbXBpbGVyX2ZsYWcoIi1mdmlzaWJpbGl0eT1oaWRkZW4iIFZJU0lCSUxJVFlfSElEREVOKQppZihWSVNJQklMSVRZX0hJRERFTikKICBzZXQoTU9EVUxFX0NPTVBJTEVfRkxBR1MgJHtNT0RVTEVfQ09NUElMRV9GTEFHU30gIi1mdmlzaWJpbGl0eT1oaWRkZW4iKQplbmRpZihWSVNJQklMSVRZX0hJRERFTikKCnBrZ19zZWFyY2hfbW9kdWxlKEdMRVcgZ2xldykKcGtnX3NlYXJjaF9tb2R1bGUoR0xGVyBnbGZ3MykKc2V0KEdMRVdfTElCUkFSWSAiJHtwa2djZmdfbGliX0dMRVdfZ2xldzMyfSIpCnNldChHTEZXX0xJQlJBUlkgIiR7cGtnY2ZnX2xpYl9HTEZXX2dsZnczfSIpCm1lc3NhZ2UoU1RBVFVTICJHTEVXX0xJQlJBUlk6ICR7R0xFV19MSUJSQVJZfSIpCm1lc3NhZ2UoU1RBVFVTICJHTEZXX0xJQlJBUlk6ICR7R0xGV19MSUJSQVJZfSIpCgpmaW5kX3F1aWNranMoKQoKYWRkX2xpYnJhcnkoCiAgcWpzLW5hbm92ZyBTSEFSRUQgbmFub3ZnLXFqcy5jIG5hbm92Zy1xanMuaCAke0NNQUtFX0NVUlJFTlRfU09VUkNFX0RJUn0vbmFub3ZnL3NyYy9uYW5vdmcuYwogICAgICAgICAgICAgICAgICAgICR7Q01BS0VfQ1VSUkVOVF9TT1VSQ0VfRElSfS9uYW5vdmcvc3JjL25hbm92Zy5oICR7Q01BS0VfQ1VSUkVOVF9TT1VSQ0VfRElSfS9uYW5vdmcvc3JjL25hbm92Z19nbC5oKQoKc2V0X3RhcmdldF9wcm9wZXJ0aWVzKHFqcy1uYW5vdmcgUFJPUEVSVElFUyBPVVRQVVRfTkFNRSBuYW5vdmcgUFJFRklYICIiIENPTVBJTEVfRkxBR1MgIiR7TU9EVUxFX0NPTVBJTEVfRkxBR1N9IikKCnRhcmdldF9pbmNsdWRlX2RpcmVjdG9yaWVzKHFqcy1uYW5vdmcgUFJJVkFURSAke0NNQUtFX0NVUlJFTlRfU09VUkNFX0RJUn0vbmFub3ZnL3NyYyAke1FVSUNLSlNfSU5DTFVERV9ESVJ9KQp0YXJnZXRfbGlua19saWJyYXJpZXMocWpzLW5hbm92ZyBQUklWQVRFICR7R0xGV19MSUJSQVJZfSAke0dMRVdfTElCUkFSWX0gT3BlbkdMOjpHTCAke1FVSUNLSlNfTElCUkFSWX0pCnRhcmdldF9jb21waWxlX2RlZmluaXRpb25zKHFqcy1uYW5vdmcgUFJJVkFURSBKU19TSEFSRURfTElCUkFSWT0xIE5BTk9WR19HTEVXPTEgTkFOT1ZHX0dMM19JTVBMRU1FTlRBVElPTj0xKQppbnN0YWxsKFRBUkdFVFMgcWpzLW5hbm92ZyBERVNUSU5BVElPTiBsaWIvcXVpY2tqcyBQRVJNSVNTSU9OUyBPV05FUl9SRUFEIE9XTkVSX1dSSVRFIE9XTkVSX0VYRUNVVEUgR1JPVVBfUkVBRAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBHUk9VUF9FWEVDVVRFIFdPUkxEX1JFQUQgV09STERfRVhFQ1VURSkKAAAAAAAAAABhBQAAAAAAAAAAAAA",
+					"AQAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					18,
+					1,
+					"insert",
+					{
+						"characters": "\n\n\n"
+					},
+					"AwAAAIoEAAAAAAAAiwQAAAAAAAAAAAAAiwQAAAAAAACMBAAAAAAAAAAAAACMBAAAAAAAAI0EAAAAAAAAAAAAAA",
+					"AQAAAAAAAAABAAAAigQAAAAAAACKBAAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					20,
+					1,
+					"paste",
+					null,
+					"AQAAAIwEAAAAAAAAnwUAAAAAAAAAAAAA",
+					"AQAAAAAAAAABAAAAjAQAAAAAAACMBAAAAAAAAAAAAAAAAAAA"
+				],
+				[
+					28,
+					1,
+					"insert_snippet",
+					{
+						"contents": "${1:\\${$SELECTION\\}}"
+					},
+					"AgAAAMgFAAAAAAAAyAUAAAAAAAALAAAAbGliL3F1aWNranPIBQAAAAAAANYFAAAAAAAAAAAAAA",
+					"AQAAAAAAAAABAAAAyAUAAAAAAADTBQAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					29,
+					1,
+					"insert_snippet",
+					{
+						"contents": "{${0:$SELECTION}}"
+					},
+					"AgAAAMgFAAAAAAAAyAUAAAAAAAAOAAAAJHtsaWIvcXVpY2tqc33IBQAAAAAAANgFAAAAAAAAAAAAAA",
+					"AQAAAAAAAAABAAAAyAUAAAAAAADWBQAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					30,
+					1,
+					"left_delete",
+					null,
+					"AQAAAMkFAAAAAAAAyQUAAAAAAAAOAAAAJHtsaWIvcXVpY2tqc30",
+					"AQAAAAAAAAABAAAAyQUAAAAAAADXBQAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					31,
+					1,
+					"run_macro_file",
+					{
+						"file": "res://Packages/Default/Delete Left Right.sublime-macro"
+					},
+					"AgAAAMgFAAAAAAAAyAUAAAAAAAABAAAAe8gFAAAAAAAAyAUAAAAAAAABAAAAfQ",
+					"AQAAAAAAAAABAAAAyQUAAAAAAADJBQAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					32,
+					1,
+					"insert_snippet",
+					{
+						"contents": "\"$0\""
+					},
+					"AQAAAMgFAAAAAAAAygUAAAAAAAAAAAAA",
+					"AQAAAAAAAAABAAAAyAUAAAAAAADIBQAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					33,
+					1,
+					"insert",
+					{
+						"characters": "${"
+					},
+					"AgAAAMkFAAAAAAAAygUAAAAAAAAAAAAAygUAAAAAAADLBQAAAAAAAAAAAAA",
+					"AQAAAAAAAAABAAAAyQUAAAAAAADJBQAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					34,
+					1,
+					"paste",
+					null,
+					"AQAAAMsFAAAAAAAA3wUAAAAAAAAAAAAA",
+					"AQAAAAAAAAABAAAAywUAAAAAAADLBQAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					35,
+					1,
+					"insert",
+					{
+						"characters": "}"
+					},
+					"AQAAAN8FAAAAAAAA4AUAAAAAAAAAAAAA",
+					"AQAAAAAAAAABAAAA3wUAAAAAAADfBQAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					37,
+					1,
+					"right_delete",
+					null,
+					"AQAAAOEFAAAAAAAA4QUAAAAAAAABAAAAIA",
+					"AQAAAAAAAAABAAAA4QUAAAAAAADhBQAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					38,
+					1,
+					"left_delete",
+					null,
+					"AQAAAOAFAAAAAAAA4AUAAAAAAAABAAAAIg",
+					"AQAAAAAAAAABAAAA4QUAAAAAAADhBQAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					39,
+					1,
+					"insert",
+					{
+						"characters": " "
+					},
+					"AQAAAOAFAAAAAAAA4QUAAAAAAAAAAAAA",
+					"AQAAAAAAAAABAAAA4AUAAAAAAADgBQAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					40,
+					1,
+					"left_delete",
+					null,
+					"AQAAAOAFAAAAAAAA4AUAAAAAAAABAAAAIA",
+					"AQAAAAAAAAABAAAA4QUAAAAAAADhBQAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					41,
+					1,
+					"insert",
+					{
+						"characters": "\""
+					},
+					"AQAAAOAFAAAAAAAA4QUAAAAAAAAAAAAA",
+					"AQAAAAAAAAABAAAA4AUAAAAAAADgBQAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					42,
+					1,
+					"insert",
+					{
+						"characters": " "
+					},
+					"AQAAAOEFAAAAAAAA4gUAAAAAAAAAAAAA",
+					"AQAAAAAAAAABAAAA4QUAAAAAAADhBQAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					55,
+					1,
+					"cut",
+					null,
+					"AQAAANUAAAAAAAAA1QAAAAAAAAA6AAAAaW5jbHVkZSgke0NNQUtFX0NVUlJFTlRfU09VUkNFX0RJUn0vY21ha2UvRmluZEdMRlcuY21ha2UpCg",
+					"AQAAAAAAAAABAAAA1QAAAAAAAAAPAQAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					56,
+					2,
+					"paste",
+					null,
+					"AgAAANUAAAAAAAAADwEAAAAAAAAAAAAADwEAAAAAAABJAQAAAAAAAAAAAAA",
+					"AQAAAAAAAAABAAAA1QAAAAAAAADVAAAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					63,
+					1,
+					"insert",
+					{
+						"characters": "Z"
+					},
+					"AgAAADkBAAAAAAAAOgEAAAAAAAAAAAAAOgEAAAAAAAA6AQAAAAAAAAgAAABGaW5kR0xGVw",
+					"AQAAAAAAAAABAAAAOQEAAAAAAABBAQAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					64,
+					1,
+					"left_delete",
+					null,
+					"AQAAADkBAAAAAAAAOQEAAAAAAAABAAAAWg",
+					"AQAAAAAAAAABAAAAOgEAAAAAAAA6AQAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					65,
+					1,
+					"insert",
+					{
+						"characters": "UseMlut"
+					},
+					"BwAAADkBAAAAAAAAOgEAAAAAAAAAAAAAOgEAAAAAAAA7AQAAAAAAAAAAAAA7AQAAAAAAADwBAAAAAAAAAAAAADwBAAAAAAAAPQEAAAAAAAAAAAAAPQEAAAAAAAA+AQAAAAAAAAAAAAA+AQAAAAAAAD8BAAAAAAAAAAAAAD8BAAAAAAAAQAEAAAAAAAAAAAAA",
+					"AQAAAAAAAAABAAAAOQEAAAAAAAA5AQAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					66,
+					3,
+					"left_delete",
+					null,
+					"AwAAAD8BAAAAAAAAPwEAAAAAAAABAAAAdD4BAAAAAAAAPgEAAAAAAAABAAAAdT0BAAAAAAAAPQEAAAAAAAABAAAAbA",
+					"AQAAAAAAAAABAAAAQAEAAAAAAABAAQAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					67,
+					1,
+					"insert",
+					{
+						"characters": "ultiArch"
+					},
+					"CAAAAD0BAAAAAAAAPgEAAAAAAAAAAAAAPgEAAAAAAAA/AQAAAAAAAAAAAAA/AQAAAAAAAEABAAAAAAAAAAAAAEABAAAAAAAAQQEAAAAAAAAAAAAAQQEAAAAAAABCAQAAAAAAAAAAAABCAQAAAAAAAEMBAAAAAAAAAAAAAEMBAAAAAAAARAEAAAAAAAAAAAAARAEAAAAAAABFAQAAAAAAAAAAAAA",
+					"AQAAAAAAAAABAAAAPQEAAAAAAAA9AQAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					108,
+					1,
+					"",
+					null,
+					"AgAAAAYCAAAAAAAARAIAAAAAAAAAAAAADwEAAAAAAAAPAQAAAAAAAD4AAABpbmNsdWRlKCR7Q01BS0VfQ1VSUkVOVF9TT1VSQ0VfRElSfS9jbWFrZS9Vc2VNdWx0aUFyY2guY21ha2UpCg",
+					"AQAAAAAAAAABAAAADwEAAAAAAABNAQAAAAAAAAAAAAAAAPC/"
+				]
+			]
+		},
+		{
+			"file": "cmake/UseMultiArch.cmake",
+			"settings":
+			{
+				"buffer_size": 1145,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "cmake/FindGLFW.cmake",
+			"settings":
+			{
+				"buffer_size": 1799,
+				"line_ending": "Unix"
+			},
+			"undo_stack":
+			[
+				[
+					3,
+					1,
+					"insert",
+					{
+						"characters": "\n\n\nif"
+					},
+					"CgAAACwCAAAAAAAALQIAAAAAAAAAAAAALQIAAAAAAAAvAgAAAAAAAAAAAAAvAgAAAAAAADACAAAAAAAAAAAAADACAAAAAAAAMgIAAAAAAAAAAAAALQIAAAAAAAAtAgAAAAAAAAIAAAAgIDACAAAAAAAAMQIAAAAAAAAAAAAAMQIAAAAAAAAzAgAAAAAAAAAAAAAuAgAAAAAAAC4CAAAAAAAAAgAAACAgMQIAAAAAAAAyAgAAAAAAAAAAAAAyAgAAAAAAADMCAAAAAAAAAAAAAA",
+					"AQAAAAAAAAABAAAALAIAAAAAAAAsAgAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					4,
+					1,
+					"insert_snippet",
+					{
+						"contents": "($0)"
+					},
+					"AQAAADMCAAAAAAAANQIAAAAAAAAAAAAA",
+					"AQAAAAAAAAABAAAAMwIAAAAAAAAzAgAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					5,
+					1,
+					"insert",
+					{
+						"characters": "NOT"
+					},
+					"AwAAADQCAAAAAAAANQIAAAAAAAAAAAAANQIAAAAAAAA2AgAAAAAAAAAAAAA2AgAAAAAAADcCAAAAAAAAAAAAAA",
+					"AQAAAAAAAAABAAAANAIAAAAAAAA0AgAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					6,
+					1,
+					"insert",
+					{
+						"characters": " GLFW_LIBRARY"
+					},
+					"DQAAADcCAAAAAAAAOAIAAAAAAAAAAAAAOAIAAAAAAAA5AgAAAAAAAAAAAAA5AgAAAAAAADoCAAAAAAAAAAAAADoCAAAAAAAAOwIAAAAAAAAAAAAAOwIAAAAAAAA8AgAAAAAAAAAAAAA8AgAAAAAAAD0CAAAAAAAAAAAAAD0CAAAAAAAAPgIAAAAAAAAAAAAAPgIAAAAAAAA/AgAAAAAAAAAAAAA/AgAAAAAAAEACAAAAAAAAAAAAAEACAAAAAAAAQQIAAAAAAAAAAAAAQQIAAAAAAABCAgAAAAAAAAAAAABCAgAAAAAAAEMCAAAAAAAAAAAAAEMCAAAAAAAARAIAAAAAAAAAAAAA",
+					"AQAAAAAAAAABAAAANwIAAAAAAAA3AgAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					8,
+					1,
+					"insert",
+					{
+						"characters": "\n"
+					},
+					"AwAAAEUCAAAAAAAARgIAAAAAAAAAAAAARgIAAAAAAABIAgAAAAAAAAAAAABIAgAAAAAAAEoCAAAAAAAAAAAAAA",
+					"AQAAAAAAAAABAAAARQIAAAAAAABFAgAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					9,
+					1,
+					"paste",
+					null,
+					"AQAAAEoCAAAAAAAAaAIAAAAAAAAAAAAA",
+					"AQAAAAAAAAABAAAASgIAAAAAAABKAgAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					12,
+					1,
+					"insert",
+					{
+						"characters": "\n"
+					},
+					"AgAAAGcCAAAAAAAAaAIAAAAAAAAAAAAAaAIAAAAAAABsAgAAAAAAAAAAAAA",
+					"AQAAAAAAAAABAAAAZwIAAAAAAABnAgAAAAAAAP///////+9/"
+				],
+				[
+					13,
+					1,
+					"left_delete",
+					null,
+					"AQAAAGoCAAAAAAAAagIAAAAAAAACAAAAICA",
+					"AQAAAAAAAAABAAAAbAIAAAAAAABsAgAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					14,
+					1,
+					"insert",
+					{
+						"characters": "endif"
+					},
+					"BQAAAGoCAAAAAAAAawIAAAAAAAAAAAAAawIAAAAAAABsAgAAAAAAAAAAAABsAgAAAAAAAG0CAAAAAAAAAAAAAG0CAAAAAAAAbgIAAAAAAAAAAAAAbgIAAAAAAABvAgAAAAAAAAAAAAA",
+					"AQAAAAAAAAABAAAAagIAAAAAAABqAgAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					15,
+					1,
+					"insert_snippet",
+					{
+						"contents": "($0)"
+					},
+					"AQAAAG8CAAAAAAAAcQIAAAAAAAAAAAAA",
+					"AQAAAAAAAAABAAAAbwIAAAAAAABvAgAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					16,
+					1,
+					"insert",
+					{
+						"characters": "NOT"
+					},
+					"AwAAAHACAAAAAAAAcQIAAAAAAAAAAAAAcQIAAAAAAAByAgAAAAAAAAAAAAByAgAAAAAAAHMCAAAAAAAAAAAAAA",
+					"AQAAAAAAAAABAAAAcAIAAAAAAABwAgAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					17,
+					1,
+					"insert",
+					{
+						"characters": " FL"
+					},
+					"AwAAAHMCAAAAAAAAdAIAAAAAAAAAAAAAdAIAAAAAAAB1AgAAAAAAAAAAAAB1AgAAAAAAAHYCAAAAAAAAAAAAAA",
+					"AQAAAAAAAAABAAAAcwIAAAAAAABzAgAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					18,
+					2,
+					"left_delete",
+					null,
+					"AgAAAHUCAAAAAAAAdQIAAAAAAAABAAAATHQCAAAAAAAAdAIAAAAAAAABAAAARg",
+					"AQAAAAAAAAABAAAAdgIAAAAAAAB2AgAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					19,
+					1,
+					"insert",
+					{
+						"characters": "GLFW_LIBRARY"
+					},
+					"DAAAAHQCAAAAAAAAdQIAAAAAAAAAAAAAdQIAAAAAAAB2AgAAAAAAAAAAAAB2AgAAAAAAAHcCAAAAAAAAAAAAAHcCAAAAAAAAeAIAAAAAAAAAAAAAeAIAAAAAAAB5AgAAAAAAAAAAAAB5AgAAAAAAAHoCAAAAAAAAAAAAAHoCAAAAAAAAewIAAAAAAAAAAAAAewIAAAAAAAB8AgAAAAAAAAAAAAB8AgAAAAAAAH0CAAAAAAAAAAAAAH0CAAAAAAAAfgIAAAAAAAAAAAAAfgIAAAAAAAB/AgAAAAAAAAAAAAB/AgAAAAAAAIACAAAAAAAAAAAAAA",
+					"AQAAAAAAAAABAAAAdAIAAAAAAAB0AgAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					25,
+					1,
+					"insert",
+					{
+						"characters": "\n"
+					},
+					"AwAAAEUCAAAAAAAARgIAAAAAAAAAAAAARgIAAAAAAABIAgAAAAAAAAAAAABIAgAAAAAAAEoCAAAAAAAAAAAAAA",
+					"AQAAAAAAAAABAAAARQIAAAAAAABFAgAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					26,
+					1,
+					"paste",
+					null,
+					"AQAAAEoCAAAAAAAAYQIAAAAAAAAAAAAA",
+					"AQAAAAAAAAABAAAASgIAAAAAAABKAgAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					27,
+					1,
+					"left_delete",
+					null,
+					"AQAAAGACAAAAAAAAYAIAAAAAAAABAAAACg",
+					"AQAAAAAAAAABAAAAYQIAAAAAAABhAgAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					28,
+					1,
+					"insert",
+					{
+						"characters": "\n"
+					},
+					"AgAAAGACAAAAAAAAYQIAAAAAAAAAAAAAYQIAAAAAAABlAgAAAAAAAAAAAAA",
+					"AQAAAAAAAAABAAAAYAIAAAAAAABgAgAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					31,
+					1,
+					"revert",
+					null,
+					"AgAAAAAAAAAAAAAAAAAAAAAAAAANBwAAIyBGaW5kIEdMRlcgbGlicmFyeSBhbmQgaW5jbHVkZSBwYXRocyBmb3IgQ01VNDYyCiMgVGhpcyBkZWZpbmVzIHRoZSBmb2xsb3dpbmc6CiMKIyBHTEZXX0ZPVU5EICAgICAgICAgICAgIElmIEdMRlcgaXMgZm91bmQKIyBHTEZXX0xJQlJBUlkgICAgICAgICAgIEdMRlcgbGlicmFyaWVzCiMgR0xGV19JTkNMVURFX0RJUiAgICAgICBHTEZXIGluY2x1ZGUgZGlyZWN0b3JpZXMKIyBHTEZXX0xJQlJBUllfRElSICAgICAgIEdMRlcgbGlicmFyeSBkaXJlY3RvcmllcwptYWNybyhmaW5kX2dsZncpCiAgaWYoVU5JWCkKICAgIHNldChHTEZXX0lOQ19OQU1FUyBnbGZ3My5oIGdsZncuaCkKICAgIHNldChHTEZXX0xJQl9OQU1FUyBsaWJnbGZ3LnNvIGxpYmdsZncuYSkKICAgIGlmKEFQUExFKQogICAgICBzZXQoR0xGV19MSUJfTkFNRVMgbGliZ2xmd19vc3guYSkKICAgIGVuZGlmKEFQUExFKQogIGVuZGlmKFVOSVgpCgogICMgR0xGVyBzdGF0aWMgbGlicmFyeQogIGZpbmRfbGlicmFyeShHTEZXX0xJQlJBUlkgTkFNRVMgJHtHTEZXX0xJQl9OQU1FU30gRE9DICJHTEZXIGxpYnJhcnkiKQoKCiAgaWYoTk9UIEdMRldfTElCUkFSWSkKICAgIGluY2x1ZGUoRmluZFBrZ0NvbmZpZykKICAgIAogICAgcGtnX3NlYXJjaF9tb2R1bGUoR0xGVyBnbGZ3MykKICBlbmRpZihOT1QgR0xGV19MSUJSQVJZKQoKCiAgIyBHTEZXIGxpYnJhcnkgZGlyCiAgaWYoTk9UIEdMRldfTElCUkFSWV9ESVIpCiAgICBpZihHTEZXX0xJQlJBUlkpCiAgICAgIGdldF9maWxlbmFtZV9jb21wb25lbnQoR0xGV19MSUJSQVJZX0RJUiAiJHtHTEZXX0xJQlJBUll9IiBESVJFQ1RPUlkpCiAgICBlbHNlKEdMRldfTElCUkFSWSkKICAgICAgZmluZF9wYXRoKEdMRldfTElCUkFSWV9ESVIgTkFNRVMgJHtHTEZXX0xJQl9OQU1FU30gRE9DICJHTEZXIGxpYnJhcnkgZGlyZWN0b3J5IikKICAgIGVuZGlmKEdMRldfTElCUkFSWSkKICBlbmRpZihOT1QgR0xGV19MSUJSQVJZX0RJUikKCiAgIyBHTEZXIGluY2x1ZGUgZGlyCiAgaWYoTk9UIEdMRldfSU5DTFVERV9ESVIpCiAgICBpZihHTEZXX0xJQlJBUllfRElSKQogICAgICBzdHJpbmcoUkVHRVggUkVQTEFDRSAiL2xpYi8uKiIgIi9pbmNsdWRlIiBHTEZXX0lOQ0xVREVfRElSICIke0dMRldfTElCUkFSWV9ESVJ9IikKICAgIGVsc2UoR0xGV19MSUJSQVJZX0RJUikKICAgICAgZmluZF9wYXRoKEdMRldfSU5DTFVERV9ESVIgTkFNRVMgJHtHTEZXX0lOQ19OQU1FU30gRE9DICJHTEZXIGluY2x1ZGUgZGlyZWN0b3J5IikKICAgIGVuZGlmKEdMRldfTElCUkFSWV9ESVIpCiAgZW5kaWYoTk9UIEdMRldfSU5DTFVERV9ESVIpCgogICMgVmVyc2lvbgogIHNldChHTEZXX1ZFUlNJT04gMy4xLjEpCgogIGlmKEdMRldfTElCUkFSWSkKICAgIG1lc3NhZ2UoU1RBVFVTICJHTEZXIGxpYnJhcnk6ICR7R0xGV19MSUJSQVJZfSIpCiAgICBtZXNzYWdlKFNUQVRVUyAiR0xGVyBsaWJyYXJ5IGRpcmVjdG9yeTogJHtHTEZXX0xJQlJBUllfRElSfSIpCiAgICBtZXNzYWdlKFNUQVRVUyAiR0xGVyBpbmNsdWRlIGRpcmVjdG9yeTogJHtHTEZXX0lOQ0xVREVfRElSfSIpCiAgZW5kaWYoR0xGV19MSUJSQVJZKQoKICAjIFNldCBwYWNrYWdlIHN0YW5kYXJkIGFyZ3MKICAjaW5jbHVkZShGaW5kUGFja2FnZUhhbmRsZVN0YW5kYXJkQXJncykKICAjRklORF9QQUNLQUdFX0hBTkRMRV9TVEFOREFSRF9BUkdTKEdMRlcgUkVRVUlSRURfVkFSUyBHTEZXX0xJQlJBUlkgR0xGV19JTkNMVURFX0RJUiBHTEZXX0xJQlJBUllfRElSIFZFUlNJT05fVkFSIEdMRldfVkVSU0lPTikKZW5kbWFjcm8oZmluZF9nbGZ3KQoAAAAAAAAAAAcHAAAAAAAAAAAAAA",
+					"AQAAAAAAAAABAAAAZQIAAAAAAABlAgAAAAAAAAAAAAAAAPC/"
+				]
+			]
+		},
+		{
+			"file": "cmake/FindGLEW.cmake",
+			"settings":
+			{
+				"buffer_size": 1791,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			},
+			"undo_stack":
+			[
+				[
+					3,
+					1,
+					"paste",
+					null,
+					"AQAAACUCAAAAAAAAeAIAAAAAAAAAAAAA",
+					"AQAAAAAAAAABAAAAJQIAAAAAAAAlAgAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					4,
+					1,
+					"insert",
+					{
+						"characters": "\n"
+					},
+					"AgAAAHgCAAAAAAAAeQIAAAAAAAAAAAAAeQIAAAAAAAB7AgAAAAAAAAAAAAA",
+					"AQAAAAAAAAABAAAAeAIAAAAAAAB4AgAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					8,
+					1,
+					"left_delete",
+					null,
+					"AgAAAG0CAAAAAAAAbQIAAAAAAAABAAAARngCAAAAAAAAeAIAAAAAAAACAAAAICA",
+					"AQAAAAAAAAABAAAAbgIAAAAAAABuAgAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					9,
+					1,
+					"insert",
+					{
+						"characters": "E"
+					},
+					"AQAAAG0CAAAAAAAAbgIAAAAAAAAAAAAA",
+					"AQAAAAAAAAABAAAAbQIAAAAAAABtAgAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					13,
+					1,
+					"left_delete",
+					null,
+					"AQAAAFUCAAAAAAAAVQIAAAAAAAABAAAARg",
+					"AQAAAAAAAAABAAAAVgIAAAAAAABWAgAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					14,
+					1,
+					"insert",
+					{
+						"characters": "E"
+					},
+					"AQAAAFUCAAAAAAAAVgIAAAAAAAAAAAAA",
+					"AQAAAAAAAAABAAAAVQIAAAAAAABVAgAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					16,
+					3,
+					"left_delete",
+					null,
+					"AwAAAFwCAAAAAAAAXAIAAAAAAAABAAAAM1sCAAAAAAAAWwIAAAAAAAABAAAAd1oCAAAAAAAAWgIAAAAAAAABAAAAZg",
+					"AQAAAAAAAAABAAAAXQIAAAAAAABdAgAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					17,
+					1,
+					"insert",
+					{
+						"characters": "ew"
+					},
+					"AgAAAFoCAAAAAAAAWwIAAAAAAAAAAAAAWwIAAAAAAABcAgAAAAAAAAAAAAA",
+					"AQAAAAAAAAABAAAAWgIAAAAAAABaAgAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					21,
+					1,
+					"left_delete",
+					null,
+					"AQAAADECAAAAAAAAMQIAAAAAAAABAAAARg",
+					"AQAAAAAAAAABAAAAMgIAAAAAAAAyAgAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					22,
+					1,
+					"insert",
+					{
+						"characters": "E"
+					},
+					"AQAAADECAAAAAAAAMgIAAAAAAAAAAAAA",
+					"AQAAAAAAAAABAAAAMQIAAAAAAAAxAgAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					31,
+					1,
+					"insert",
+					{
+						"characters": "\n"
+					},
+					"AwAAADwCAAAAAAAAPQIAAAAAAAAAAAAAPQIAAAAAAAA/AgAAAAAAAAAAAAA/AgAAAAAAAEECAAAAAAAAAAAAAA",
+					"AQAAAAAAAAABAAAAPAIAAAAAAAA8AgAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					32,
+					1,
+					"paste",
+					null,
+					"AQAAAEECAAAAAAAAWAIAAAAAAAAAAAAA",
+					"AQAAAAAAAAABAAAAQQIAAAAAAABBAgAAAAAAAAAAAAAAAPC/"
+				]
+			]
+		}
 	],
 	"build_system": "",
 	"build_system_choices":
@@ -672,7 +1246,8 @@
 	},
 	"expanded_folders":
 	[
-		"/home/roman/Projects/plot-cv/quickjs/qjs-nanovg"
+		"/home/roman/Projects/plot-cv/quickjs/qjs-nanovg",
+		"/home/roman/Projects/plot-cv/quickjs/qjs-nanovg/cmake"
 	],
 	"file_history":
 	[
@@ -842,6 +1417,275 @@
 		{
 			"sheets":
 			[
+				{
+					"buffer": 0,
+					"file": "qjs-nanovg.sublime-project",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 47,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"auto_complete_triggers":
+							[
+								{
+									"characters": "./",
+									"selector": "text.html, text.xml"
+								},
+								{
+									"rhs_empty": true,
+									"selector": "punctuation.accessor"
+								}
+							],
+							"function_name_status_row": 0,
+							"syntax": "Packages/JSON/JSON.sublime-syntax",
+							"tab_size": 2,
+							"tabs_extra_last_activated": 1640837606.41,
+							"tabs_extra_last_activated_sheet_index": 0,
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 5,
+					"stack_multiselect": false,
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "nanovg-qjs.c",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 25353,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"auto_complete_triggers":
+							[
+								{
+									"characters": "./",
+									"selector": "text.html, text.xml"
+								},
+								{
+									"rhs_empty": true,
+									"selector": "punctuation.accessor"
+								}
+							],
+							"function_name_status_row": 0,
+							"syntax": "Packages/C++/C.sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 4,
+					"stack_multiselect": false,
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "CMakeLists.txt",
+					"selected": true,
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1731,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								270,
+								154
+							]
+						],
+						"settings":
+						{
+							"auto_complete_triggers":
+							[
+								{
+									"characters": "./",
+									"selector": "text.html, text.xml"
+								},
+								{
+									"rhs_empty": true,
+									"selector": "punctuation.accessor"
+								}
+							],
+							"function_name_status_row": -1,
+							"syntax": "Packages/User/Themes/CMake.sublime-syntax",
+							"tab_size": 2,
+							"tabs_extra_last_activated": 1640846060.87,
+							"tabs_extra_last_activated_sheet_index": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"stack_multiselect": false,
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "cmake/UseMultiArch.cmake",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1145,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"auto_complete_triggers":
+							[
+								{
+									"characters": "./",
+									"selector": "text.html, text.xml"
+								},
+								{
+									"rhs_empty": true,
+									"selector": "punctuation.accessor"
+								}
+							],
+							"function_name_status_row": 0,
+							"syntax": "Packages/User/Themes/CMake.sublime-syntax",
+							"tab_size": 2,
+							"tabs_extra_last_activated": 1640843091.3,
+							"tabs_extra_last_activated_sheet_index": 3,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"stack_multiselect": false,
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "cmake/FindGLFW.cmake",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1799,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								613,
+								613
+							]
+						],
+						"settings":
+						{
+							"auto_complete_triggers":
+							[
+								{
+									"characters": "./",
+									"selector": "text.html, text.xml"
+								},
+								{
+									"rhs_empty": true,
+									"selector": "punctuation.accessor"
+								}
+							],
+							"function_name_status_row": 22,
+							"syntax": "Packages/User/Themes/CMake.sublime-syntax",
+							"tab_size": 2,
+							"tabs_extra_last_activated": 1640842946.15,
+							"tabs_extra_last_activated_sheet_index": 3,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 180.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 2,
+					"stack_multiselect": false,
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"file": "cmake/FindGLEW.cmake",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1791,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								600,
+								600
+							]
+						],
+						"settings":
+						{
+							"auto_complete_triggers":
+							[
+								{
+									"characters": "./",
+									"selector": "text.html, text.xml"
+								},
+								{
+									"rhs_empty": true,
+									"selector": "punctuation.accessor"
+								}
+							],
+							"function_name_status_row": 21,
+							"syntax": "Packages/User/Themes/CMake.sublime-syntax",
+							"tab_size": 2,
+							"tabs_extra_last_activated": 1640842758.66,
+							"tabs_extra_last_activated_sheet_index": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 3,
+					"stack_multiselect": false,
+					"type": "text"
+				}
 			]
 		}
 	],
