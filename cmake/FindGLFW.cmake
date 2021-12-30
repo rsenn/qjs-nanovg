@@ -17,6 +17,12 @@ macro(find_glfw)
   # GLFW static library
   find_library(GLFW_LIBRARY NAMES ${GLFW_LIB_NAMES} DOC "GLFW library")
 
+  if(NOT GLFW_LIBRARY)
+    include(FindPkgConfig)
+
+    pkg_search_module(GLFW glfw3)
+  endif(NOT GLFW_LIBRARY)
+
   # GLFW library dir
   if(NOT GLFW_LIBRARY_DIR)
     if(GLFW_LIBRARY)

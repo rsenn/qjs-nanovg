@@ -18,6 +18,8 @@ macro(find_glew)
   find_library(GLEW_LIBRARY NAMES ${GLEW_LIB_NAMES} DOC "GLEW library")
 
   if(NOT GLEW_LIBRARY)
+    include(FindPkgConfig)
+
     pkg_search_module(GLEW glew)
   endif(NOT GLEW_LIBRARY)
 
