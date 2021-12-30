@@ -7,24 +7,42 @@
 # GLFW_LIBRARY_DIR       GLFW library directories
 macro(find_glfw)
   if(UNIX)
-    set(GLFW_INC_NAMES glfw.h)
-    set(GLFW_LIB_NAMES libglfw.a)
+    set(GLFW_INC_NAMES glfw3.h glfw.h)
+    set(GLFW_LIB_NAMES libglfw.so libglfw.a)
     if(APPLE)
       set(GLFW_LIB_NAMES libglfw_osx.a)
     endif(APPLE)
   endif(UNIX)
 
   # GLFW static library
-  find_library(GLFW_LIBRARY NAMES ${GLFW_LIB_NAMES} PATHS ${PROJECT_SOURCE_DIR}/../lib DOC "GLFW library")
+  find_library(GLFW_LIBRARY NAMES ${GLFW_LIB_NAMES} DOC "GLFW library")
 
   # GLFW library dir
-  find_path(GLFW_LIBRARY_DIR NAMES ${GLFW_LIB_NAMES} PATHS ${PROJECT_SOURCE_DIR}/../lib DOC "462 include directories")
+  if(NOT GLFW_LIBRARY_DIR)
+    if(GLFW_LIBRARY)
+      get_filename_component(GLFW_LIBRARY_DIR "${GLFW_LIBRARY}" DIRECTORY)
+    else(GLFW_LIBRARY)
+      find_path(GLFW_LIBRARY_DIR NAMES ${GLFW_LIB_NAMES} DOC "GLFW library directory")
+    endif(GLFW_LIBRARY)
+  endif(NOT GLFW_LIBRARY_DIR)
 
   # GLFW include dir
-  find_path(GLFW_INCLUDE_DIR NAMES ${GLFW_INC_NAMES} PATHS ${PROJECT_SOURCE_DIR}/../include/GLFW DOC "462 include directories")
+  if(NOT GLFW_INCLUDE_DIR)
+    if(GLFW_LIBRARY_DIR)
+      string(REGEX REPLACE "/lib/.*" "/include" GLFW_INCLUDE_DIR "${GLFW_LIBRARY_DIR}")
+    else(GLFW_LIBRARY_DIR)
+      find_path(GLFW_INCLUDE_DIR NAMES ${GLFW_INC_NAMES} DOC "GLFW include directory")
+    endif(GLFW_LIBRARY_DIR)
+  endif(NOT GLFW_INCLUDE_DIR)
 
   # Version
   set(GLFW_VERSION 3.1.1)
+
+  if(GLFW_LIBRARY)
+    message(STATUS "GLFW library: ${GLFW_LIBRARY}")
+    message(STATUS "GLFW library directory: ${GLFW_LIBRARY_DIR}")
+    message(STATUS "GLFW include directory: ${GLFW_INCLUDE_DIR}")
+  endif(GLFW_LIBRARY)
 
   # Set package standard args
   #include(FindPackageHandleStandardArgs)
