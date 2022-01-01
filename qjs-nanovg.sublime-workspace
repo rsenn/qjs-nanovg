@@ -516,6 +516,1072 @@
 	"buffers":
 	[
 		{
+			"contents": "  js_init_module_nanovg\n  js_nanovg_init_with_context\n  js_init_module_nanovg",
+			"settings":
+			{
+				"buffer_size": 77,
+				"line_ending": "Unix",
+				"name": "𝌆 Outline",
+				"scratch": true
+			},
+			"undo_stack":
+			[
+				[
+					1,
+					1,
+					"outline_refresh",
+					{
+						"path": "/home/roman/Projects/plot-cv/quickjs/qjs-nanovg/cmake/FindGLEW.cmake",
+						"symkeys":
+						[
+							[
+								269,
+								278
+							],
+							[
+								299,
+								313
+							],
+							[
+								330,
+								344
+							],
+							[
+								391,
+								405
+							],
+							[
+								513,
+								527
+							],
+							[
+								779,
+								791
+							],
+							[
+								869,
+								883
+							],
+							[
+								1111,
+								1127
+							],
+							[
+								1199,
+								1213
+							],
+							[
+								1322,
+								1334
+							],
+							[
+								1399,
+								1411
+							],
+							[
+								1461,
+								1477
+							],
+							[
+								1527,
+								1543
+							]
+						],
+						"symlist":
+						[
+							"find_glew",
+							"GLEW_INC_NAMES",
+							"GLEW_LIB_NAMES",
+							"GLEW_LIB_NAMES",
+							"GLEW_LIB_NAMES",
+							"GLEW_LIBRARY",
+							"GLEW_LIB_NAMES",
+							"GLEW_LIBRARY_DIR",
+							"GLEW_INC_NAMES",
+							"GLEW_VERSION",
+							"GLEW_LIBRARY",
+							"GLEW_LIBRARY_DIR",
+							"GLEW_INCLUDE_DIR"
+						]
+					},
+					"AQAAAAAAAAAAAAAAvwAAAAAAAAAAAAAA",
+					"AQAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					2,
+					1,
+					"outline_refresh",
+					{
+						"path": "/home/roman/Projects/plot-cv/quickjs/qjs-nanovg/cmake/FindGLFW.cmake",
+						"symkeys":
+						[
+							[
+								269,
+								278
+							],
+							[
+								299,
+								313
+							],
+							[
+								338,
+								352
+							],
+							[
+								399,
+								413
+							],
+							[
+								521,
+								535
+							],
+							[
+								788,
+								800
+							],
+							[
+								878,
+								892
+							],
+							[
+								1120,
+								1136
+							],
+							[
+								1208,
+								1222
+							],
+							[
+								1331,
+								1343
+							],
+							[
+								1407,
+								1419
+							],
+							[
+								1469,
+								1485
+							],
+							[
+								1535,
+								1551
+							]
+						],
+						"symlist":
+						[
+							"find_glfw",
+							"GLFW_INC_NAMES",
+							"GLFW_LIB_NAMES",
+							"GLFW_LIB_NAMES",
+							"GLFW_LIB_NAMES",
+							"GLFW_LIBRARY",
+							"GLFW_LIB_NAMES",
+							"GLFW_LIBRARY_DIR",
+							"GLFW_INC_NAMES",
+							"GLFW_VERSION",
+							"GLFW_LIBRARY",
+							"GLFW_LIBRARY_DIR",
+							"GLFW_INCLUDE_DIR"
+						]
+					},
+					"AgAAAAAAAAAAAAAAAAAAAAAAAAC/AAAAICBmaW5kX2dsZXcKR0xFV19JTkNfTkFNRVMKR0xFV19MSUJfTkFNRVMKR0xFV19MSUJfTkFNRVMKR0xFV19MSUJfTkFNRVMKR0xFV19MSUJSQVJZCkdMRVdfTElCX05BTUVTCkdMRVdfTElCUkFSWV9ESVIKR0xFV19JTkNfTkFNRVMKR0xFV19WRVJTSU9OCkdMRVdfTElCUkFSWQpHTEVXX0xJQlJBUllfRElSCkdMRVdfSU5DTFVERV9ESVIAAAAAAAAAAL8AAAAAAAAAAAAAAA",
+					"AQAAAAAAAAAAAAAA"
+				],
+				[
+					3,
+					1,
+					"outline_refresh",
+					{
+						"path": "/home/roman/Projects/plot-cv/quickjs/qjs-nanovg/cmake/UseMultiArch.cmake",
+						"symkeys":
+						[
+							[
+								97,
+								117
+							],
+							[
+								238,
+								258
+							],
+							[
+								414,
+								430
+							],
+							[
+								520,
+								536
+							],
+							[
+								551,
+								562
+							],
+							[
+								621,
+								632
+							],
+							[
+								653,
+								669
+							],
+							[
+								673,
+								689
+							],
+							[
+								763,
+								783
+							],
+							[
+								787,
+								807
+							],
+							[
+								811,
+								822
+							],
+							[
+								834,
+								854
+							],
+							[
+								861,
+								872
+							],
+							[
+								909,
+								929
+							],
+							[
+								933,
+								953
+							],
+							[
+								957,
+								968
+							],
+							[
+								1009,
+								1029
+							]
+						],
+						"symlist":
+						[
+							"CMAKE_INSTALL_LIBDIR",
+							"CMAKE_INSTALL_LIBDIR",
+							"CMAKE_C_COMPILER",
+							"HOST_SYSTEM_NAME",
+							"SYSTEM_NAME",
+							"SYSTEM_NAME",
+							"CMAKE_CROSS_ARCH",
+							"CMAKE_CROSS_ARCH",
+							"CMAKE_INSTALL_PREFIX",
+							"CMAKE_INSTALL_LIBDIR",
+							"SYSTEM_NAME",
+							"CMAKE_INSTALL_LIBDIR",
+							"SYSTEM_NAME",
+							"CMAKE_INSTALL_PREFIX",
+							"CMAKE_INSTALL_LIBDIR",
+							"SYSTEM_NAME",
+							"CMAKE_INSTALL_LIBDIR"
+						]
+					},
+					"AgAAAAAAAAAAAAAAAAAAAAAAAAC/AAAAICBmaW5kX2dsZncKR0xGV19JTkNfTkFNRVMKR0xGV19MSUJfTkFNRVMKR0xGV19MSUJfTkFNRVMKR0xGV19MSUJfTkFNRVMKR0xGV19MSUJSQVJZCkdMRldfTElCX05BTUVTCkdMRldfTElCUkFSWV9ESVIKR0xGV19JTkNfTkFNRVMKR0xGV19WRVJTSU9OCkdMRldfTElCUkFSWQpHTEZXX0xJQlJBUllfRElSCkdMRldfSU5DTFVERV9ESVIAAAAAAAAAACcBAAAAAAAAAAAAAA",
+					"AQAAAAAAAAAAAAAA"
+				],
+				[
+					4,
+					1,
+					"outline_refresh",
+					{
+						"path": "/home/roman/Projects/plot-cv/quickjs/qjs-nanovg/CMakeLists.txt",
+						"symkeys":
+						[
+							[
+								104,
+								128
+							],
+							[
+								165,
+								189
+							],
+							[
+								223,
+								247
+							],
+							[
+								281,
+								305
+							],
+							[
+								425,
+								445
+							],
+							[
+								448,
+								468
+							],
+							[
+								641,
+								665
+							],
+							[
+								709,
+								733
+							],
+							[
+								757,
+								781
+							],
+							[
+								898,
+								918
+							],
+							[
+								971,
+								995
+							],
+							[
+								1010,
+								1029
+							],
+							[
+								1075,
+								1087
+							],
+							[
+								1091,
+								1103
+							],
+							[
+								1118,
+								1133
+							],
+							[
+								1281,
+								1301
+							],
+							[
+								1374,
+								1394
+							],
+							[
+								1398,
+								1418
+							],
+							[
+								1505,
+								1525
+							]
+						],
+						"symlist":
+						[
+							"CMAKE_CURRENT_SOURCE_DIR",
+							"CMAKE_CURRENT_SOURCE_DIR",
+							"CMAKE_CURRENT_SOURCE_DIR",
+							"CMAKE_CURRENT_SOURCE_DIR",
+							"MODULE_COMPILE_FLAGS",
+							"MODULE_COMPILE_FLAGS",
+							"CMAKE_CURRENT_SOURCE_DIR",
+							"CMAKE_CURRENT_SOURCE_DIR",
+							"CMAKE_CURRENT_SOURCE_DIR",
+							"MODULE_COMPILE_FLAGS",
+							"CMAKE_CURRENT_SOURCE_DIR",
+							"QUICKJS_INCLUDE_DIR",
+							"GLFW_LIBRARY",
+							"GLEW_LIBRARY",
+							"QUICKJS_LIBRARY",
+							"CMAKE_INSTALL_LIBDIR",
+							"QUICKJS_C_MODULE_DIR",
+							"CMAKE_INSTALL_LIBDIR",
+							"QUICKJS_C_MODULE_DIR"
+						]
+					},
+					"AgAAAAAAAAAAAAAAAAAAAAAAAAAnAQAAQ01BS0VfSU5TVEFMTF9MSUJESVIKQ01BS0VfSU5TVEFMTF9MSUJESVIKQ01BS0VfQ19DT01QSUxFUgpIT1NUX1NZU1RFTV9OQU1FClNZU1RFTV9OQU1FClNZU1RFTV9OQU1FCkNNQUtFX0NST1NTX0FSQ0gKQ01BS0VfQ1JPU1NfQVJDSApDTUFLRV9JTlNUQUxMX1BSRUZJWApDTUFLRV9JTlNUQUxMX0xJQkRJUgpTWVNURU1fTkFNRQpDTUFLRV9JTlNUQUxMX0xJQkRJUgpTWVNURU1fTkFNRQpDTUFLRV9JTlNUQUxMX1BSRUZJWApDTUFLRV9JTlNUQUxMX0xJQkRJUgpTWVNURU1fTkFNRQpDTUFLRV9JTlNUQUxMX0xJQkRJUgAAAAAAAAAAmAEAAAAAAAAAAAAA",
+					"AQAAAAAAAAAAAAAA"
+				],
+				[
+					5,
+					1,
+					"outline_refresh",
+					{
+						"path": "/home/roman/Projects/plot-cv/quickjs/qjs-nanovg/nanovg-qjs.c",
+						"symkeys":
+						[
+							[
+								344,
+								356
+							],
+							[
+								609,
+								634
+							],
+							[
+								781,
+								801
+							],
+							[
+								1484,
+								1498
+							],
+							[
+								1681,
+								1702
+							],
+							[
+								1914,
+								1936
+							],
+							[
+								2146,
+								2161
+							],
+							[
+								2532,
+								2548
+							],
+							[
+								3052,
+								3067
+							],
+							[
+								3421,
+								3425
+							],
+							[
+								19944,
+								19957
+							],
+							[
+								20020,
+								20035
+							],
+							[
+								24354,
+								24368
+							],
+							[
+								24977,
+								24998
+							],
+							[
+								25277,
+								25304
+							]
+						],
+						"symlist":
+						[
+							"JS_ToFloat32",
+							"js_nanovg_paint_finalizer",
+							"js_nanovg_paint_ctor",
+							"js_nanovg_wrap",
+							"GetFloat32PropertyStr",
+							"GetFloat32PropertyUint",
+							"js_get_NVGcolor",
+							"js_get_transform",
+							"js_NVGcolor_obj",
+							"FUNC",
+							"_JS_CFUNC_DEF",
+							"_JS_NANOVG_FLAG",
+							"js_nanovg_init",
+							"js_init_module_nanovg",
+							"js_nanovg_init_with_context"
+						]
+					},
+					"AgAAAAAAAAAAAAAAAAAAAAAAAACYAQAAQ01BS0VfQ1VSUkVOVF9TT1VSQ0VfRElSCkNNQUtFX0NVUlJFTlRfU09VUkNFX0RJUgpDTUFLRV9DVVJSRU5UX1NPVVJDRV9ESVIKQ01BS0VfQ1VSUkVOVF9TT1VSQ0VfRElSCk1PRFVMRV9DT01QSUxFX0ZMQUdTCk1PRFVMRV9DT01QSUxFX0ZMQUdTCkNNQUtFX0NVUlJFTlRfU09VUkNFX0RJUgpDTUFLRV9DVVJSRU5UX1NPVVJDRV9ESVIKQ01BS0VfQ1VSUkVOVF9TT1VSQ0VfRElSCk1PRFVMRV9DT01QSUxFX0ZMQUdTCkNNQUtFX0NVUlJFTlRfU09VUkNFX0RJUgpRVUlDS0pTX0lOQ0xVREVfRElSCkdMRldfTElCUkFSWQpHTEVXX0xJQlJBUlkKUVVJQ0tKU19MSUJSQVJZCkNNQUtFX0lOU1RBTExfTElCRElSClFVSUNLSlNfQ19NT0RVTEVfRElSCkNNQUtFX0lOU1RBTExfTElCRElSClFVSUNLSlNfQ19NT0RVTEVfRElSAAAAAAAAAAAiAQAAAAAAAAAAAAA",
+					"AQAAAAAAAAAAAAAA"
+				],
+				[
+					6,
+					1,
+					"outline_refresh",
+					{
+						"path": "/home/roman/Projects/plot-cv/quickjs/qjs-nanovg/qjs-nanovg.sublime-project",
+						"symkeys":
+						[
+						],
+						"symlist":
+						[
+						]
+					},
+					"AgAAAAAAAAAAAAAAAAAAAAAAAAAiAQAASlNfVG9GbG9hdDMyCiAganNfbmFub3ZnX3BhaW50X2ZpbmFsaXplcgogIGpzX25hbm92Z19wYWludF9jdG9yCiAganNfbmFub3ZnX3dyYXAKR2V0RmxvYXQzMlByb3BlcnR5U3RyCkdldEZsb2F0MzJQcm9wZXJ0eVVpbnQKICBqc19nZXRfTlZHY29sb3IKICBqc19nZXRfdHJhbnNmb3JtCiAganNfTlZHY29sb3Jfb2JqCkZVTkMKICBfSlNfQ0ZVTkNfREVGCiAgX0pTX05BTk9WR19GTEFHCiAganNfbmFub3ZnX2luaXQKICBqc19pbml0X21vZHVsZV9uYW5vdmcKICBqc19uYW5vdmdfaW5pdF93aXRoX2NvbnRleHQAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+					"AQAAAAAAAAAAAAAA"
+				],
+				[
+					7,
+					2,
+					"outline_refresh",
+					{
+						"path": "/home/roman/Projects/plot-cv/quickjs/qjs-nanovg/nanovg-qjs.c",
+						"symkeys":
+						[
+							[
+								344,
+								356
+							],
+							[
+								609,
+								634
+							],
+							[
+								781,
+								801
+							],
+							[
+								1484,
+								1498
+							],
+							[
+								1681,
+								1702
+							],
+							[
+								1914,
+								1936
+							],
+							[
+								2146,
+								2161
+							],
+							[
+								2532,
+								2548
+							],
+							[
+								3052,
+								3067
+							],
+							[
+								3421,
+								3425
+							],
+							[
+								19944,
+								19957
+							],
+							[
+								20020,
+								20035
+							],
+							[
+								24354,
+								24368
+							],
+							[
+								24977,
+								24998
+							],
+							[
+								25277,
+								25304
+							]
+						],
+						"symlist":
+						[
+							"JS_ToFloat32",
+							"js_nanovg_paint_finalizer",
+							"js_nanovg_paint_ctor",
+							"js_nanovg_wrap",
+							"GetFloat32PropertyStr",
+							"GetFloat32PropertyUint",
+							"js_get_NVGcolor",
+							"js_get_transform",
+							"js_NVGcolor_obj",
+							"FUNC",
+							"_JS_CFUNC_DEF",
+							"_JS_NANOVG_FLAG",
+							"js_nanovg_init",
+							"js_init_module_nanovg",
+							"js_nanovg_init_with_context"
+						]
+					},
+					"AwAAAAAAAAAAAAAAIgEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACIBAABKU19Ub0Zsb2F0MzIKICBqc19uYW5vdmdfcGFpbnRfZmluYWxpemVyCiAganNfbmFub3ZnX3BhaW50X2N0b3IKICBqc19uYW5vdmdfd3JhcApHZXRGbG9hdDMyUHJvcGVydHlTdHIKR2V0RmxvYXQzMlByb3BlcnR5VWludAogIGpzX2dldF9OVkdjb2xvcgogIGpzX2dldF90cmFuc2Zvcm0KICBqc19OVkdjb2xvcl9vYmoKRlVOQwogIF9KU19DRlVOQ19ERUYKICBfSlNfTkFOT1ZHX0ZMQUcKICBqc19uYW5vdmdfaW5pdAogIGpzX2luaXRfbW9kdWxlX25hbm92ZwogIGpzX25hbm92Z19pbml0X3dpdGhfY29udGV4dAAAAAAAAAAAIgEAAAAAAAAAAAAA",
+					"AQAAAAAAAAAAAAAA"
+				],
+				[
+					14,
+					1,
+					"outline_refresh",
+					{
+						"path": "/home/roman/Projects/plot-cv/quickjs/qjs-nanovg/nanovg-qjs.h",
+						"symkeys":
+						[
+							[
+								166,
+								193
+							],
+							[
+								232,
+								253
+							]
+						],
+						"symlist":
+						[
+							"js_nanovg_init_with_context",
+							"js_init_module_nanovg"
+						]
+					},
+					"AgAAAAAAAAAAAAAAAAAAAAAAAAAiAQAASlNfVG9GbG9hdDMyCiAganNfbmFub3ZnX3BhaW50X2ZpbmFsaXplcgogIGpzX25hbm92Z19wYWludF9jdG9yCiAganNfbmFub3ZnX3dyYXAKR2V0RmxvYXQzMlByb3BlcnR5U3RyCkdldEZsb2F0MzJQcm9wZXJ0eVVpbnQKICBqc19nZXRfTlZHY29sb3IKICBqc19nZXRfdHJhbnNmb3JtCiAganNfTlZHY29sb3Jfb2JqCkZVTkMKICBfSlNfQ0ZVTkNfREVGCiAgX0pTX05BTk9WR19GTEFHCiAganNfbmFub3ZnX2luaXQKICBqc19pbml0X21vZHVsZV9uYW5vdmcKICBqc19uYW5vdmdfaW5pdF93aXRoX2NvbnRleHQAAAAAAAAAADUAAAAAAAAAAAAAAA",
+					"AQAAAAAAAAABAAAA7wAAAAAAAAAEAQAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					15,
+					1,
+					"outline_refresh",
+					{
+						"path": "/home/roman/Projects/plot-cv/quickjs/qjs-nanovg/nanovg-qjs.c",
+						"symkeys":
+						[
+							[
+								344,
+								356
+							],
+							[
+								609,
+								634
+							],
+							[
+								781,
+								801
+							],
+							[
+								1484,
+								1498
+							],
+							[
+								1681,
+								1702
+							],
+							[
+								1914,
+								1936
+							],
+							[
+								2146,
+								2161
+							],
+							[
+								2532,
+								2548
+							],
+							[
+								3052,
+								3067
+							],
+							[
+								3421,
+								3425
+							],
+							[
+								19944,
+								19957
+							],
+							[
+								20020,
+								20035
+							],
+							[
+								24354,
+								24368
+							],
+							[
+								24977,
+								24998
+							],
+							[
+								25277,
+								25304
+							]
+						],
+						"symlist":
+						[
+							"JS_ToFloat32",
+							"js_nanovg_paint_finalizer",
+							"js_nanovg_paint_ctor",
+							"js_nanovg_wrap",
+							"GetFloat32PropertyStr",
+							"GetFloat32PropertyUint",
+							"js_get_NVGcolor",
+							"js_get_transform",
+							"js_NVGcolor_obj",
+							"FUNC",
+							"_JS_CFUNC_DEF",
+							"_JS_NANOVG_FLAG",
+							"js_nanovg_init",
+							"js_init_module_nanovg",
+							"js_nanovg_init_with_context"
+						]
+					},
+					"AgAAAAAAAAAAAAAAAAAAAAAAAAA1AAAAICBqc19uYW5vdmdfaW5pdF93aXRoX2NvbnRleHQKICBqc19pbml0X21vZHVsZV9uYW5vdmcAAAAAAAAAACIBAAAAAAAAAAAAAA",
+					"AQAAAAAAAAAAAAAA"
+				],
+				[
+					16,
+					1,
+					"outline_refresh",
+					{
+						"path": "/home/roman/Projects/plot-cv/quickjs/qjs-nanovg/nanovg-qjs.h",
+						"symkeys":
+						[
+							[
+								166,
+								193
+							],
+							[
+								232,
+								253
+							]
+						],
+						"symlist":
+						[
+							"js_nanovg_init_with_context",
+							"js_init_module_nanovg"
+						]
+					},
+					"AgAAAAAAAAAAAAAAAAAAAAAAAAAiAQAASlNfVG9GbG9hdDMyCiAganNfbmFub3ZnX3BhaW50X2ZpbmFsaXplcgogIGpzX25hbm92Z19wYWludF9jdG9yCiAganNfbmFub3ZnX3dyYXAKR2V0RmxvYXQzMlByb3BlcnR5U3RyCkdldEZsb2F0MzJQcm9wZXJ0eVVpbnQKICBqc19nZXRfTlZHY29sb3IKICBqc19nZXRfdHJhbnNmb3JtCiAganNfTlZHY29sb3Jfb2JqCkZVTkMKICBfSlNfQ0ZVTkNfREVGCiAgX0pTX05BTk9WR19GTEFHCiAganNfbmFub3ZnX2luaXQKICBqc19pbml0X21vZHVsZV9uYW5vdmcKICBqc19uYW5vdmdfaW5pdF93aXRoX2NvbnRleHQAAAAAAAAAADUAAAAAAAAAAAAAAA",
+					"AQAAAAAAAAAAAAAA"
+				],
+				[
+					17,
+					3,
+					"outline_refresh",
+					{
+						"path": "/home/roman/Projects/plot-cv/quickjs/qjs-nanovg/nanovg-qjs.h",
+						"symkeys":
+						[
+							[
+								97,
+								118
+							],
+							[
+								214,
+								241
+							],
+							[
+								280,
+								301
+							]
+						],
+						"symlist":
+						[
+							"js_init_module_nanovg",
+							"js_nanovg_init_with_context",
+							"js_init_module_nanovg"
+						]
+					},
+					"BgAAAAAAAAAAAAAAAAAAAAAAAAA1AAAAICBqc19uYW5vdmdfaW5pdF93aXRoX2NvbnRleHQKICBqc19pbml0X21vZHVsZV9uYW5vdmcAAAAAAAAAAE0AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABNAAAAICBqc19pbml0X21vZHVsZV9uYW5vdmcKICBqc19uYW5vdmdfaW5pdF93aXRoX2NvbnRleHQKICBqc19pbml0X21vZHVsZV9uYW5vdmcAAAAAAAAAAE0AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABNAAAAICBqc19pbml0X21vZHVsZV9uYW5vdmcKICBqc19uYW5vdmdfaW5pdF93aXRoX2NvbnRleHQKICBqc19pbml0X21vZHVsZV9uYW5vdmcAAAAAAAAAAE0AAAAAAAAAAAAAAA",
+					"AQAAAAAAAAAAAAAA"
+				],
+				[
+					18,
+					1,
+					"outline_refresh",
+					{
+						"path": "/home/roman/Projects/plot-cv/quickjs/qjs-nanovg/nanovg-qjs.h",
+						"symkeys":
+						[
+							[
+								97,
+								118
+							],
+							[
+								175,
+								202
+							],
+							[
+								281,
+								302
+							]
+						],
+						"symlist":
+						[
+							"js_init_module_nanovg",
+							"js_nanovg_init_with_context",
+							"js_init_module_nanovg"
+						]
+					},
+					"AgAAAAAAAAAAAAAAAAAAAAAAAABNAAAAICBqc19pbml0X21vZHVsZV9uYW5vdmcKICBqc19uYW5vdmdfaW5pdF93aXRoX2NvbnRleHQKICBqc19pbml0X21vZHVsZV9uYW5vdmcAAAAAAAAAAE0AAAAAAAAAAAAAAA",
+					"AQAAAAAAAAAAAAAA"
+				],
+				[
+					19,
+					2,
+					"outline_refresh",
+					{
+						"path": null,
+						"symkeys":
+						[
+						],
+						"symlist":
+						[
+						]
+					},
+					"AwAAAAAAAAAAAAAAAAAAAAAAAABNAAAAICBqc19pbml0X21vZHVsZV9uYW5vdmcKICBqc19uYW5vdmdfaW5pdF93aXRoX2NvbnRleHQKICBqc19pbml0X21vZHVsZV9uYW5vdmcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+					"AQAAAAAAAAAAAAAA"
+				],
+				[
+					20,
+					1,
+					"outline_refresh",
+					{
+						"path": null,
+						"symkeys":
+						[
+						],
+						"symlist":
+						[
+						]
+					},
+					"AQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+					"AQAAAAAAAAAAAAAA"
+				],
+				[
+					21,
+					2,
+					"outline_refresh",
+					{
+						"path": null,
+						"symkeys":
+						[
+						],
+						"symlist":
+						[
+						]
+					},
+					"AgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+					"AQAAAAAAAAAAAAAA"
+				],
+				[
+					22,
+					1,
+					"outline_refresh",
+					{
+						"path": null,
+						"symkeys":
+						[
+						],
+						"symlist":
+						[
+						]
+					},
+					"AQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+					"AQAAAAAAAAAAAAAA"
+				],
+				[
+					23,
+					1,
+					"outline_refresh",
+					{
+						"path": "/home/roman/Projects/plot-cv/quickjs/qjs-nanovg/CMakeFiles/qjs-nanovg.dir/build.make",
+						"symkeys":
+						[
+							[
+								140,
+								156
+							],
+							[
+								333,
+								342
+							],
+							[
+								381,
+								382
+							],
+							[
+								426,
+								427
+							],
+							[
+								473,
+								474
+							],
+							[
+								522,
+								523
+							],
+							[
+								572,
+								573
+							],
+							[
+								581,
+								590
+							],
+							[
+								736,
+								753
+							],
+							[
+								795,
+								806
+							],
+							[
+								808,
+								814
+							],
+							[
+								1922,
+								1981
+							],
+							[
+								2039,
+								2098
+							],
+							[
+								2132,
+								2191
+							],
+							[
+								2821,
+								2880
+							],
+							[
+								3241,
+								3300
+							],
+							[
+								3667,
+								3733
+							],
+							[
+								3791,
+								3857
+							],
+							[
+								3898,
+								3964
+							],
+							[
+								4629,
+								4695
+							],
+							[
+								5077,
+								5143
+							],
+							[
+								5766,
+								5794
+							],
+							[
+								5856,
+								5884
+							],
+							[
+								5953,
+								5981
+							],
+							[
+								6039,
+								6067
+							],
+							[
+								6104,
+								6132
+							],
+							[
+								6158,
+								6186
+							],
+							[
+								6643,
+								6693
+							],
+							[
+								6724,
+								6730
+							],
+							[
+								6785,
+								6835
+							],
+							[
+								6956,
+								6962
+							],
+							[
+								7017,
+								7068
+							],
+							[
+								7419,
+								7425
+							]
+						],
+						"symlist":
+						[
+							".DELETE_ON_ERROR",
+							".SUFFIXES",
+							"%",
+							"%",
+							"%",
+							"%",
+							"%",
+							".SUFFIXES",
+							"$(VERBOSE).SILENT",
+							"cmake_force",
+							".PHONY",
+							"quickjs/qjs-nanovg/CMakeFiles/qjs-nanovg.dir/nanovg-qjs.c.o",
+							"quickjs/qjs-nanovg/CMakeFiles/qjs-nanovg.dir/nanovg-qjs.c.o",
+							"quickjs/qjs-nanovg/CMakeFiles/qjs-nanovg.dir/nanovg-qjs.c.o",
+							"quickjs/qjs-nanovg/CMakeFiles/qjs-nanovg.dir/nanovg-qjs.c.i",
+							"quickjs/qjs-nanovg/CMakeFiles/qjs-nanovg.dir/nanovg-qjs.c.s",
+							"quickjs/qjs-nanovg/CMakeFiles/qjs-nanovg.dir/nanovg/src/nanovg.c.o",
+							"quickjs/qjs-nanovg/CMakeFiles/qjs-nanovg.dir/nanovg/src/nanovg.c.o",
+							"quickjs/qjs-nanovg/CMakeFiles/qjs-nanovg.dir/nanovg/src/nanovg.c.o",
+							"quickjs/qjs-nanovg/CMakeFiles/qjs-nanovg.dir/nanovg/src/nanovg.c.i",
+							"quickjs/qjs-nanovg/CMakeFiles/qjs-nanovg.dir/nanovg/src/nanovg.c.s",
+							"quickjs/qjs-nanovg/nanovg.so",
+							"quickjs/qjs-nanovg/nanovg.so",
+							"quickjs/qjs-nanovg/nanovg.so",
+							"quickjs/qjs-nanovg/nanovg.so",
+							"quickjs/qjs-nanovg/nanovg.so",
+							"quickjs/qjs-nanovg/nanovg.so",
+							"quickjs/qjs-nanovg/CMakeFiles/qjs-nanovg.dir/build",
+							".PHONY",
+							"quickjs/qjs-nanovg/CMakeFiles/qjs-nanovg.dir/clean",
+							".PHONY",
+							"quickjs/qjs-nanovg/CMakeFiles/qjs-nanovg.dir/depend",
+							".PHONY"
+						]
+					},
+					"AQAAAAAAAAAAAAAAYQQAAAAAAAAAAAAA",
+					"AQAAAAAAAAAAAAAA"
+				],
+				[
+					24,
+					1,
+					"outline_refresh",
+					{
+						"path": "/home/roman/Projects/plot-cv/quickjs/qjs-nanovg/nanovg-qjs.h",
+						"symkeys":
+						[
+							[
+								97,
+								118
+							],
+							[
+								175,
+								202
+							],
+							[
+								281,
+								302
+							]
+						],
+						"symlist":
+						[
+							"js_init_module_nanovg",
+							"js_nanovg_init_with_context",
+							"js_init_module_nanovg"
+						]
+					},
+					"AgAAAAAAAAAAAAAAAAAAAAAAAABhBAAAICAuREVMRVRFX09OX0VSUk9SCiAgLlNVRkZJWEVTCiUKJQolCiUKJQogIC5TVUZGSVhFUwokKFZFUkJPU0UpLlNJTEVOVAogIGNtYWtlX2ZvcmNlCiAgLlBIT05ZCiAgcXVpY2tqcy9xanMtbmFub3ZnL0NNYWtlRmlsZXMvcWpzLW5hbm92Zy5kaXIvbmFub3ZnLXFqcy5jLm8KICBxdWlja2pzL3Fqcy1uYW5vdmcvQ01ha2VGaWxlcy9xanMtbmFub3ZnLmRpci9uYW5vdmctcWpzLmMubwogIHF1aWNranMvcWpzLW5hbm92Zy9DTWFrZUZpbGVzL3Fqcy1uYW5vdmcuZGlyL25hbm92Zy1xanMuYy5vCiAgcXVpY2tqcy9xanMtbmFub3ZnL0NNYWtlRmlsZXMvcWpzLW5hbm92Zy5kaXIvbmFub3ZnLXFqcy5jLmkKICBxdWlja2pzL3Fqcy1uYW5vdmcvQ01ha2VGaWxlcy9xanMtbmFub3ZnLmRpci9uYW5vdmctcWpzLmMucwogIHF1aWNranMvcWpzLW5hbm92Zy9DTWFrZUZpbGVzL3Fqcy1uYW5vdmcuZGlyL25hbm92Zy9zcmMvbmFub3ZnLmMubwogIHF1aWNranMvcWpzLW5hbm92Zy9DTWFrZUZpbGVzL3Fqcy1uYW5vdmcuZGlyL25hbm92Zy9zcmMvbmFub3ZnLmMubwogIHF1aWNranMvcWpzLW5hbm92Zy9DTWFrZUZpbGVzL3Fqcy1uYW5vdmcuZGlyL25hbm92Zy9zcmMvbmFub3ZnLmMubwogIHF1aWNranMvcWpzLW5hbm92Zy9DTWFrZUZpbGVzL3Fqcy1uYW5vdmcuZGlyL25hbm92Zy9zcmMvbmFub3ZnLmMuaQogIHF1aWNranMvcWpzLW5hbm92Zy9DTWFrZUZpbGVzL3Fqcy1uYW5vdmcuZGlyL25hbm92Zy9zcmMvbmFub3ZnLmMucwogIHF1aWNranMvcWpzLW5hbm92Zy9uYW5vdmcuc28KICBxdWlja2pzL3Fqcy1uYW5vdmcvbmFub3ZnLnNvCiAgcXVpY2tqcy9xanMtbmFub3ZnL25hbm92Zy5zbwogIHF1aWNranMvcWpzLW5hbm92Zy9uYW5vdmcuc28KICBxdWlja2pzL3Fqcy1uYW5vdmcvbmFub3ZnLnNvCiAgcXVpY2tqcy9xanMtbmFub3ZnL25hbm92Zy5zbwogIHF1aWNranMvcWpzLW5hbm92Zy9DTWFrZUZpbGVzL3Fqcy1uYW5vdmcuZGlyL2J1aWxkCiAgLlBIT05ZCiAgcXVpY2tqcy9xanMtbmFub3ZnL0NNYWtlRmlsZXMvcWpzLW5hbm92Zy5kaXIvY2xlYW4KICAuUEhPTlkKICBxdWlja2pzL3Fqcy1uYW5vdmcvQ01ha2VGaWxlcy9xanMtbmFub3ZnLmRpci9kZXBlbmQKICAuUEhPTlkAAAAAAAAAAE0AAAAAAAAAAAAAAA",
+					"AQAAAAAAAAAAAAAA"
+				]
+			]
+		},
+		{
 			"file": "qjs-nanovg.sublime-project",
 			"settings":
 			{
@@ -529,7 +1595,144 @@
 			{
 				"buffer_size": 25353,
 				"line_ending": "Unix"
-			}
+			},
+			"undo_stack":
+			[
+			]
+		},
+		{
+			"file": "nanovg-qjs.h",
+			"settings":
+			{
+				"buffer_size": 372,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			},
+			"undo_stack":
+			[
+				[
+					23,
+					1,
+					"left_delete",
+					null,
+					"AQAAAHYAAAAAAAAAdgAAAAAAAAABAAAAIA",
+					"AQAAAAAAAAABAAAAdwAAAAAAAAB3AAAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					24,
+					1,
+					"insert",
+					{
+						"characters": "(x...)"
+					},
+					"BgAAAHYAAAAAAAAAdwAAAAAAAAAAAAAAdwAAAAAAAAB4AAAAAAAAAAAAAAB4AAAAAAAAAHkAAAAAAAAAAAAAAHkAAAAAAAAAegAAAAAAAAAAAAAAegAAAAAAAAB7AAAAAAAAAAAAAAB7AAAAAAAAAHwAAAAAAAAAAAAAAA",
+					"AQAAAAAAAAABAAAAdgAAAAAAAAB2AAAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					25,
+					1,
+					"insert",
+					{
+						"characters": " "
+					},
+					"AQAAAHwAAAAAAAAAfQAAAAAAAAAAAAAA",
+					"AQAAAAAAAAABAAAAfAAAAAAAAAB8AAAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					27,
+					1,
+					"insert_snippet",
+					{
+						"contents": "($0)"
+					},
+					"AQAAAIsAAAAAAAAAjQAAAAAAAAAAAAAA",
+					"AQAAAAAAAAABAAAAiwAAAAAAAACLAAAAAAAAAP///////+9/"
+				],
+				[
+					28,
+					1,
+					"insert",
+					{
+						"characters": "x"
+					},
+					"AQAAAIwAAAAAAAAAjQAAAAAAAAAAAAAA",
+					"AQAAAAAAAAABAAAAjAAAAAAAAACMAAAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					30,
+					1,
+					"insert",
+					{
+						"characters": " __"
+					},
+					"AwAAAI4AAAAAAAAAjwAAAAAAAAAAAAAAjwAAAAAAAACQAAAAAAAAAAAAAACQAAAAAAAAAJEAAAAAAAAAAAAAAA",
+					"AQAAAAAAAAABAAAAjgAAAAAAAACOAAAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					31,
+					1,
+					"insert",
+					{
+						"characters": "attribute__"
+					},
+					"CwAAAJEAAAAAAAAAkgAAAAAAAAAAAAAAkgAAAAAAAACTAAAAAAAAAAAAAACTAAAAAAAAAJQAAAAAAAAAAAAAAJQAAAAAAAAAlQAAAAAAAAAAAAAAlQAAAAAAAACWAAAAAAAAAAAAAACWAAAAAAAAAJcAAAAAAAAAAAAAAJcAAAAAAAAAmAAAAAAAAAAAAAAAmAAAAAAAAACZAAAAAAAAAAAAAACZAAAAAAAAAJoAAAAAAAAAAAAAAJoAAAAAAAAAmwAAAAAAAAAAAAAAmwAAAAAAAACcAAAAAAAAAAAAAAA",
+					"AQAAAAAAAAABAAAAkQAAAAAAAACRAAAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					32,
+					2,
+					"insert_snippet",
+					{
+						"contents": "($0)"
+					},
+					"AgAAAJwAAAAAAAAAngAAAAAAAAAAAAAAnQAAAAAAAACfAAAAAAAAAAAAAAA",
+					"AQAAAAAAAAABAAAAnAAAAAAAAACcAAAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					35,
+					1,
+					"insert",
+					{
+						"characters": " "
+					},
+					"AgAAAI4AAAAAAAAAjwAAAAAAAAAAAAAAjwAAAAAAAACPAAAAAAAAABIAAAAgX19hdHRyaWJ1dGVfXygoKSk",
+					"AQAAAAAAAAABAAAAjgAAAAAAAACgAAAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					36,
+					1,
+					"paste",
+					null,
+					"AQAAAI8AAAAAAAAAtQAAAAAAAAAAAAAA",
+					"AQAAAAAAAAABAAAAjwAAAAAAAACPAAAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					49,
+					1,
+					"cut",
+					null,
+					"AQAAAI4AAAAAAAAAjgAAAAAAAAAnAAAAIF9fYXR0cmlidXRlX18oKHZpc2liaWxpdHkoImRlZmF1bHQiKSkp",
+					"AQAAAAAAAAABAAAAjgAAAAAAAAC1AAAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					53,
+					1,
+					"paste",
+					null,
+					"AQAAAOQAAAAAAAAACwEAAAAAAAAAAAAA",
+					"AQAAAAAAAAABAAAA5AAAAAAAAADkAAAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					54,
+					1,
+					"insert",
+					{
+						"characters": " "
+					},
+					"AQAAAAsBAAAAAAAADAEAAAAAAAAAAAAA",
+					"AQAAAAAAAAABAAAACwEAAAAAAAALAQAAAAAAAAAAAAAAAPC/"
+				]
+			]
 		},
 		{
 			"file": "CMakeLists.txt",
@@ -547,7 +1750,7 @@
 					"revert",
 					null,
 					"AgAAAAAAAAAAAAAAAAAAAAAAAADfBQAAcHJvamVjdChxanMtbmFub3ZnIEMpCgppbmNsdWRlKCR7Q01BS0VfQ1VSUkVOVF9TT1VSQ0VfRElSfS9jbWFrZS9GaW5kUXVpY2tKUy5jbWFrZSkKaW5jbHVkZShGaW5kT3BlbkdMKQojaW5jbHVkZShGaW5kR0xFVykKaW5jbHVkZShGaW5kUGtnQ29uZmlnKQppbmNsdWRlKENoZWNrQ0NvbXBpbGVyRmxhZykKCgpjaGVja19jX2NvbXBpbGVyX2ZsYWcoIi1mdmlzaWJpbGl0eT1oaWRkZW4iIFZJU0lCSUxJVFlfSElEREVOKQppZihWSVNJQklMSVRZX0hJRERFTikKICBzZXQoTU9EVUxFX0NPTVBJTEVfRkxBR1MgJHtNT0RVTEVfQ09NUElMRV9GTEFHU30gIi1mdmlzaWJpbGl0eT1oaWRkZW4iKQplbmRpZihWSVNJQklMSVRZX0hJRERFTikKCnBrZ19zZWFyY2hfbW9kdWxlKEdMRVcgZ2xldykKcGtnX3NlYXJjaF9tb2R1bGUoR0xGVyBnbGZ3MykKc2V0KEdMRVdfTElCUkFSWSAiJHtwa2djZmdfbGliX0dMRVdfZ2xldzMyfSIpCnNldChHTEZXX0xJQlJBUlkgIiR7cGtnY2ZnX2xpYl9HTEZXX2dsZnczfSIpCm1lc3NhZ2UoU1RBVFVTICJHTEVXX0xJQlJBUlk6ICR7R0xFV19MSUJSQVJZfSIpCm1lc3NhZ2UoU1RBVFVTICJHTEZXX0xJQlJBUlk6ICR7R0xGV19MSUJSQVJZfSIpCgpmaW5kX3F1aWNranMoKQoKYWRkX2xpYnJhcnkoCiAgcWpzLW5hbm92ZyBTSEFSRUQgbmFub3ZnLXFqcy5jIG5hbm92Zy1xanMuaCAke0NNQUtFX0NVUlJFTlRfU09VUkNFX0RJUn0vbmFub3ZnL3NyYy9uYW5vdmcuYwogICAgICAgICAgICAgICAgICAgICR7Q01BS0VfQ1VSUkVOVF9TT1VSQ0VfRElSfS9uYW5vdmcvc3JjL25hbm92Zy5oICR7Q01BS0VfQ1VSUkVOVF9TT1VSQ0VfRElSfS9uYW5vdmcvc3JjL25hbm92Z19nbC5oKQoKc2V0X3RhcmdldF9wcm9wZXJ0aWVzKHFqcy1uYW5vdmcgUFJPUEVSVElFUyBPVVRQVVRfTkFNRSBuYW5vdmcgUFJFRklYICIiIENPTVBJTEVfRkxBR1MgIiR7TU9EVUxFX0NPTVBJTEVfRkxBR1N9IikKCnRhcmdldF9pbmNsdWRlX2RpcmVjdG9yaWVzKHFqcy1uYW5vdmcgUFJJVkFURSAke0NNQUtFX0NVUlJFTlRfU09VUkNFX0RJUn0vbmFub3ZnL3NyYyAke1FVSUNLSlNfSU5DTFVERV9ESVJ9KQp0YXJnZXRfbGlua19saWJyYXJpZXMocWpzLW5hbm92ZyBQUklWQVRFICR7R0xGV19MSUJSQVJZfSAke0dMRVdfTElCUkFSWX0gT3BlbkdMOjpHTCAke1FVSUNLSlNfTElCUkFSWX0pCnRhcmdldF9jb21waWxlX2RlZmluaXRpb25zKHFqcy1uYW5vdmcgUFJJVkFURSBKU19TSEFSRURfTElCUkFSWT0xIE5BTk9WR19HTEVXPTEgTkFOT1ZHX0dMM19JTVBMRU1FTlRBVElPTj0xKQppbnN0YWxsKFRBUkdFVFMgcWpzLW5hbm92ZyBERVNUSU5BVElPTiBsaWIvcXVpY2tqcyBQRVJNSVNTSU9OUyBPV05FUl9SRUFEIE9XTkVSX1dSSVRFIE9XTkVSX0VYRUNVVEUgR1JPVVBfUkVBRAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBHUk9VUF9FWEVDVVRFIFdPUkxEX1JFQUQgV09STERfRVhFQ1VURSkKAAAAAAAAAABhBQAAAAAAAAAAAAA",
-					"BAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/"
+					"BQAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8"
 				],
 				[
 					18,
@@ -557,7 +1760,7 @@
 						"characters": "\n\n\n"
 					},
 					"AwAAAIoEAAAAAAAAiwQAAAAAAAAAAAAAiwQAAAAAAACMBAAAAAAAAAAAAACMBAAAAAAAAI0EAAAAAAAAAAAAAA",
-					"BAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAigQAAAAAAACKBAAAAAAAAAAAAAAAAPC/"
+					"BQAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAACKBAAAAAAAAIoEAAAAAAAAAAAAAAAA8L8"
 				],
 				[
 					20,
@@ -565,7 +1768,7 @@
 					"paste",
 					null,
 					"AQAAAIwEAAAAAAAAnwUAAAAAAAAAAAAA",
-					"BAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAjAQAAAAAAACMBAAAAAAAAAAAAAAAAAAA"
+					"BQAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAACMBAAAAAAAAIwEAAAAAAAAAAAAAAAAAAA"
 				],
 				[
 					28,
@@ -575,7 +1778,7 @@
 						"contents": "${1:\\${$SELECTION\\}}"
 					},
 					"AgAAAMgFAAAAAAAAyAUAAAAAAAALAAAAbGliL3F1aWNranPIBQAAAAAAANYFAAAAAAAAAAAAAA",
-					"BAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAyAUAAAAAAADTBQAAAAAAAAAAAAAAAPC/"
+					"BQAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAADIBQAAAAAAANMFAAAAAAAAAAAAAAAA8L8"
 				],
 				[
 					29,
@@ -585,7 +1788,7 @@
 						"contents": "{${0:$SELECTION}}"
 					},
 					"AgAAAMgFAAAAAAAAyAUAAAAAAAAOAAAAJHtsaWIvcXVpY2tqc33IBQAAAAAAANgFAAAAAAAAAAAAAA",
-					"BAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAyAUAAAAAAADWBQAAAAAAAAAAAAAAAPC/"
+					"BQAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAADIBQAAAAAAANYFAAAAAAAAAAAAAAAA8L8"
 				],
 				[
 					30,
@@ -593,7 +1796,7 @@
 					"left_delete",
 					null,
 					"AQAAAMkFAAAAAAAAyQUAAAAAAAAOAAAAJHtsaWIvcXVpY2tqc30",
-					"BAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAyQUAAAAAAADXBQAAAAAAAAAAAAAAAPC/"
+					"BQAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAADJBQAAAAAAANcFAAAAAAAAAAAAAAAA8L8"
 				],
 				[
 					31,
@@ -603,7 +1806,7 @@
 						"file": "res://Packages/Default/Delete Left Right.sublime-macro"
 					},
 					"AgAAAMgFAAAAAAAAyAUAAAAAAAABAAAAe8gFAAAAAAAAyAUAAAAAAAABAAAAfQ",
-					"BAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAyQUAAAAAAADJBQAAAAAAAAAAAAAAAPC/"
+					"BQAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAADJBQAAAAAAAMkFAAAAAAAAAAAAAAAA8L8"
 				],
 				[
 					32,
@@ -613,7 +1816,7 @@
 						"contents": "\"$0\""
 					},
 					"AQAAAMgFAAAAAAAAygUAAAAAAAAAAAAA",
-					"BAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAyAUAAAAAAADIBQAAAAAAAAAAAAAAAPC/"
+					"BQAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAADIBQAAAAAAAMgFAAAAAAAAAAAAAAAA8L8"
 				],
 				[
 					33,
@@ -623,7 +1826,7 @@
 						"characters": "${"
 					},
 					"AgAAAMkFAAAAAAAAygUAAAAAAAAAAAAAygUAAAAAAADLBQAAAAAAAAAAAAA",
-					"BAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAyQUAAAAAAADJBQAAAAAAAAAAAAAAAPC/"
+					"BQAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAADJBQAAAAAAAMkFAAAAAAAAAAAAAAAA8L8"
 				],
 				[
 					34,
@@ -631,7 +1834,7 @@
 					"paste",
 					null,
 					"AQAAAMsFAAAAAAAA3wUAAAAAAAAAAAAA",
-					"BAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAywUAAAAAAADLBQAAAAAAAAAAAAAAAPC/"
+					"BQAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAADLBQAAAAAAAMsFAAAAAAAAAAAAAAAA8L8"
 				],
 				[
 					35,
@@ -641,7 +1844,7 @@
 						"characters": "}"
 					},
 					"AQAAAN8FAAAAAAAA4AUAAAAAAAAAAAAA",
-					"BAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAA3wUAAAAAAADfBQAAAAAAAAAAAAAAAPC/"
+					"BQAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAADfBQAAAAAAAN8FAAAAAAAAAAAAAAAA8L8"
 				],
 				[
 					37,
@@ -649,7 +1852,7 @@
 					"right_delete",
 					null,
 					"AQAAAOEFAAAAAAAA4QUAAAAAAAABAAAAIA",
-					"BAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAA4QUAAAAAAADhBQAAAAAAAAAAAAAAAPC/"
+					"BQAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAADhBQAAAAAAAOEFAAAAAAAAAAAAAAAA8L8"
 				],
 				[
 					38,
@@ -657,7 +1860,7 @@
 					"left_delete",
 					null,
 					"AQAAAOAFAAAAAAAA4AUAAAAAAAABAAAAIg",
-					"BAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAA4QUAAAAAAADhBQAAAAAAAAAAAAAAAPC/"
+					"BQAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAADhBQAAAAAAAOEFAAAAAAAAAAAAAAAA8L8"
 				],
 				[
 					39,
@@ -667,7 +1870,7 @@
 						"characters": " "
 					},
 					"AQAAAOAFAAAAAAAA4QUAAAAAAAAAAAAA",
-					"BAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAA4AUAAAAAAADgBQAAAAAAAAAAAAAAAPC/"
+					"BQAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAADgBQAAAAAAAOAFAAAAAAAAAAAAAAAA8L8"
 				],
 				[
 					40,
@@ -675,7 +1878,7 @@
 					"left_delete",
 					null,
 					"AQAAAOAFAAAAAAAA4AUAAAAAAAABAAAAIA",
-					"BAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAA4QUAAAAAAADhBQAAAAAAAAAAAAAAAPC/"
+					"BQAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAADhBQAAAAAAAOEFAAAAAAAAAAAAAAAA8L8"
 				],
 				[
 					41,
@@ -685,7 +1888,7 @@
 						"characters": "\""
 					},
 					"AQAAAOAFAAAAAAAA4QUAAAAAAAAAAAAA",
-					"BAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAA4AUAAAAAAADgBQAAAAAAAAAAAAAAAPC/"
+					"BQAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAADgBQAAAAAAAOAFAAAAAAAAAAAAAAAA8L8"
 				],
 				[
 					42,
@@ -695,7 +1898,7 @@
 						"characters": " "
 					},
 					"AQAAAOEFAAAAAAAA4gUAAAAAAAAAAAAA",
-					"BAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAA4QUAAAAAAADhBQAAAAAAAAAAAAAAAPC/"
+					"BQAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAADhBQAAAAAAAOEFAAAAAAAAAAAAAAAA8L8"
 				],
 				[
 					55,
@@ -703,7 +1906,7 @@
 					"cut",
 					null,
 					"AQAAANUAAAAAAAAA1QAAAAAAAAA6AAAAaW5jbHVkZSgke0NNQUtFX0NVUlJFTlRfU09VUkNFX0RJUn0vY21ha2UvRmluZEdMRlcuY21ha2UpCg",
-					"BAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAA1QAAAAAAAAAPAQAAAAAAAAAAAAAAAPC/"
+					"BQAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAADVAAAAAAAAAA8BAAAAAAAAAAAAAAAA8L8"
 				],
 				[
 					56,
@@ -711,7 +1914,7 @@
 					"paste",
 					null,
 					"AgAAANUAAAAAAAAADwEAAAAAAAAAAAAADwEAAAAAAABJAQAAAAAAAAAAAAA",
-					"BAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAA1QAAAAAAAADVAAAAAAAAAAAAAAAAAPC/"
+					"BQAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAADVAAAAAAAAANUAAAAAAAAAAAAAAAAA8L8"
 				],
 				[
 					63,
@@ -721,7 +1924,7 @@
 						"characters": "Z"
 					},
 					"AgAAADkBAAAAAAAAOgEAAAAAAAAAAAAAOgEAAAAAAAA6AQAAAAAAAAgAAABGaW5kR0xGVw",
-					"BAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAOQEAAAAAAABBAQAAAAAAAAAAAAAAAPC/"
+					"BQAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAA5AQAAAAAAAEEBAAAAAAAAAAAAAAAA8L8"
 				],
 				[
 					64,
@@ -729,7 +1932,7 @@
 					"left_delete",
 					null,
 					"AQAAADkBAAAAAAAAOQEAAAAAAAABAAAAWg",
-					"BAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAOgEAAAAAAAA6AQAAAAAAAAAAAAAAAPC/"
+					"BQAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAA6AQAAAAAAADoBAAAAAAAAAAAAAAAA8L8"
 				],
 				[
 					65,
@@ -739,7 +1942,7 @@
 						"characters": "UseMlut"
 					},
 					"BwAAADkBAAAAAAAAOgEAAAAAAAAAAAAAOgEAAAAAAAA7AQAAAAAAAAAAAAA7AQAAAAAAADwBAAAAAAAAAAAAADwBAAAAAAAAPQEAAAAAAAAAAAAAPQEAAAAAAAA+AQAAAAAAAAAAAAA+AQAAAAAAAD8BAAAAAAAAAAAAAD8BAAAAAAAAQAEAAAAAAAAAAAAA",
-					"BAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAOQEAAAAAAAA5AQAAAAAAAAAAAAAAAPC/"
+					"BQAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAA5AQAAAAAAADkBAAAAAAAAAAAAAAAA8L8"
 				],
 				[
 					66,
@@ -747,7 +1950,7 @@
 					"left_delete",
 					null,
 					"AwAAAD8BAAAAAAAAPwEAAAAAAAABAAAAdD4BAAAAAAAAPgEAAAAAAAABAAAAdT0BAAAAAAAAPQEAAAAAAAABAAAAbA",
-					"BAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAQAEAAAAAAABAAQAAAAAAAAAAAAAAAPC/"
+					"BQAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAABAAQAAAAAAAEABAAAAAAAAAAAAAAAA8L8"
 				],
 				[
 					67,
@@ -757,7 +1960,7 @@
 						"characters": "ultiArch"
 					},
 					"CAAAAD0BAAAAAAAAPgEAAAAAAAAAAAAAPgEAAAAAAAA/AQAAAAAAAAAAAAA/AQAAAAAAAEABAAAAAAAAAAAAAEABAAAAAAAAQQEAAAAAAAAAAAAAQQEAAAAAAABCAQAAAAAAAAAAAABCAQAAAAAAAEMBAAAAAAAAAAAAAEMBAAAAAAAARAEAAAAAAAAAAAAARAEAAAAAAABFAQAAAAAAAAAAAAA",
-					"BAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAPQEAAAAAAAA9AQAAAAAAAAAAAAAAAPC/"
+					"BQAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAA9AQAAAAAAAD0BAAAAAAAAAAAAAAAA8L8"
 				],
 				[
 					108,
@@ -765,7 +1968,7 @@
 					"",
 					null,
 					"AgAAAAYCAAAAAAAARAIAAAAAAAAAAAAADwEAAAAAAAAPAQAAAAAAAD4AAABpbmNsdWRlKCR7Q01BS0VfQ1VSUkVOVF9TT1VSQ0VfRElSfS9jbWFrZS9Vc2VNdWx0aUFyY2guY21ha2UpCg",
-					"BAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAADwEAAAAAAABNAQAAAAAAAAAAAAAAAPC/"
+					"BQAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAPAQAAAAAAAE0BAAAAAAAAAAAAAAAA8L8"
 				],
 				[
 					1,
@@ -773,7 +1976,7 @@
 					"revert",
 					null,
 					"AgAAAAAAAAAAAAAAAAAAAAAAAADDBgAAcHJvamVjdChxanMtbmFub3ZnIEMpCgppbmNsdWRlKEZpbmRPcGVuR0wpCmluY2x1ZGUoRmluZFBrZ0NvbmZpZykKaW5jbHVkZShDaGVja0NDb21waWxlckZsYWcpCmluY2x1ZGUoJHtDTUFLRV9DVVJSRU5UX1NPVVJDRV9ESVJ9L2NtYWtlL0ZpbmRRdWlja0pTLmNtYWtlKQppbmNsdWRlKCR7Q01BS0VfQ1VSUkVOVF9TT1VSQ0VfRElSfS9jbWFrZS9GaW5kR0xFVy5jbWFrZSkKaW5jbHVkZSgke0NNQUtFX0NVUlJFTlRfU09VUkNFX0RJUn0vY21ha2UvRmluZEdMRlcuY21ha2UpCgpjaGVja19jX2NvbXBpbGVyX2ZsYWcoIi1mdmlzaWJpbGl0eT1oaWRkZW4iIFZJU0lCSUxJVFlfSElEREVOKQppZihWSVNJQklMSVRZX0hJRERFTikKICBzZXQoTU9EVUxFX0NPTVBJTEVfRkxBR1MgJHtNT0RVTEVfQ09NUElMRV9GTEFHU30gIi1mdmlzaWJpbGl0eT1oaWRkZW4iKQplbmRpZihWSVNJQklMSVRZX0hJRERFTikKaW5jbHVkZSgke0NNQUtFX0NVUlJFTlRfU09VUkNFX0RJUn0vY21ha2UvVXNlTXVsdGlBcmNoLmNtYWtlKQoKZmluZF9nbGV3KCkKZmluZF9nbGZ3KCkKCmZpbmRfcXVpY2tqcygpCgphZGRfbGlicmFyeSgKICBxanMtbmFub3ZnIFNIQVJFRCBuYW5vdmctcWpzLmMgbmFub3ZnLXFqcy5oICR7Q01BS0VfQ1VSUkVOVF9TT1VSQ0VfRElSfS9uYW5vdmcvc3JjL25hbm92Zy5jCiAgICAgICAgICAgICAgICAgICAgJHtDTUFLRV9DVVJSRU5UX1NPVVJDRV9ESVJ9L25hbm92Zy9zcmMvbmFub3ZnLmggJHtDTUFLRV9DVVJSRU5UX1NPVVJDRV9ESVJ9L25hbm92Zy9zcmMvbmFub3ZnX2dsLmgpCgpzZXRfdGFyZ2V0X3Byb3BlcnRpZXMocWpzLW5hbm92ZyBQUk9QRVJUSUVTIE9VVFBVVF9OQU1FIG5hbm92ZyBQUkVGSVggIiIgQ09NUElMRV9GTEFHUyAiJHtNT0RVTEVfQ09NUElMRV9GTEFHU30iKQoKdGFyZ2V0X2luY2x1ZGVfZGlyZWN0b3JpZXMocWpzLW5hbm92ZyBQUklWQVRFICR7Q01BS0VfQ1VSUkVOVF9TT1VSQ0VfRElSfS9uYW5vdmcvc3JjICR7UVVJQ0tKU19JTkNMVURFX0RJUn0pCnRhcmdldF9saW5rX2xpYnJhcmllcyhxanMtbmFub3ZnIFBSSVZBVEUgJHtHTEZXX0xJQlJBUll9ICR7R0xFV19MSUJSQVJZfSBPcGVuR0w6OkdMICR7UVVJQ0tKU19MSUJSQVJZfSkKdGFyZ2V0X2NvbXBpbGVfZGVmaW5pdGlvbnMocWpzLW5hbm92ZyBQUklWQVRFIEpTX1NIQVJFRF9MSUJSQVJZPTEgTkFOT1ZHX0dMRVc9MSBOQU5PVkdfR0wzX0lNUExFTUVOVEFUSU9OPTEpCgoKaWYoTk9UIENNQUtFX0lOU1RBTExfTElCRElSKQogIHNldChDTUFLRV9JTlNUQUxMX0xJQkRJUiBsaWIpCmVuZGlmKE5PVCBDTUFLRV9JTlNUQUxMX0xJQkRJUikKaWYoTk9UIFFVSUNLSlNfQ19NT0RVTEVfRElSKQogIHNldChRVUlDS0pTX0NfTU9EVUxFX0RJUiAiJHtDTUFLRV9JTlNUQUxMX0xJQkRJUn0vcXVpY2tqcyIpCmVuZGlmKE5PVCBRVUlDS0pTX0NfTU9EVUxFX0RJUikKCm1lc3NhZ2UoIlFVSUNLSlNfQ19NT0RVTEVfRElSOiAke1FVSUNLSlNfQ19NT0RVTEVfRElSfSIpCgoKaW5zdGFsbChUQVJHRVRTIHFqcy1uYW5vdmcgREVTVElOQVRJT04gIiR7UVVJQ0tKU19DX01PRFVMRV9ESVJ9IiBQRVJNSVNTSU9OUyBPV05FUl9SRUFEIE9XTkVSX1dSSVRFIE9XTkVSX0VYRUNVVEUgR1JPVVBfUkVBRAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBHUk9VUF9FWEVDVVRFIFdPUkxEX1JFQUQgV09STERfRVhFQ1VURSkKAAAAAAAAAABQBgAAAAAAAAAAAAA",
-					"AwAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAA4BAAAAAAAAmgAAAAAAAAAAAAAAAADwvw"
+					"BAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAADgEAAAAAAACaAAAAAAAAAAAAAAAAAPC/"
 				],
 				[
 					16,
@@ -781,7 +1984,7 @@
 					"paste",
 					null,
 					"AQAAAC8CAAAAAAAAQAIAAAAAAAAAAAAA",
-					"AwAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAC8CAAAAAAAALwIAAAAAAAAAAAAAAADwvw"
+					"BAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAALwIAAAAAAAAvAgAAAAAAAAAAAAAAAPC/"
 				],
 				[
 					17,
@@ -791,7 +1994,7 @@
 						"contents": "($0)"
 					},
 					"AQAAAEACAAAAAAAAQgIAAAAAAAAAAAAA",
-					"AwAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAEACAAAAAAAAQAIAAAAAAAAAAAAAAADwvw"
+					"BAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAQAIAAAAAAABAAgAAAAAAAAAAAAAAAPC/"
 				],
 				[
 					19,
@@ -801,7 +2004,7 @@
 						"characters": "\n"
 					},
 					"AQAAAEICAAAAAAAAQwIAAAAAAAAAAAAA",
-					"AwAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAEICAAAAAAAAQgIAAAAAAAAAAAAAAADwvw"
+					"BAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAQgIAAAAAAABCAgAAAAAAAAAAAAAAAPC/"
 				]
 			]
 		},
@@ -830,7 +2033,7 @@
 						"characters": "\n\n\nif"
 					},
 					"CgAAACwCAAAAAAAALQIAAAAAAAAAAAAALQIAAAAAAAAvAgAAAAAAAAAAAAAvAgAAAAAAADACAAAAAAAAAAAAADACAAAAAAAAMgIAAAAAAAAAAAAALQIAAAAAAAAtAgAAAAAAAAIAAAAgIDACAAAAAAAAMQIAAAAAAAAAAAAAMQIAAAAAAAAzAgAAAAAAAAAAAAAuAgAAAAAAAC4CAAAAAAAAAgAAACAgMQIAAAAAAAAyAgAAAAAAAAAAAAAyAgAAAAAAADMCAAAAAAAAAAAAAA",
-					"BAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAALAIAAAAAAAAsAgAAAAAAAAAAAAAAAPC/"
+					"BQAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAsAgAAAAAAACwCAAAAAAAAAAAAAAAA8L8"
 				],
 				[
 					4,
@@ -840,7 +2043,7 @@
 						"contents": "($0)"
 					},
 					"AQAAADMCAAAAAAAANQIAAAAAAAAAAAAA",
-					"BAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAMwIAAAAAAAAzAgAAAAAAAAAAAAAAAPC/"
+					"BQAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAzAgAAAAAAADMCAAAAAAAAAAAAAAAA8L8"
 				],
 				[
 					5,
@@ -850,7 +2053,7 @@
 						"characters": "NOT"
 					},
 					"AwAAADQCAAAAAAAANQIAAAAAAAAAAAAANQIAAAAAAAA2AgAAAAAAAAAAAAA2AgAAAAAAADcCAAAAAAAAAAAAAA",
-					"BAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAANAIAAAAAAAA0AgAAAAAAAAAAAAAAAPC/"
+					"BQAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAA0AgAAAAAAADQCAAAAAAAAAAAAAAAA8L8"
 				],
 				[
 					6,
@@ -860,7 +2063,7 @@
 						"characters": " GLFW_LIBRARY"
 					},
 					"DQAAADcCAAAAAAAAOAIAAAAAAAAAAAAAOAIAAAAAAAA5AgAAAAAAAAAAAAA5AgAAAAAAADoCAAAAAAAAAAAAADoCAAAAAAAAOwIAAAAAAAAAAAAAOwIAAAAAAAA8AgAAAAAAAAAAAAA8AgAAAAAAAD0CAAAAAAAAAAAAAD0CAAAAAAAAPgIAAAAAAAAAAAAAPgIAAAAAAAA/AgAAAAAAAAAAAAA/AgAAAAAAAEACAAAAAAAAAAAAAEACAAAAAAAAQQIAAAAAAAAAAAAAQQIAAAAAAABCAgAAAAAAAAAAAABCAgAAAAAAAEMCAAAAAAAAAAAAAEMCAAAAAAAARAIAAAAAAAAAAAAA",
-					"BAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAANwIAAAAAAAA3AgAAAAAAAAAAAAAAAPC/"
+					"BQAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAA3AgAAAAAAADcCAAAAAAAAAAAAAAAA8L8"
 				],
 				[
 					8,
@@ -870,7 +2073,7 @@
 						"characters": "\n"
 					},
 					"AwAAAEUCAAAAAAAARgIAAAAAAAAAAAAARgIAAAAAAABIAgAAAAAAAAAAAABIAgAAAAAAAEoCAAAAAAAAAAAAAA",
-					"BAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAARQIAAAAAAABFAgAAAAAAAAAAAAAAAPC/"
+					"BQAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAABFAgAAAAAAAEUCAAAAAAAAAAAAAAAA8L8"
 				],
 				[
 					9,
@@ -878,7 +2081,7 @@
 					"paste",
 					null,
 					"AQAAAEoCAAAAAAAAaAIAAAAAAAAAAAAA",
-					"BAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAASgIAAAAAAABKAgAAAAAAAAAAAAAAAPC/"
+					"BQAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAABKAgAAAAAAAEoCAAAAAAAAAAAAAAAA8L8"
 				],
 				[
 					12,
@@ -888,7 +2091,7 @@
 						"characters": "\n"
 					},
 					"AgAAAGcCAAAAAAAAaAIAAAAAAAAAAAAAaAIAAAAAAABsAgAAAAAAAAAAAAA",
-					"BAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAZwIAAAAAAABnAgAAAAAAAP///////+9/"
+					"BQAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAABnAgAAAAAAAGcCAAAAAAAA////////738"
 				],
 				[
 					13,
@@ -896,7 +2099,7 @@
 					"left_delete",
 					null,
 					"AQAAAGoCAAAAAAAAagIAAAAAAAACAAAAICA",
-					"BAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAbAIAAAAAAABsAgAAAAAAAAAAAAAAAPC/"
+					"BQAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAABsAgAAAAAAAGwCAAAAAAAAAAAAAAAA8L8"
 				],
 				[
 					14,
@@ -906,7 +2109,7 @@
 						"characters": "endif"
 					},
 					"BQAAAGoCAAAAAAAAawIAAAAAAAAAAAAAawIAAAAAAABsAgAAAAAAAAAAAABsAgAAAAAAAG0CAAAAAAAAAAAAAG0CAAAAAAAAbgIAAAAAAAAAAAAAbgIAAAAAAABvAgAAAAAAAAAAAAA",
-					"BAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAagIAAAAAAABqAgAAAAAAAAAAAAAAAPC/"
+					"BQAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAABqAgAAAAAAAGoCAAAAAAAAAAAAAAAA8L8"
 				],
 				[
 					15,
@@ -916,7 +2119,7 @@
 						"contents": "($0)"
 					},
 					"AQAAAG8CAAAAAAAAcQIAAAAAAAAAAAAA",
-					"BAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAbwIAAAAAAABvAgAAAAAAAAAAAAAAAPC/"
+					"BQAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAABvAgAAAAAAAG8CAAAAAAAAAAAAAAAA8L8"
 				],
 				[
 					16,
@@ -926,7 +2129,7 @@
 						"characters": "NOT"
 					},
 					"AwAAAHACAAAAAAAAcQIAAAAAAAAAAAAAcQIAAAAAAAByAgAAAAAAAAAAAAByAgAAAAAAAHMCAAAAAAAAAAAAAA",
-					"BAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAcAIAAAAAAABwAgAAAAAAAAAAAAAAAPC/"
+					"BQAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAABwAgAAAAAAAHACAAAAAAAAAAAAAAAA8L8"
 				],
 				[
 					17,
@@ -936,7 +2139,7 @@
 						"characters": " FL"
 					},
 					"AwAAAHMCAAAAAAAAdAIAAAAAAAAAAAAAdAIAAAAAAAB1AgAAAAAAAAAAAAB1AgAAAAAAAHYCAAAAAAAAAAAAAA",
-					"BAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAcwIAAAAAAABzAgAAAAAAAAAAAAAAAPC/"
+					"BQAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAABzAgAAAAAAAHMCAAAAAAAAAAAAAAAA8L8"
 				],
 				[
 					18,
@@ -944,7 +2147,7 @@
 					"left_delete",
 					null,
 					"AgAAAHUCAAAAAAAAdQIAAAAAAAABAAAATHQCAAAAAAAAdAIAAAAAAAABAAAARg",
-					"BAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAdgIAAAAAAAB2AgAAAAAAAAAAAAAAAPC/"
+					"BQAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAB2AgAAAAAAAHYCAAAAAAAAAAAAAAAA8L8"
 				],
 				[
 					19,
@@ -954,7 +2157,7 @@
 						"characters": "GLFW_LIBRARY"
 					},
 					"DAAAAHQCAAAAAAAAdQIAAAAAAAAAAAAAdQIAAAAAAAB2AgAAAAAAAAAAAAB2AgAAAAAAAHcCAAAAAAAAAAAAAHcCAAAAAAAAeAIAAAAAAAAAAAAAeAIAAAAAAAB5AgAAAAAAAAAAAAB5AgAAAAAAAHoCAAAAAAAAAAAAAHoCAAAAAAAAewIAAAAAAAAAAAAAewIAAAAAAAB8AgAAAAAAAAAAAAB8AgAAAAAAAH0CAAAAAAAAAAAAAH0CAAAAAAAAfgIAAAAAAAAAAAAAfgIAAAAAAAB/AgAAAAAAAAAAAAB/AgAAAAAAAIACAAAAAAAAAAAAAA",
-					"BAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAdAIAAAAAAAB0AgAAAAAAAAAAAAAAAPC/"
+					"BQAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAB0AgAAAAAAAHQCAAAAAAAAAAAAAAAA8L8"
 				],
 				[
 					25,
@@ -964,7 +2167,7 @@
 						"characters": "\n"
 					},
 					"AwAAAEUCAAAAAAAARgIAAAAAAAAAAAAARgIAAAAAAABIAgAAAAAAAAAAAABIAgAAAAAAAEoCAAAAAAAAAAAAAA",
-					"BAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAARQIAAAAAAABFAgAAAAAAAAAAAAAAAPC/"
+					"BQAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAABFAgAAAAAAAEUCAAAAAAAAAAAAAAAA8L8"
 				],
 				[
 					26,
@@ -972,7 +2175,7 @@
 					"paste",
 					null,
 					"AQAAAEoCAAAAAAAAYQIAAAAAAAAAAAAA",
-					"BAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAASgIAAAAAAABKAgAAAAAAAAAAAAAAAPC/"
+					"BQAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAABKAgAAAAAAAEoCAAAAAAAAAAAAAAAA8L8"
 				],
 				[
 					27,
@@ -980,7 +2183,7 @@
 					"left_delete",
 					null,
 					"AQAAAGACAAAAAAAAYAIAAAAAAAABAAAACg",
-					"BAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAYQIAAAAAAABhAgAAAAAAAAAAAAAAAPC/"
+					"BQAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAABhAgAAAAAAAGECAAAAAAAAAAAAAAAA8L8"
 				],
 				[
 					28,
@@ -990,15 +2193,15 @@
 						"characters": "\n"
 					},
 					"AgAAAGACAAAAAAAAYQIAAAAAAAAAAAAAYQIAAAAAAABlAgAAAAAAAAAAAAA",
-					"BAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAYAIAAAAAAABgAgAAAAAAAAAAAAAAAPC/"
+					"BQAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAABgAgAAAAAAAGACAAAAAAAAAAAAAAAA8L8"
 				],
 				[
 					31,
 					1,
 					"revert",
 					null,
-					"BQAAAAAAAAAAAAAAAAAAAAAAAAANBwAAIyBGaW5kIEdMRlcgbGlicmFyeSBhbmQgaW5jbHVkZSBwYXRocyBmb3IgQ01VNDYyCiMgVGhpcyBkZWZpbmVzIHRoZSBmb2xsb3dpbmc6CiMKIyBHTEZXX0ZPVU5EICAgICAgICAgICAgIElmIEdMRlcgaXMgZm91bmQKIyBHTEZXX0xJQlJBUlkgICAgICAgICAgIEdMRlcgbGlicmFyaWVzCiMgR0xGV19JTkNMVURFX0RJUiAgICAgICBHTEZXIGluY2x1ZGUgZGlyZWN0b3JpZXMKIyBHTEZXX0xJQlJBUllfRElSICAgICAgIEdMRlcgbGlicmFyeSBkaXJlY3RvcmllcwptYWNybyhmaW5kX2dsZncpCiAgaWYoVU5JWCkKICAgIHNldChHTEZXX0lOQ19OQU1FUyBnbGZ3My5oIGdsZncuaCkKICAgIHNldChHTEZXX0xJQl9OQU1FUyBsaWJnbGZ3LnNvIGxpYmdsZncuYSkKICAgIGlmKEFQUExFKQogICAgICBzZXQoR0xGV19MSUJfTkFNRVMgbGliZ2xmd19vc3guYSkKICAgIGVuZGlmKEFQUExFKQogIGVuZGlmKFVOSVgpCgogICMgR0xGVyBzdGF0aWMgbGlicmFyeQogIGZpbmRfbGlicmFyeShHTEZXX0xJQlJBUlkgTkFNRVMgJHtHTEZXX0xJQl9OQU1FU30gRE9DICJHTEZXIGxpYnJhcnkiKQoKCiAgaWYoTk9UIEdMRldfTElCUkFSWSkKICAgIGluY2x1ZGUoRmluZFBrZ0NvbmZpZykKICAgIAogICAgcGtnX3NlYXJjaF9tb2R1bGUoR0xGVyBnbGZ3MykKICBlbmRpZihOT1QgR0xGV19MSUJSQVJZKQoKCiAgIyBHTEZXIGxpYnJhcnkgZGlyCiAgaWYoTk9UIEdMRldfTElCUkFSWV9ESVIpCiAgICBpZihHTEZXX0xJQlJBUlkpCiAgICAgIGdldF9maWxlbmFtZV9jb21wb25lbnQoR0xGV19MSUJSQVJZX0RJUiAiJHtHTEZXX0xJQlJBUll9IiBESVJFQ1RPUlkpCiAgICBlbHNlKEdMRldfTElCUkFSWSkKICAgICAgZmluZF9wYXRoKEdMRldfTElCUkFSWV9ESVIgTkFNRVMgJHtHTEZXX0xJQl9OQU1FU30gRE9DICJHTEZXIGxpYnJhcnkgZGlyZWN0b3J5IikKICAgIGVuZGlmKEdMRldfTElCUkFSWSkKICBlbmRpZihOT1QgR0xGV19MSUJSQVJZX0RJUikKCiAgIyBHTEZXIGluY2x1ZGUgZGlyCiAgaWYoTk9UIEdMRldfSU5DTFVERV9ESVIpCiAgICBpZihHTEZXX0xJQlJBUllfRElSKQogICAgICBzdHJpbmcoUkVHRVggUkVQTEFDRSAiL2xpYi8uKiIgIi9pbmNsdWRlIiBHTEZXX0lOQ0xVREVfRElSICIke0dMRldfTElCUkFSWV9ESVJ9IikKICAgIGVsc2UoR0xGV19MSUJSQVJZX0RJUikKICAgICAgZmluZF9wYXRoKEdMRldfSU5DTFVERV9ESVIgTkFNRVMgJHtHTEZXX0lOQ19OQU1FU30gRE9DICJHTEZXIGluY2x1ZGUgZGlyZWN0b3J5IikKICAgIGVuZGlmKEdMRldfTElCUkFSWV9ESVIpCiAgZW5kaWYoTk9UIEdMRldfSU5DTFVERV9ESVIpCgogICMgVmVyc2lvbgogIHNldChHTEZXX1ZFUlNJT04gMy4xLjEpCgogIGlmKEdMRldfTElCUkFSWSkKICAgIG1lc3NhZ2UoU1RBVFVTICJHTEZXIGxpYnJhcnk6ICR7R0xGV19MSUJSQVJZfSIpCiAgICBtZXNzYWdlKFNUQVRVUyAiR0xGVyBsaWJyYXJ5IGRpcmVjdG9yeTogJHtHTEZXX0xJQlJBUllfRElSfSIpCiAgICBtZXNzYWdlKFNUQVRVUyAiR0xGVyBpbmNsdWRlIGRpcmVjdG9yeTogJHtHTEZXX0lOQ0xVREVfRElSfSIpCiAgZW5kaWYoR0xGV19MSUJSQVJZKQoKICAjIFNldCBwYWNrYWdlIHN0YW5kYXJkIGFyZ3MKICAjaW5jbHVkZShGaW5kUGFja2FnZUhhbmRsZVN0YW5kYXJkQXJncykKICAjRklORF9QQUNLQUdFX0hBTkRMRV9TVEFOREFSRF9BUkdTKEdMRlcgUkVRVUlSRURfVkFSUyBHTEZXX0xJQlJBUlkgR0xGV19JTkNMVURFX0RJUiBHTEZXX0xJQlJBUllfRElSIFZFUlNJT05fVkFSIEdMRldfVkVSU0lPTikKZW5kbWFjcm8oZmluZF9nbGZ3KQoAAAAAAAAAAAcHAAAAAAAAAAAAAAAAAAAAAAAABwcAAAAAAAAAAAAAAAAAAAAAAAAHBwAAAAAAAAAAAAAAAAAAAAAAAAcHAAAAAAAAAAAAAA",
-					"BAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAZQIAAAAAAABlAgAAAAAAAAAAAAAAAPC/"
+					"BgAAAAAAAAAAAAAAAAAAAAAAAAANBwAAIyBGaW5kIEdMRlcgbGlicmFyeSBhbmQgaW5jbHVkZSBwYXRocyBmb3IgQ01VNDYyCiMgVGhpcyBkZWZpbmVzIHRoZSBmb2xsb3dpbmc6CiMKIyBHTEZXX0ZPVU5EICAgICAgICAgICAgIElmIEdMRlcgaXMgZm91bmQKIyBHTEZXX0xJQlJBUlkgICAgICAgICAgIEdMRlcgbGlicmFyaWVzCiMgR0xGV19JTkNMVURFX0RJUiAgICAgICBHTEZXIGluY2x1ZGUgZGlyZWN0b3JpZXMKIyBHTEZXX0xJQlJBUllfRElSICAgICAgIEdMRlcgbGlicmFyeSBkaXJlY3RvcmllcwptYWNybyhmaW5kX2dsZncpCiAgaWYoVU5JWCkKICAgIHNldChHTEZXX0lOQ19OQU1FUyBnbGZ3My5oIGdsZncuaCkKICAgIHNldChHTEZXX0xJQl9OQU1FUyBsaWJnbGZ3LnNvIGxpYmdsZncuYSkKICAgIGlmKEFQUExFKQogICAgICBzZXQoR0xGV19MSUJfTkFNRVMgbGliZ2xmd19vc3guYSkKICAgIGVuZGlmKEFQUExFKQogIGVuZGlmKFVOSVgpCgogICMgR0xGVyBzdGF0aWMgbGlicmFyeQogIGZpbmRfbGlicmFyeShHTEZXX0xJQlJBUlkgTkFNRVMgJHtHTEZXX0xJQl9OQU1FU30gRE9DICJHTEZXIGxpYnJhcnkiKQoKCiAgaWYoTk9UIEdMRldfTElCUkFSWSkKICAgIGluY2x1ZGUoRmluZFBrZ0NvbmZpZykKICAgIAogICAgcGtnX3NlYXJjaF9tb2R1bGUoR0xGVyBnbGZ3MykKICBlbmRpZihOT1QgR0xGV19MSUJSQVJZKQoKCiAgIyBHTEZXIGxpYnJhcnkgZGlyCiAgaWYoTk9UIEdMRldfTElCUkFSWV9ESVIpCiAgICBpZihHTEZXX0xJQlJBUlkpCiAgICAgIGdldF9maWxlbmFtZV9jb21wb25lbnQoR0xGV19MSUJSQVJZX0RJUiAiJHtHTEZXX0xJQlJBUll9IiBESVJFQ1RPUlkpCiAgICBlbHNlKEdMRldfTElCUkFSWSkKICAgICAgZmluZF9wYXRoKEdMRldfTElCUkFSWV9ESVIgTkFNRVMgJHtHTEZXX0xJQl9OQU1FU30gRE9DICJHTEZXIGxpYnJhcnkgZGlyZWN0b3J5IikKICAgIGVuZGlmKEdMRldfTElCUkFSWSkKICBlbmRpZihOT1QgR0xGV19MSUJSQVJZX0RJUikKCiAgIyBHTEZXIGluY2x1ZGUgZGlyCiAgaWYoTk9UIEdMRldfSU5DTFVERV9ESVIpCiAgICBpZihHTEZXX0xJQlJBUllfRElSKQogICAgICBzdHJpbmcoUkVHRVggUkVQTEFDRSAiL2xpYi8uKiIgIi9pbmNsdWRlIiBHTEZXX0lOQ0xVREVfRElSICIke0dMRldfTElCUkFSWV9ESVJ9IikKICAgIGVsc2UoR0xGV19MSUJSQVJZX0RJUikKICAgICAgZmluZF9wYXRoKEdMRldfSU5DTFVERV9ESVIgTkFNRVMgJHtHTEZXX0lOQ19OQU1FU30gRE9DICJHTEZXIGluY2x1ZGUgZGlyZWN0b3J5IikKICAgIGVuZGlmKEdMRldfTElCUkFSWV9ESVIpCiAgZW5kaWYoTk9UIEdMRldfSU5DTFVERV9ESVIpCgogICMgVmVyc2lvbgogIHNldChHTEZXX1ZFUlNJT04gMy4xLjEpCgogIGlmKEdMRldfTElCUkFSWSkKICAgIG1lc3NhZ2UoU1RBVFVTICJHTEZXIGxpYnJhcnk6ICR7R0xGV19MSUJSQVJZfSIpCiAgICBtZXNzYWdlKFNUQVRVUyAiR0xGVyBsaWJyYXJ5IGRpcmVjdG9yeTogJHtHTEZXX0xJQlJBUllfRElSfSIpCiAgICBtZXNzYWdlKFNUQVRVUyAiR0xGVyBpbmNsdWRlIGRpcmVjdG9yeTogJHtHTEZXX0lOQ0xVREVfRElSfSIpCiAgZW5kaWYoR0xGV19MSUJSQVJZKQoKICAjIFNldCBwYWNrYWdlIHN0YW5kYXJkIGFyZ3MKICAjaW5jbHVkZShGaW5kUGFja2FnZUhhbmRsZVN0YW5kYXJkQXJncykKICAjRklORF9QQUNLQUdFX0hBTkRMRV9TVEFOREFSRF9BUkdTKEdMRlcgUkVRVUlSRURfVkFSUyBHTEZXX0xJQlJBUlkgR0xGV19JTkNMVURFX0RJUiBHTEZXX0xJQlJBUllfRElSIFZFUlNJT05fVkFSIEdMRldfVkVSU0lPTikKZW5kbWFjcm8oZmluZF9nbGZ3KQoAAAAAAAAAAAcHAAAAAAAAAAAAAAAAAAAAAAAABwcAAAAAAAAAAAAAAAAAAAAAAAAHBwAAAAAAAAAAAAAAAAAAAAAAAAcHAAAAAAAAAAAAAAAAAAAAAAAABwcAAAAAAAAAAAAA",
+					"BQAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAABlAgAAAAAAAGUCAAAAAAAAAAAAAAAA8L8"
 				]
 			]
 		},
@@ -1018,7 +2221,7 @@
 					"paste",
 					null,
 					"AQAAACUCAAAAAAAAeAIAAAAAAAAAAAAA",
-					"BAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAJQIAAAAAAAAlAgAAAAAAAAAAAAAAAPC/"
+					"BQAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAlAgAAAAAAACUCAAAAAAAAAAAAAAAA8L8"
 				],
 				[
 					4,
@@ -1028,7 +2231,7 @@
 						"characters": "\n"
 					},
 					"AgAAAHgCAAAAAAAAeQIAAAAAAAAAAAAAeQIAAAAAAAB7AgAAAAAAAAAAAAA",
-					"BAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAeAIAAAAAAAB4AgAAAAAAAAAAAAAAAPC/"
+					"BQAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAB4AgAAAAAAAHgCAAAAAAAAAAAAAAAA8L8"
 				],
 				[
 					8,
@@ -1036,7 +2239,7 @@
 					"left_delete",
 					null,
 					"AgAAAG0CAAAAAAAAbQIAAAAAAAABAAAARngCAAAAAAAAeAIAAAAAAAACAAAAICA",
-					"BAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAbgIAAAAAAABuAgAAAAAAAAAAAAAAAPC/"
+					"BQAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAABuAgAAAAAAAG4CAAAAAAAAAAAAAAAA8L8"
 				],
 				[
 					9,
@@ -1046,7 +2249,7 @@
 						"characters": "E"
 					},
 					"AQAAAG0CAAAAAAAAbgIAAAAAAAAAAAAA",
-					"BAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAbQIAAAAAAABtAgAAAAAAAAAAAAAAAPC/"
+					"BQAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAABtAgAAAAAAAG0CAAAAAAAAAAAAAAAA8L8"
 				],
 				[
 					13,
@@ -1054,7 +2257,7 @@
 					"left_delete",
 					null,
 					"AQAAAFUCAAAAAAAAVQIAAAAAAAABAAAARg",
-					"BAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAVgIAAAAAAABWAgAAAAAAAAAAAAAAAPC/"
+					"BQAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAABWAgAAAAAAAFYCAAAAAAAAAAAAAAAA8L8"
 				],
 				[
 					14,
@@ -1064,7 +2267,7 @@
 						"characters": "E"
 					},
 					"AQAAAFUCAAAAAAAAVgIAAAAAAAAAAAAA",
-					"BAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAVQIAAAAAAABVAgAAAAAAAAAAAAAAAPC/"
+					"BQAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAABVAgAAAAAAAFUCAAAAAAAAAAAAAAAA8L8"
 				],
 				[
 					16,
@@ -1072,7 +2275,7 @@
 					"left_delete",
 					null,
 					"AwAAAFwCAAAAAAAAXAIAAAAAAAABAAAAM1sCAAAAAAAAWwIAAAAAAAABAAAAd1oCAAAAAAAAWgIAAAAAAAABAAAAZg",
-					"BAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAXQIAAAAAAABdAgAAAAAAAAAAAAAAAPC/"
+					"BQAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAABdAgAAAAAAAF0CAAAAAAAAAAAAAAAA8L8"
 				],
 				[
 					17,
@@ -1082,7 +2285,7 @@
 						"characters": "ew"
 					},
 					"AgAAAFoCAAAAAAAAWwIAAAAAAAAAAAAAWwIAAAAAAABcAgAAAAAAAAAAAAA",
-					"BAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAWgIAAAAAAABaAgAAAAAAAAAAAAAAAPC/"
+					"BQAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAABaAgAAAAAAAFoCAAAAAAAAAAAAAAAA8L8"
 				],
 				[
 					21,
@@ -1090,7 +2293,7 @@
 					"left_delete",
 					null,
 					"AQAAADECAAAAAAAAMQIAAAAAAAABAAAARg",
-					"BAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAMgIAAAAAAAAyAgAAAAAAAAAAAAAAAPC/"
+					"BQAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAyAgAAAAAAADICAAAAAAAAAAAAAAAA8L8"
 				],
 				[
 					22,
@@ -1100,7 +2303,7 @@
 						"characters": "E"
 					},
 					"AQAAADECAAAAAAAAMgIAAAAAAAAAAAAA",
-					"BAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAMQIAAAAAAAAxAgAAAAAAAAAAAAAAAPC/"
+					"BQAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAxAgAAAAAAADECAAAAAAAAAAAAAAAA8L8"
 				],
 				[
 					31,
@@ -1110,7 +2313,7 @@
 						"characters": "\n"
 					},
 					"AwAAADwCAAAAAAAAPQIAAAAAAAAAAAAAPQIAAAAAAAA/AgAAAAAAAAAAAAA/AgAAAAAAAEECAAAAAAAAAAAAAA",
-					"BAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAPAIAAAAAAAA8AgAAAAAAAAAAAAAAAPC/"
+					"BQAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAA8AgAAAAAAADwCAAAAAAAAAAAAAAAA8L8"
 				],
 				[
 					32,
@@ -1118,7 +2321,7 @@
 					"paste",
 					null,
 					"AQAAAEECAAAAAAAAWAIAAAAAAAAAAAAA",
-					"BAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAQQIAAAAAAABBAgAAAAAAAAAAAAAAAPC/"
+					"BQAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvwAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAABBAgAAAAAAAEECAAAAAAAAAAAAAAAA8L8"
 				]
 			]
 		}
@@ -1284,6 +2487,7 @@
 	],
 	"file_history":
 	[
+		"/home/roman/Projects/plot-cv/quickjs/qjs-nanovg/CMakeFiles/qjs-nanovg.dir/build.make",
 		"/home/roman/Projects/plot-cv/quickjs/qjs-modules/lib/util.js",
 		"/home/roman/Projects/plot-cv/quickjs/qjs-modules/quickjs-syscallerror.c",
 		"/home/roman/Projects/plot-cv/quickjs/qjs-modules/quickjs-stringdecoder.c",
@@ -1410,8 +2614,7 @@
 		"/home/roman/Projects/plot-cv/quickjs/qjs-modules/modules.project",
 		"/home/roman/Projects/plot-cv/quickjs/qjs-modules/mmap-win32.c",
 		"/home/roman/Projects/plot-cv/quickjs/qjs-modules/mmap-win32.h",
-		"/tmp/spawn/process.2.c",
-		"/tmp/spawn/process.c"
+		"/tmp/spawn/process.2.c"
 	],
 	"find":
 	{
@@ -1452,6 +2655,73 @@
 			[
 				{
 					"buffer": 0,
+					"selected": true,
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 77,
+						"regions":
+						{
+						},
+						"selection":
+						[
+						],
+						"settings":
+						{
+							"auto_complete_triggers":
+							[
+								{
+									"characters": "./",
+									"selector": "text.html, text.xml"
+								},
+								{
+									"rhs_empty": true,
+									"selector": "punctuation.accessor"
+								}
+							],
+							"current_file": "/home/roman/Projects/plot-cv/quickjs/qjs-nanovg/nanovg-qjs.h",
+							"function_name_status_row": 13,
+							"outline_rename_mode": false,
+							"symkeys":
+							[
+								[
+									97,
+									118
+								],
+								[
+									175,
+									202
+								],
+								[
+									281,
+									302
+								]
+							],
+							"symlist":
+							[
+								"  js_init_module_nanovg",
+								"  js_nanovg_init_with_context",
+								"  js_init_module_nanovg"
+							],
+							"syntax": "Packages/Outline/outline.hidden-tmLanguage",
+							"tabs_extra_last_activated": 1641049636.74,
+							"tabs_extra_last_activated_sheet_index": 0
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"stack_multiselect": false,
+					"type": "text"
+				}
+			]
+		},
+		{
+			"sheets":
+			[
+				{
+					"buffer": 1,
 					"file": "qjs-nanovg.sublime-project",
 					"semi_transient": false,
 					"settings":
@@ -1483,7 +2753,7 @@
 							"function_name_status_row": 0,
 							"syntax": "Packages/JSON/JSON.sublime-syntax",
 							"tab_size": 2,
-							"tabs_extra_last_activated": 1640837606.41,
+							"tabs_extra_last_activated": 1641049633.76,
 							"tabs_extra_last_activated_sheet_index": 0,
 							"translate_tabs_to_spaces": false
 						},
@@ -1491,12 +2761,12 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 5,
+					"stack_index": 2,
 					"stack_multiselect": false,
 					"type": "text"
 				},
 				{
-					"buffer": 1,
+					"buffer": 2,
 					"file": "nanovg-qjs.c",
 					"semi_transient": false,
 					"settings":
@@ -1508,8 +2778,8 @@
 						"selection":
 						[
 							[
-								0,
-								0
+								24977,
+								24998
 							]
 						],
 						"settings":
@@ -1525,23 +2795,68 @@
 									"selector": "punctuation.accessor"
 								}
 							],
-							"function_name_status_row": 0,
+							"function_name_status_row": 959,
 							"syntax": "Packages/C++/C.sublime-syntax",
 							"tab_size": 2,
+							"tabs_extra_last_activated": 1641049658.23,
+							"tabs_extra_last_activated_sheet_index": 1,
 							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 18743.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"stack_multiselect": false,
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "nanovg-qjs.h",
+					"selected": true,
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 372,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								268,
+								268
+							]
+						],
+						"settings":
+						{
+							"auto_complete_triggers":
+							[
+								{
+									"characters": "./",
+									"selector": "text.html, text.xml"
+								},
+								{
+									"rhs_empty": true,
+									"selector": "punctuation.accessor"
+								}
+							],
+							"function_name_status_row": 11,
+							"syntax": "Packages/C++/C.sublime-syntax",
+							"tabs_extra_last_activated": 1641050109.56,
+							"tabs_extra_last_activated_sheet_index": 2
 						},
 						"translation.x": 0.0,
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 4,
+					"stack_index": 0,
 					"stack_multiselect": false,
 					"type": "text"
 				},
 				{
-					"buffer": 2,
+					"buffer": 4,
 					"file": "CMakeLists.txt",
-					"selected": true,
 					"semi_transient": false,
 					"settings":
 					{
@@ -1572,20 +2887,20 @@
 							"function_name_status_row": 20,
 							"syntax": "Packages/User/Themes/CMake.sublime-syntax",
 							"tab_size": 2,
-							"tabs_extra_last_activated": 1640854222.63,
-							"tabs_extra_last_activated_sheet_index": 2,
+							"tabs_extra_last_activated": 1641049633.65,
+							"tabs_extra_last_activated_sheet_index": 0,
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 0,
+					"stack_index": 3,
 					"stack_multiselect": false,
 					"type": "text"
 				},
 				{
-					"buffer": 3,
+					"buffer": 5,
 					"file": "cmake/UseMultiArch.cmake",
 					"semi_transient": false,
 					"settings":
@@ -1617,20 +2932,20 @@
 							"function_name_status_row": 15,
 							"syntax": "Packages/User/Themes/CMake.sublime-syntax",
 							"tab_size": 2,
-							"tabs_extra_last_activated": 1640848858.9,
-							"tabs_extra_last_activated_sheet_index": 3,
+							"tabs_extra_last_activated": 1641049633.58,
+							"tabs_extra_last_activated_sheet_index": 0,
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
 						"translation.y": 60.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 1,
+					"stack_index": 4,
 					"stack_multiselect": false,
 					"type": "text"
 				},
 				{
-					"buffer": 4,
+					"buffer": 6,
 					"file": "cmake/FindGLFW.cmake",
 					"semi_transient": false,
 					"settings":
@@ -1662,20 +2977,20 @@
 							"function_name_status_row": 22,
 							"syntax": "Packages/User/Themes/CMake.sublime-syntax",
 							"tab_size": 2,
-							"tabs_extra_last_activated": 1640842946.15,
-							"tabs_extra_last_activated_sheet_index": 3,
+							"tabs_extra_last_activated": 1641049633.51,
+							"tabs_extra_last_activated_sheet_index": 0,
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
 						"translation.y": 180.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 2,
+					"stack_index": 5,
 					"stack_multiselect": false,
 					"type": "text"
 				},
 				{
-					"buffer": 5,
+					"buffer": 7,
 					"file": "cmake/FindGLEW.cmake",
 					"semi_transient": false,
 					"settings":
@@ -1707,15 +3022,15 @@
 							"function_name_status_row": 21,
 							"syntax": "Packages/User/Themes/CMake.sublime-syntax",
 							"tab_size": 2,
-							"tabs_extra_last_activated": 1640842758.66,
-							"tabs_extra_last_activated_sheet_index": 4,
+							"tabs_extra_last_activated": 1641049633.43,
+							"tabs_extra_last_activated_sheet_index": 0,
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 3,
+					"stack_index": 6,
 					"stack_multiselect": false,
 					"type": "text"
 				}
@@ -1735,20 +3050,29 @@
 		"cells":
 		[
 			[
+				2,
+				0,
+				3,
+				2
+			],
+			[
 				0,
 				0,
-				1,
-				1
+				2,
+				2
 			]
 		],
 		"cols":
 		[
 			0.0,
+			0.2,
+			0.8,
 			1.0
 		],
 		"rows":
 		[
 			0.0,
+			0.5,
 			1.0
 		]
 	},
@@ -2331,7 +3655,7 @@
 		],
 		"width": 970.0
 	},
-	"selected_group": 0,
+	"selected_group": 1,
 	"settings":
 	{
 	},
