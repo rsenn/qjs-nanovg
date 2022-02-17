@@ -26,8 +26,7 @@ add_library(
   ${CMAKE_CURRENT_SOURCE_DIR}/nanovg/src/nanovg_gl.h)
 
 set_target_properties(
-  qjs-nanovg PROPERTIES OUTPUT_NAME nanovg PREFIX "" COMPILE_FLAGS
-                                                     "${MODULE_COMPILE_FLAGS}")
+  qjs-nanovg PROPERTIES OUTPUT_NAME nanovg PREFIX "" COMPILE_FLAGS "${MODULE_COMPILE_FLAGS} -DJS_SHARED_LIBRARY")
 
 target_include_directories(
   qjs-nanovg PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/nanovg/src
