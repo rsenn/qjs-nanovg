@@ -956,8 +956,8 @@ js_nanovg_init(JSContext* ctx, JSModuleDef* m) {
   return 0;
 }
 
-JSModuleDef*
-js_init_module_nanovg(JSContext* ctx, const char* module_name) {
+VISIBLE JSModuleDef*
+JS_INIT_MODULE(JSContext* ctx, const char* module_name) {
   JSModuleDef* m;
   m = JS_NewCModule(ctx, module_name, js_nanovg_init);
   if(!m)
