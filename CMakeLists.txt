@@ -1,5 +1,7 @@
 project(qjs-nanovg C)
 
+set(PKG_CONFIG_USE_CMAKE_PREFIX_PATH TRUE)
+
 include(FindOpenGL)
 include(FindPkgConfig)
 include(CheckCCompilerFlag)
@@ -18,6 +20,9 @@ find_glfw()
 
 find_quickjs()
 configure_quickjs()
+
+include_directories(${GLEW_INCLUDE_DIR} ${GLFW_INCLUDE_DIR} ${QUICKJS_INCLUDE_DIR})
+link_directories(${GLEW_LIBRARY_DIR} ${GLFW_LIBRARY_DIR} ${QUICKJS_LIBRARY_DIR})
 
 add_library(
   qjs-nanovg SHARED
