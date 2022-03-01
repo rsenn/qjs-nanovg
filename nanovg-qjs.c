@@ -956,8 +956,8 @@ js_nanovg_init(JSContext* ctx, JSModuleDef* m) {
   return 0;
 }
 
-VISIBLE JSModuleDef*
-JS_INIT_MODULE(JSContext* ctx, const char* module_name) {
+static JSModuleDef*
+js_init_module_nanovg(JSContext* ctx, const char* module_name) {
   JSModuleDef* m;
   m = JS_NewCModule(ctx, module_name, js_nanovg_init);
   if(!m)
@@ -966,6 +966,14 @@ JS_INIT_MODULE(JSContext* ctx, const char* module_name) {
   JS_AddModuleExportList(ctx, m, js_nanovg_funcs, countof(js_nanovg_funcs));
   return m;
 }
+
+
+#ifdef JS_SHARED_LIBRARY
+VISIBLE JSModuleDef*
+js_init_module(JSContext* ctx, const char* module_name) {
+  return js_init_module_nanovg(ctx, module_name);
+}
+#endif
 
 void
 js_nanovg_init_with_context(struct NVGcontext* vg) {
