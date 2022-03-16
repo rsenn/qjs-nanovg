@@ -15,14 +15,13 @@ export function DrawImage(image, pos) {
   nvg.Restore();
 }
 
-export function DrawCircle(pos, radius, stroke = nvg.RGB(255,255,255), fill = nvg.RGBA(255,0,0,96)) {
+export function DrawCircle(/*pos, */ radius, stroke = nvg.RGB(255, 255, 255), fill = nvg.RGBA(255, 0, 0, 96)) {
   nvg.Save();
-  nvg.Translate(...pos);
+  //nvg.Translate(...pos);
   nvg.BeginPath();
   nvg.StrokeColor(stroke);
   nvg.StrokeWidth(5);
-  if(fill)
-  nvg.FillColor(fill);
+  if(fill) nvg.FillColor(fill);
   nvg.Circle(0, 0, radius);
   if(fill) nvg.Fill();
   nvg.Stroke();
@@ -134,31 +133,34 @@ function main(...args) {
     let center = new glfw.Position(size.width / 2, size.height / 2);
     let imgSz = new glfw.Position(img2Sz.width * -1, img2Sz.height * -1);
     let imgSz_2 = new glfw.Position(img2Sz.width * -0.5, img2Sz.height * -0.5);
+    let phi = a => ((a % 360) / 180) * Math.PI;
+    let vec = (w, h, angle = phi(i)) => [Math.cos(angle) * w, Math.sin(angle) * h]; /*.map(n => n * radius)*/
 
     nvg.Save();
+    nvg.Translate(...center);
+    nvg.Translate(...vec(50, 100, phi(i + 240)));
 
-    DrawCircle(center, 100, nvg.RGBA(255,192,0,255),nvg.RGBA(0,0,0,0));
+    DrawCircle(50, nvg.RGB(255, 255, 224), nvg.RGBA(255, 192, 0, 255));
+
+    nvg.Restore();
+    nvg.Save();
 
     nvg.Translate(...center);
-    nvg.Translate(...imgSz_2);
+    nvg.Translate(...vec(40, 20));
 
-    let phi = ((i % 360) / 180) * Math.PI;
-    let vec = [Math.cos(phi), Math.sin(phi)].map(n => n * 100);
+    DrawCircle(20, nvg.RGB(255, 180, 180), nvg.RGBA(255, 0, 0, 0.8 * 255));
 
-    //  DrawImage(img2Id, vec);
+    nvg.Restore();
+    nvg.Save();
 
-    // nvg.Translate(...vec);
-    //nvg.Translate(imgSz_2.x * -1, imgSz_2.y * -1);
+    nvg.Translate(...center);
+    nvg.Translate(...vec(100, 30, phi(i + 120)));
 
-    //nvg.Scale(0.5, 0.5);
-    DrawCircle(new glfw.Position(...vec), 50, nvg.RGB(255,255,255), nvg.RGBA(255,0,0,0.8*255));
-    //  DrawCircle(new glfw.Position(0, 0), 40);
+    DrawCircle(30, nvg.RGB(160, 220, 255), nvg.RGBA(0, 120, 255, 0.8 * 255));
 
     nvg.Restore();
 
     context.end();
-    /*window.swapBuffers();
-    glfw.poll();*/
     i++;
   }
 }
