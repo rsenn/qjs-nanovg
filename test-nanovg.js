@@ -140,18 +140,18 @@ function main(...args) {
     DrawCircle(center, 100, nvg.RGBA(255,192,0,255),nvg.RGBA(0,0,0,0));
 
     nvg.Translate(...center);
-    nvg.Translate(...imgSz);
+    nvg.Translate(...imgSz_2);
 
     let phi = ((i % 360) / 180) * Math.PI;
-    let vec = [Math.cos(phi), Math.sin(phi)].map(n => n * 200);
+    let vec = [Math.cos(phi), Math.sin(phi)].map(n => n * 100);
 
     //  DrawImage(img2Id, vec);
 
     // nvg.Translate(...vec);
     //nvg.Translate(imgSz_2.x * -1, imgSz_2.y * -1);
 
-    nvg.Scale(0.5, 0.5);
-    DrawCircle(new glfw.Position(...vec), 100, nvg.RGB(255,255,255), nvg.RGBA(255,0,0,0.8*255));
+    //nvg.Scale(0.5, 0.5);
+    DrawCircle(new glfw.Position(...vec), 50, nvg.RGB(255,255,255), nvg.RGBA(255,0,0,0.8*255));
     //  DrawCircle(new glfw.Position(0, 0), 40);
 
     nvg.Restore();
