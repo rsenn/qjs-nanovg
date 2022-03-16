@@ -15,17 +15,20 @@ export function DrawImage(image, pos) {
   nvg.Restore();
 }
 
-export function DrawCircle(/*pos, */ radius, stroke = nvg.RGB(255, 255, 255), fill = nvg.RGBA(255, 0, 0, 96)) {
-  nvg.Save();
-  //nvg.Translate(...pos);
-  nvg.BeginPath();
+export function DrawCircle(  radius, stroke = nvg.RGB(255, 255, 255), fill = nvg.RGBA(255, 0, 0, 96)) {
+   nvg.BeginPath();
   nvg.StrokeColor(stroke);
-  nvg.StrokeWidth(5);
+  nvg.StrokeWidth(3);
   if(fill) nvg.FillColor(fill);
   nvg.Circle(0, 0, radius);
   if(fill) nvg.Fill();
   nvg.Stroke();
-  nvg.Restore();
+}
+
+function RotatePoint(x,y, angle) {
+  let c = Math.cos(angle),
+    s = Math.sin(angle);
+  return [ x * c - y * s, x * s + y * c ];
 }
 
 export function Clear(color = nvg.RGB(0, 0, 0)) {
@@ -69,7 +72,6 @@ function main(...args) {
 
   Object.assign(context, {
     begin(color = nvg.RGB(255, 255, 255)) {
-      console.log('begin', color);
       Clear(color);
       nvg.BeginFrame(...size, 1);
     },
@@ -128,38 +130,82 @@ function main(...args) {
 
     let p = nvg.TransformMultiply(nvg.TransformMultiply(m, t), s);
 
-    // let pattern = nvg.ImagePattern(0, 0, ...img2Sz, 0, img2Id, 1);
-
+ 
     let center = new glfw.Position(size.width / 2, size.height / 2);
     let imgSz = new glfw.Position(img2Sz.width * -1, img2Sz.height * -1);
     let imgSz_2 = new glfw.Position(img2Sz.width * -0.5, img2Sz.height * -0.5);
     let phi = a => ((a % 360) / 180) * Math.PI;
     let vec = (w, h, angle = phi(i)) => [Math.cos(angle) * w, Math.sin(angle) * h]; /*.map(n => n * radius)*/
 
-    nvg.Save();
-    nvg.Translate(...center);
-    nvg.Translate(...vec(50, 100, phi(i + 240)));
+    function Planet(radius, stroke, fill, getAngle, getPrecession, getPosition) {
+      return Object.assign(this, {
+        radius,
+        stroke,
+        fill,
+        get angle() {
+          return getAngle();
+        },
+        get precession() {
+          return getPrecession();
+        },
+        get position() {
+          return RotatePoint(...getPosition(this.angle), this.precession);
+        },
+        draw() {
+          nvg.Save();
+          nvg.Translate(...center);
+          nvg.Translate(...this.position);
+          DrawCircle(this.radius, this.stroke, this.fill);
+          nvg.Restore();
+        },
+        get zpos() {
+          const [x, y] = this.position;
 
-    DrawCircle(50, nvg.RGB(255, 255, 224), nvg.RGBA(255, 192, 0, 255));
+          return y;
+        }
+      });
+    }
 
-    nvg.Restore();
-    nvg.Save();
+    let planets = [
+      new Planet(
+        50,
+        nvg.RGB(255, 255, 224),
+        nvg.RGBA(255, 192, 0, 255),
+        () => phi(i + 240),
+        () => phi(i * 0.01),
+        a => vec(20, 10, a)
+      ),
+      new Planet(
+        20,
+        nvg.RGB(255, 180, 180),
+        nvg.RGBA(255, 0, 0, 0.8 * 255),
+        () => phi(i),
+        () => phi(i * -0.01),
+        a => vec(300, 100, a)
+      ),
+      new Planet(
+        30,
+        nvg.RGB(160, 220, 255),
+        nvg.RGBA(0, 120, 255, 0.8 * 255),
+        () => phi(i*0.8 + 120),
+        () => phi(i * 0.02),
+        a => vec(180, 40, a)
+      ),
+      new Planet(
+        10,
+        nvg.RGB(220, 160, 255),
+        nvg.RGBA(120, 0, 255, 0.8 * 255),
+        () => phi(i*0.4  -120),
+        () => phi(i * 0.001),
+        a => vec(320, 200, a)
+      )
+    ];
 
-    nvg.Translate(...center);
-    nvg.Translate(...vec(40, 20));
+    planets.sort((a, b) => a.zpos - b.zpos);
 
-    DrawCircle(20, nvg.RGB(255, 180, 180), nvg.RGBA(255, 0, 0, 0.8 * 255));
-
-    nvg.Restore();
-    nvg.Save();
-
-    nvg.Translate(...center);
-    nvg.Translate(...vec(100, 30, phi(i + 120)));
-
-    DrawCircle(30, nvg.RGB(160, 220, 255), nvg.RGBA(0, 120, 255, 0.8 * 255));
-
-    nvg.Restore();
-
+    for(let planet of planets) {
+      planet.draw();
+    }
     context.end();
     i++;
   }
