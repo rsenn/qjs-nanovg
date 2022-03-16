@@ -15,15 +15,16 @@ export function DrawImage(image, pos) {
   nvg.Restore();
 }
 
-export function DrawCircle(pos, radius) {
+export function DrawCircle(pos, radius, stroke = nvg.RGB(255,255,255), fill = nvg.RGBA(255,0,0,96)) {
   nvg.Save();
   nvg.Translate(...pos);
   nvg.BeginPath();
-  nvg.StrokeColor(nvg.RGB(255, 255, 255));
+  nvg.StrokeColor(stroke);
   nvg.StrokeWidth(5);
-  nvg.FillColor(nvg.RGBA(255, 0, 0, 96));
+  if(fill)
+  nvg.FillColor(fill);
   nvg.Circle(0, 0, radius);
-  nvg.Fill();
+  if(fill) nvg.Fill();
   nvg.Stroke();
   nvg.Restore();
 }
@@ -71,8 +72,10 @@ function main(...args) {
     begin(color = nvg.RGB(255, 255, 255)) {
       console.log('begin', color);
       Clear(color);
+      nvg.BeginFrame(...size, 1);
     },
     end() {
+      nvg.EndFrame();
       window.swapBuffers();
       glfw.poll();
     }
@@ -106,19 +109,6 @@ function main(...args) {
   const { width, height } = size;
   const { x, y } = position;
 
-  //console.log(`width: ${width}, height: ${height}, x: ${x}, y: ${y}`);
-
-  /*  let mat = new Mat(size, cv.CV_8UC4);
-
-  mat.setTo([11, 22, 33, 255]);
-
-  cv.line(mat, new Point(10, 10), new Point(size.width - 10, size.height - 10), [255, 255, 0, 255], 4, cv.LINE_AA);
-  cv.line(mat, new Point(size.width - 10, 10), new Point(10, size.height - 10), [255, 0, 0, 255], 4, cv.LINE_AA);
-
-  let image2 = cv.imread('Architektur.png');
-
-  let { buffer } = mat;
-*/
   let pixels;
   let imgId = nvg.CreateImage('Architektur.png', 0);
   let img2Id = nvg.CreateImage('Muehleberg.png', 0);
@@ -133,8 +123,6 @@ function main(...args) {
 
     context.begin(color);
 
-    nvg.BeginFrame(width, height, 1);
-
     let m = nvg.CurrentTransform();
     let t = nvg.TransformTranslate([], 10, 20);
     let s = nvg.TransformScale([], 3, 3);
@@ -144,26 +132,29 @@ function main(...args) {
     // let pattern = nvg.ImagePattern(0, 0, ...img2Sz, 0, img2Id, 1);
 
     let center = new glfw.Position(size.width / 2, size.height / 2);
+    let imgSz = new glfw.Position(img2Sz.width * -1, img2Sz.height * -1);
     let imgSz_2 = new glfw.Position(img2Sz.width * -0.5, img2Sz.height * -0.5);
 
     nvg.Save();
 
+    DrawCircle(center, 100, nvg.RGBA(255,192,0,255),nvg.RGBA(0,0,0,0));
+
     nvg.Translate(...center);
-    nvg.Scale(0.5, 0.5);
-    nvg.Translate(...imgSz_2);
+    nvg.Translate(...imgSz);
 
     let phi = ((i % 360) / 180) * Math.PI;
-    let vec = [Math.cos(phi), Math.sin(phi)].map(n => n * 100);
+    let vec = [Math.cos(phi), Math.sin(phi)].map(n => n * 200);
 
-    DrawImage(img2Id, vec);
-    nvg.Translate(imgSz_2.width * -1, imgSz_2.height * -1);
-    DrawCircle(new glfw.Position(0, 0), 40);
+    //  DrawImage(img2Id, vec);
+
+    // nvg.Translate(...vec);
+    //nvg.Translate(imgSz_2.x * -1, imgSz_2.y * -1);
+
+    nvg.Scale(0.5, 0.5);
+    DrawCircle(new glfw.Position(...vec), 100, nvg.RGB(255,255,255), nvg.RGBA(255,0,0,0.8*255));
+    //  DrawCircle(new glfw.Position(0, 0), 40);
 
     nvg.Restore();
-
-    DrawCircle(center, 100);
-
-    nvg.EndFrame();
 
     context.end();
     /*window.swapBuffers();
