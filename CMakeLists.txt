@@ -1,9 +1,13 @@
 project(qjs-nanovg C)
 
+message("Building project [1;31m${PROJECT_NAME}[0m")
+
 set(PKG_CONFIG_USE_CMAKE_PREFIX_PATH TRUE)
 
 include(FindOpenGL)
-include(FindPkgConfig)
+if(NOT PKG_CONFIG_FOUND)
+  include(FindPkgConfig)
+endif(NOT PKG_CONFIG_FOUND)
 include(CheckCCompilerFlag)
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindQuickJS.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindGLEW.cmake)
@@ -24,7 +28,8 @@ configure_quickjs()
 include_directories(${GLEW_INCLUDE_DIR} ${GLFW_INCLUDE_DIR} ${QUICKJS_INCLUDE_DIR})
 link_directories(${GLEW_LIBRARY_DIR} ${GLFW_LIBRARY_DIR} ${QUICKJS_LIBRARY_DIR})
 
-add_library(qjs-nanovg SHARED nanovg-qjs.c nanovg-qjs.h ${CMAKE_CURRENT_SOURCE_DIR}/nanovg/src/nanovg.c ${CMAKE_CURRENT_SOURCE_DIR}/nanovg/src/nanovg.h ${CMAKE_CURRENT_SOURCE_DIR}/nanovg/src/nanovg_gl.h)
+add_library(qjs-nanovg SHARED nanovg-qjs.c nanovg-qjs.h ${CMAKE_CURRENT_SOURCE_DIR}/nanovg/src/nanovg.c ${CMAKE_CURRENT_SOURCE_DIR}/nanovg/src/nanovg.h
+                              ${CMAKE_CURRENT_SOURCE_DIR}/nanovg/src/nanovg_gl.h)
 
 set_target_properties(qjs-nanovg PROPERTIES OUTPUT_NAME nanovg PREFIX "" COMPILE_FLAGS "${MODULE_COMPILE_FLAGS} -DJS_SHARED_LIBRARY")
 
