@@ -45,3 +45,10 @@ if(NOT QUICKJS_C_MODULE_DIR)
 endif(NOT QUICKJS_C_MODULE_DIR)
 
 install(TARGETS qjs-nanovg DESTINATION "${QUICKJS_C_MODULE_DIR}" PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
+
+include_directories(nanovg/src)
+add_executable(nanovg_example nanovg/example/example_gl3.c nanovg/example/perf.c nanovg/example/demo.c ${CMAKE_CURRENT_SOURCE_DIR}/nanovg/src/nanovg.c ${CMAKE_CURRENT_SOURCE_DIR}/nanovg/src/nanovg.h
+                              ${CMAKE_CURRENT_SOURCE_DIR}/nanovg/src/nanovg_gl.h)
+target_link_libraries(nanovg_example m ${GLFW_LIBRARY} ${GLEW_LIBRARY} OpenGL::GL)
+
+add_custom_target(run_example COMMAND ${CMAKE_CURRENT_BINARY_DIR}/nanovg_example WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/nanovg/example)
