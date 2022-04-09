@@ -25,17 +25,28 @@ find_glfw()
 find_quickjs()
 configure_quickjs()
 
-include_directories(${GLEW_INCLUDE_DIR} ${GLFW_INCLUDE_DIR} ${QUICKJS_INCLUDE_DIR})
+include_directories(${GLEW_INCLUDE_DIR} ${GLFW_INCLUDE_DIR}
+                    ${QUICKJS_INCLUDE_DIR})
 link_directories(${GLEW_LIBRARY_DIR} ${GLFW_LIBRARY_DIR} ${QUICKJS_LIBRARY_DIR})
 
-add_library(qjs-nanovg SHARED nanovg-qjs.c nanovg-qjs.h ${CMAKE_CURRENT_SOURCE_DIR}/nanovg/src/nanovg.c ${CMAKE_CURRENT_SOURCE_DIR}/nanovg/src/nanovg.h
-                              ${CMAKE_CURRENT_SOURCE_DIR}/nanovg/src/nanovg_gl.h)
+add_library(
+  qjs-nanovg SHARED
+  nanovg-qjs.c nanovg-qjs.h ${CMAKE_CURRENT_SOURCE_DIR}/nanovg/src/nanovg.c
+  ${CMAKE_CURRENT_SOURCE_DIR}/nanovg/src/nanovg.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/nanovg/src/nanovg_gl.h)
 
-set_target_properties(qjs-nanovg PROPERTIES OUTPUT_NAME nanovg PREFIX "" COMPILE_FLAGS "${MODULE_COMPILE_FLAGS} -DJS_SHARED_LIBRARY")
+set_target_properties(
+  qjs-nanovg
+  PROPERTIES OUTPUT_NAME nanovg PREFIX ""
+             COMPILE_FLAGS "${MODULE_COMPILE_FLAGS} -DJS_SHARED_LIBRARY")
 
-target_include_directories(qjs-nanovg PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/nanovg/src ${QUICKJS_INCLUDE_DIR})
-target_link_libraries(qjs-nanovg PRIVATE ${GLFW_LIBRARY} ${GLEW_LIBRARY} OpenGL::GL ${QUICKJS_LIBRARY})
-target_compile_definitions(qjs-nanovg PRIVATE JS_SHARED_LIBRARY=1 NANOVG_GLEW=1 NANOVG_GL3_IMPLEMENTATION=1)
+target_include_directories(
+  qjs-nanovg PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/nanovg/src
+                     ${QUICKJS_INCLUDE_DIR})
+target_link_libraries(qjs-nanovg PRIVATE ${GLFW_LIBRARY} ${GLEW_LIBRARY}
+                                         OpenGL::GL ${QUICKJS_LIBRARY})
+target_compile_definitions(qjs-nanovg PRIVATE JS_SHARED_LIBRARY=1 NANOVG_GLEW=1
+                                              NANOVG_GL3_IMPLEMENTATION=1)
 
 if(NOT CMAKE_INSTALL_LIBDIR)
   set(CMAKE_INSTALL_LIBDIR lib)
@@ -44,11 +55,21 @@ if(NOT QUICKJS_C_MODULE_DIR)
   set(QUICKJS_C_MODULE_DIR "${CMAKE_INSTALL_LIBDIR}/quickjs")
 endif(NOT QUICKJS_C_MODULE_DIR)
 
-install(TARGETS qjs-nanovg DESTINATION "${QUICKJS_C_MODULE_DIR}" PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
+install(TARGETS qjs-nanovg DESTINATION "${QUICKJS_C_MODULE_DIR}"
+        PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ
+                    GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
 
 include_directories(nanovg/src)
-add_executable(nanovg_example nanovg/example/example_gl3.c nanovg/example/perf.c nanovg/example/demo.c ${CMAKE_CURRENT_SOURCE_DIR}/nanovg/src/nanovg.c ${CMAKE_CURRENT_SOURCE_DIR}/nanovg/src/nanovg.h
-                              ${CMAKE_CURRENT_SOURCE_DIR}/nanovg/src/nanovg_gl.h)
-target_link_libraries(nanovg_example m ${GLFW_LIBRARY} ${GLEW_LIBRARY} OpenGL::GL)
+add_executable(
+  nanovg_example
+  nanovg/example/example_gl3.c
+  nanovg/example/perf.c
+  nanovg/example/demo.c
+  ${CMAKE_CURRENT_SOURCE_DIR}/nanovg/src/nanovg.c
+  ${CMAKE_CURRENT_SOURCE_DIR}/nanovg/src/nanovg.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/nanovg/src/nanovg_gl.h)
+target_link_libraries(nanovg_example m ${GLFW_LIBRARY} ${GLEW_LIBRARY}
+                      OpenGL::GL)
 
-add_custom_target(run_example COMMAND ${CMAKE_CURRENT_BINARY_DIR}/nanovg_example WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/nanovg/example)
+add_custom_target(run_example COMMAND ${CMAKE_CURRENT_BINARY_DIR}/nanovg_example
+                  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/nanovg/example)
