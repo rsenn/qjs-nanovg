@@ -15,8 +15,8 @@ export function DrawImage(image, pos) {
   nvg.Restore();
 }
 
-export function DrawCircle(  radius, stroke = nvg.RGB(255, 255, 255), fill = nvg.RGBA(255, 0, 0, 96)) {
-   nvg.BeginPath();
+export function DrawCircle(radius, stroke = nvg.RGB(255, 255, 255), fill = nvg.RGBA(255, 0, 0, 96)) {
+  nvg.BeginPath();
   nvg.StrokeColor(stroke);
   nvg.StrokeWidth(3);
   if(fill) nvg.FillColor(fill);
@@ -25,10 +25,10 @@ export function DrawCircle(  radius, stroke = nvg.RGB(255, 255, 255), fill = nvg
   nvg.Stroke();
 }
 
-function RotatePoint(x,y, angle) {
+function RotatePoint(x, y, angle) {
   let c = Math.cos(angle),
     s = Math.sin(angle);
-  return [ x * c - y * s, x * s + y * c ];
+  return [x * c - y * s, x * s + y * c];
 }
 
 export function Clear(color = nvg.RGB(0, 0, 0)) {
@@ -130,7 +130,6 @@ function main(...args) {
 
     let p = nvg.TransformMultiply(nvg.TransformMultiply(m, t), s);
 
- 
     let center = new glfw.Position(size.width / 2, size.height / 2);
     let imgSz = new glfw.Position(img2Sz.width * -1, img2Sz.height * -1);
     let imgSz_2 = new glfw.Position(img2Sz.width * -0.5, img2Sz.height * -0.5);
@@ -187,7 +186,7 @@ function main(...args) {
         30,
         nvg.RGB(160, 220, 255),
         nvg.RGBA(0, 120, 255, 0.8 * 255),
-        () => phi(i*0.8 + 120),
+        () => phi(i * 0.8 + 120),
         () => phi(i * 0.02),
         a => vec(180, 40, a)
       ),
@@ -195,7 +194,7 @@ function main(...args) {
         10,
         nvg.RGB(220, 160, 255),
         nvg.RGBA(120, 0, 255, 0.8 * 255),
-        () => phi(i*0.4  -120),
+        () => phi(i * 0.4 - 120),
         () => phi(i * 0.001),
         a => vec(320, 200, a)
       )
