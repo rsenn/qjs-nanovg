@@ -150,8 +150,7 @@ FUNC(CreateGL3) {
 
   glewExperimental = GL_TRUE;
   if(glewInit() != GLEW_OK) {
-    printf("Could not init glew.\n");
-    return JS_EXCEPTION;
+    return JS_ThrowInternalError(ctx, "nvg.CreateGL3: Could not init glew.\n");
   }
 
   // GLEW generates GL error because it calls glGetString(GL_EXTENSIONS), we'll consume it here.
@@ -928,16 +927,9 @@ static const JSCFunctionListEntry js_nanovg_funcs[] = {
     _JS_NANOVG_FLAG(IMAGE_FLIPY),
     _JS_NANOVG_FLAG(IMAGE_PREMULTIPLIED),
     _JS_NANOVG_FLAG(IMAGE_NEAREST),
-    _JS_NANOVG_FLAG(BUTT),
-    _JS_NANOVG_FLAG(ROUND),
-    _JS_NANOVG_FLAG(SQUARE),
-    _JS_NANOVG_FLAG(MITER),
-    _JS_NANOVG_FLAG(ROUND),
-    _JS_NANOVG_FLAG(BEVEL),
-    _JS_NANOVG_FLAG(CCW),
-    _JS_NANOVG_FLAG(CW),
     _JS_NANOVG_FLAG(TEXTURE_ALPHA),
-    _JS_NANOVG_FLAG(TEXTURE_RGBA)};
+    _JS_NANOVG_FLAG(TEXTURE_RGBA),
+  };
 
 static int
 js_nanovg_init(JSContext* ctx, JSModuleDef* m) {
