@@ -1,6 +1,5 @@
 import * as glfw from 'glfw';
-//import { glClear, glClearColor, glViewport, GL_COLOR_BUFFER_BIT, GL_DEPTH_BUFFER_BIT, GL_STENCIL_BUFFER_BIT } from './gl.js';
-import * as nvg from 'nanovg';
+ import * as nvg from 'nanovg';
 
 let window;
 
@@ -43,17 +42,7 @@ export function Clear(color = nvg.RGB(0, 0, 0)) {
 }
 
 function main(...args) {
-  /* globalThis.console = new Console({
-    inspectOptions: {
-      maxStringLength: 200,
-      maxArrayLength: 10,
-      breakLength: Infinity,
-      compact: 2,
-      depth: 10
-    }
-  });*/
-
-  let i = 0;
+   let i = 0;
   let running = true;
 
   glfw.Window.hint(glfw.CONTEXT_VERSION_MAJOR, 3);
@@ -113,6 +102,8 @@ function main(...args) {
   let pixels;
   let imgId = nvg.CreateImage('Architektur.png', 0);
   let img2Id = nvg.CreateImage('Muehleberg.png', 0);
+   
+   console.log(`main`, { imgId,img2Id });
 
   let img2Sz = nvg.ImageSize(img2Id);
   let imgSz = nvg.ImageSize(imgId);
@@ -219,14 +210,4 @@ const runMain = () => {
   }
 };
 
-import('console').catch(runMain) .then(({ Console }) => ((globalThis.console = new Console({ inspectOptions: {} })), runMain()));
-
-/*
-try {
-  main(...scriptArgs.slice(1));
-} catch(error) {
-  console.log('ERROR:',error.message);
-   std.exit(1);
-} finally {
- }
-*/
+import('console').catch(runMain) .then(({ Console }) => ((globalThis.console = new Console({ inspectOptions: {} })), runMain()));s
