@@ -2,8 +2,8 @@
 #ifdef NANOVG_GLEW
 #include <GL/glew.h>
 #endif
-#define GLFW_INCLUDE_GLEXT
-#include <GLFW/glfw3.h>
+/*#define GLFW_INCLUDE_GLEXT
+#include <GLFW/glfw3.h>*/
 
 #include "nanovg.h"
 //#define NANOVG_GL3_IMPLEMENTATION
@@ -606,6 +606,16 @@ FUNC(CreateImageRGBA) {
   return JS_NewInt32(ctx, nvgCreateImageRGBA(g_NVGcontext, width, height, flags, (const unsigned char*)ptr));
 }
 
+FUNC(UpdateImage) {
+  int32_t image;
+  size_t len;
+  uint8_t* ptr;
+  JS_ToInt32(ctx, &image, argv[0]);
+  ptr = JS_GetArrayBuffer(ctx, &len, argv[1]);
+  nvgUpdateImage(g_NVGcontext, image, (const unsigned char*)ptr);
+  return JS_UNDEFINED;
+}
+
 FUNC(ImageSize) {
   int32_t id = 0;
   int width, height;
@@ -852,6 +862,7 @@ static const JSCFunctionListEntry js_nanovg_funcs[] = {
     _JS_CFUNC_DEF(HSLA, 4),
     _JS_CFUNC_DEF(CreateImage, 2),
     _JS_CFUNC_DEF(CreateImageRGBA, 4),
+    _JS_CFUNC_DEF(UpdateImage, 2),
     _JS_CFUNC_DEF(ImageSize, 1),
     _JS_CFUNC_DEF(DeleteImage, 1),
     _JS_CFUNC_DEF(ResetTransform, 0),
@@ -929,7 +940,7 @@ static const JSCFunctionListEntry js_nanovg_funcs[] = {
     _JS_NANOVG_FLAG(IMAGE_NEAREST),
     _JS_NANOVG_FLAG(TEXTURE_ALPHA),
     _JS_NANOVG_FLAG(TEXTURE_RGBA),
-  };
+};
 
 static int
 js_nanovg_init(JSContext* ctx, JSModuleDef* m) {
@@ -958,7 +969,6 @@ js_init_module_nanovg(JSContext* ctx, const char* module_name) {
   JS_AddModuleExportList(ctx, m, js_nanovg_funcs, countof(js_nanovg_funcs));
   return m;
 }
-
 
 #ifdef JS_SHARED_LIBRARY
 VISIBLE JSModuleDef*
