@@ -137,6 +137,13 @@ js_set_transform(JSContext* ctx, JSValueConst this_obj, const float* xform) {
   }
 }
 
+JSValue
+js_new_transform(JSContext* ctx,   const float* xform) {
+  JSValue ret=JS_NewArray(ctx);
+  js_set_transform(ctx, ret,xform);
+  return ret;
+}
+
 int
 js_argument_transform(JSContext* ctx, float* xform, int argc, JSValueConst argv[]) {
   int i = 0;
@@ -787,7 +794,11 @@ FUNC(CurrentTransform) {
 
 FUNC(TransformIdentity) {
   float t[6];
-  nvgTransformIdentity(t);
+
+   nvgTransformIdentity(t);
+
+if(argc == 0) return js_new_transform(ctx, t);
+
   js_set_transform(ctx, argv[0], t);
   return JS_UNDEFINED;
 }
@@ -795,9 +806,15 @@ FUNC(TransformIdentity) {
 FUNC(TransformTranslate) {
   float t[6];
   int32_t x, y;
-  JS_ToInt32(ctx, &x, argv[1]);
-  JS_ToInt32(ctx, &y, argv[2]);
+int i=0;
+if(argc >= 3 && JS_IsObject(argv[0]))
+  i++;
+    JS_ToInt32(ctx, &x, argv[i]);
+  JS_ToInt32(ctx, &y, argv[i+1]);
+
   nvgTransformTranslate(t, x, y);
+  
+if(i==0) return js_new_transform(ctx, t);
   js_set_transform(ctx, argv[0], t);
   return JS_UNDEFINED;
 }
@@ -805,19 +822,26 @@ FUNC(TransformTranslate) {
 FUNC(TransformScale) {
   float t[6];
   double x, y;
-  JS_ToFloat64(ctx, &x, argv[1]);
-  JS_ToFloat64(ctx, &y, argv[2]);
+int i=0;
+if(argc >= 3 && JS_IsObject(argv[0]))
+  i++;  
+  JS_ToFloat64(ctx, &x, argv[i]);
+  JS_ToFloat64(ctx, &y, argv[i+1]);
   nvgTransformScale(t, x, y);
-  js_set_transform(ctx, argv[0], t);
+ if(i==0) return js_new_transform(ctx, t);
+ js_set_transform(ctx, argv[0], t);
   return JS_UNDEFINED;
 }
 
 FUNC(TransformRotate) {
   float t[6];
   double angle;
-  JS_ToFloat64(ctx, &angle, argv[1]);
+int i=0;
+if(argc >= 2 && JS_IsObject(argv[0]))
+  i++;    JS_ToFloat64(ctx, &angle, argv[i]);
   nvgTransformRotate(t, angle);
-  js_set_transform(ctx, argv[0], t);
+  if(i==0) return js_new_transform(ctx, t);
+ js_set_transform(ctx, argv[0], t);
   return JS_UNDEFINED;
 }
 
