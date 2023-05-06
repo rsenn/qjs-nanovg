@@ -267,6 +267,11 @@ FUNC(LineTo) {
   return JS_UNDEFINED;
 }
 
+FUNC(ClosePath) {
+  nvgClosePath(g_NVGcontext);
+  return JS_UNDEFINED;
+}
+
 FUNC(FontBlur) {
   if(argc != 1)
     return JS_EXCEPTION;
@@ -832,7 +837,7 @@ static const JSCFunctionListEntry js_nanovg_funcs[] = {
     _JS_CFUNC_DEF(Save, 0),
     _JS_CFUNC_DEF(Restore, 0),
     _JS_CFUNC_DEF(ShapeAntiAlias, 1),
-    //_JS_CFUNC_DEF(ClosePath, 0),
+  _JS_CFUNC_DEF(ClosePath, 0),
     _JS_CFUNC_DEF(Scissor, 4),
     _JS_CFUNC_DEF(IntersectScissor, 4),
     _JS_CFUNC_DEF(ResetScissor, 0),
