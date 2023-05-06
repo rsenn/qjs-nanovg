@@ -105,16 +105,92 @@ js_get_NVGcolor(JSContext* ctx, JSValueConst this_obj, NVGcolor* color) {
   return ret;
 }
 
+/*static const char* transform_obj_props[] = {"a", "c", "e", "b", "d", "f"};
+static const int transform_arg_index[] = {0, 3, 1, 4, 2, 5};*/
+
+static const char* transform_obj_props[] = {"a", "b", "c", "d", "e", "f"};
+static const int transform_arg_index[] = {0, 1, 2, 3, 4, 5};
+
 int
 js_get_transform(JSContext* ctx, JSValueConst this_obj, float* xform) {
   int ret = 0;
-  ret = ret || GetFloat32PropertyUint(ctx, this_obj, 0, &xform[0]);
-  ret = ret || GetFloat32PropertyUint(ctx, this_obj, 1, &xform[1]);
-  ret = ret || GetFloat32PropertyUint(ctx, this_obj, 2, &xform[2]);
-  ret = ret || GetFloat32PropertyUint(ctx, this_obj, 3, &xform[3]);
-  ret = ret || GetFloat32PropertyUint(ctx, this_obj, 4, &xform[4]);
-  ret = ret || GetFloat32PropertyUint(ctx, this_obj, 5, &xform[5]);
+  if(JS_IsArray(ctx, this_obj)) {
+    for(int i = 0; i < 6; i++)
+      if(ret = GetFloat32PropertyUint(ctx, this_obj, i, &xform[i]))
+        break;
+  } else if(JS_IsObject(this_obj)) {
+    for(int i = 0; i < 6; i++)
+      if(ret = GetFloat32PropertyStr(ctx, this_obj, transform_obj_props[i], &xform[i]))
+        break;
+  } else {
+    ret = 1;
+  }
   return ret;
+}
+
+void
+js_set_transform(JSContext* ctx, JSValueConst this_obj, const float* xform) {
+  if(JS_IsArray(ctx, this_obj)) {
+    for(int i = 0; i < 6; i++) JS_SetPropertyUint32(ctx, this_obj, i, JS_NewFloat64(ctx, xform[i]));
+  } else {
+    for(int i = 0; i < 6; i++) JS_SetPropertyStr(ctx, this_obj, transform_obj_props[i], JS_NewFloat64(ctx, xform[i]));
+  }
+}
+
+int
+js_argument_transform(JSContext* ctx, float* xform, int argc, JSValueConst argv[]) {
+  int i = 0;
+  if(argc >= 6) {
+    for(i = 0; i < 6; i++) {
+      if(JS_ToFloat32(ctx, &xform[transform_arg_index[i]], argv[i]))
+        break;
+    }
+  }
+  if(i == 6)
+    return i;
+
+  return !js_get_transform(ctx, argv[0], xform);
+}
+
+int
+js_get_vector(JSContext* ctx, JSValueConst this_obj, float vec[2]) {
+  int ret = 0;
+  if(JS_IsArray(ctx, this_obj)) {
+    for(int i = 0; i < 2; i++)
+      if(ret = GetFloat32PropertyUint(ctx, this_obj, i, &vec[i]))
+        break;
+  } else if(JS_IsObject(this_obj)) {
+    for(int i = 0; i < 2; i++)
+      if(ret = GetFloat32PropertyStr(ctx, this_obj, i ? "y" : "x", &vec[i]))
+        break;
+  } else {
+    ret = 1;
+  }
+  return ret;
+}
+
+void
+js_set_vector(JSContext* ctx, JSValueConst this_obj, const float vec[2]) {
+  if(JS_IsArray(ctx, this_obj)) {
+    JS_SetPropertyUint32(ctx, this_obj, 0, JS_NewFloat64(ctx, vec[0]));
+    JS_SetPropertyUint32(ctx, this_obj, 1, JS_NewFloat64(ctx, vec[1]));
+  } else {
+    JS_SetPropertyStr(ctx, this_obj, "x", JS_NewFloat64(ctx, vec[0]));
+    JS_SetPropertyStr(ctx, this_obj, "y", JS_NewFloat64(ctx, vec[1]));
+  }
+}
+
+int
+js_argument_vector(JSContext* ctx, float vec[2], int argc, JSValueConst argv[]) {
+  int i = 0;
+  if(argc >= 2)
+    for(i = 0; i < 2; i++)
+      if(JS_ToFloat32(ctx, &vec[i], argv[i]))
+        break;
+  if(i == 2)
+    return i;
+
+  return !js_get_vector(ctx, argv[0], vec);
 }
 
 JSValue
@@ -652,14 +728,19 @@ FUNC(ResetTransform) {
 }
 
 FUNC(Transform) {
-  double a, b, c, d, e, f;
-  JS_ToFloat64(ctx, &a, argv[0]);
-  JS_ToFloat64(ctx, &b, argv[1]);
-  JS_ToFloat64(ctx, &c, argv[2]);
-  JS_ToFloat64(ctx, &d, argv[3]);
-  JS_ToFloat64(ctx, &e, argv[4]);
-  JS_ToFloat64(ctx, &f, argv[5]);
-  nvgTransform(g_NVGcontext, a, b, c, d, e, f);
+  float t[6];
+  int n;
+  while((n = js_argument_transform(ctx, t, argc, argv))) {
+    nvgTransform(g_NVGcontext,
+                 t[transform_arg_index[0]],
+                 t[transform_arg_index[1]],
+                 t[transform_arg_index[2]],
+                 t[transform_arg_index[3]],
+                 t[transform_arg_index[4]],
+                 t[transform_arg_index[5]]);
+    argc -= n;
+    argv += n;
+  }
   return JS_UNDEFINED;
 }
 
@@ -699,88 +780,89 @@ FUNC(Scale) {
 
 FUNC(CurrentTransform) {
   float t[6];
-  uint32_t i;
-  JSValue obj = argc > 0 ? JS_DupValue(ctx, argv[0]) : JS_NewArray(ctx);
-
   nvgCurrentTransform(g_NVGcontext, t);
-
-  for(i = 0; i < 6; i++) JS_SetPropertyUint32(ctx, obj, i, JS_NewFloat64(ctx, t[i]));
-
-  return obj;
+  js_set_transform(ctx, argv[0], t);
+  return JS_UNDEFINED;
 }
 
 FUNC(TransformIdentity) {
   float t[6];
-  uint32_t i;
-  JSValue obj = argc > 0 ? JS_DupValue(ctx, argv[0]) : JS_NewArray(ctx);
   nvgTransformIdentity(t);
-  for(i = 0; i < 6; i++) JS_SetPropertyUint32(ctx, obj, i, JS_NewFloat64(ctx, t[i]));
-  return obj;
+  js_set_transform(ctx, argv[0], t);
+  return JS_UNDEFINED;
 }
 
 FUNC(TransformTranslate) {
   float t[6];
-  uint32_t i;
   int32_t x, y;
-  JSValue obj = argc > 0 ? JS_DupValue(ctx, argv[0]) : JS_NewArray(ctx);
   JS_ToInt32(ctx, &x, argv[1]);
   JS_ToInt32(ctx, &y, argv[2]);
   nvgTransformTranslate(t, x, y);
-  for(i = 0; i < 6; i++) JS_SetPropertyUint32(ctx, obj, i, JS_NewFloat64(ctx, t[i]));
-  return obj;
+  js_set_transform(ctx, argv[0], t);
+  return JS_UNDEFINED;
 }
 
 FUNC(TransformScale) {
   float t[6];
-  uint32_t i;
   double x, y;
-  JSValue obj = argc > 0 ? JS_DupValue(ctx, argv[0]) : JS_NewArray(ctx);
   JS_ToFloat64(ctx, &x, argv[1]);
   JS_ToFloat64(ctx, &y, argv[2]);
   nvgTransformScale(t, x, y);
-  for(i = 0; i < 6; i++) JS_SetPropertyUint32(ctx, obj, i, JS_NewFloat64(ctx, t[i]));
-  return obj;
+  js_set_transform(ctx, argv[0], t);
+  return JS_UNDEFINED;
 }
 
 FUNC(TransformRotate) {
   float t[6];
-  uint32_t i;
   double angle;
-  JSValue obj = argc > 0 ? JS_DupValue(ctx, argv[0]) : JS_NewArray(ctx);
   JS_ToFloat64(ctx, &angle, argv[1]);
   nvgTransformRotate(t, angle);
-  for(i = 0; i < 6; i++) JS_SetPropertyUint32(ctx, obj, i, JS_NewFloat64(ctx, t[i]));
-  return obj;
+  js_set_transform(ctx, argv[0], t);
+  return JS_UNDEFINED;
 }
 
 FUNC(TransformMultiply) {
   float dst[6], src[6];
-  uint32_t i;
-  JSValue obj = JS_DupValue(ctx, argv[0]);
+  int i = 1, n;
+  js_get_transform(ctx, argv[0], dst);
+  while(i < argc && (n = js_argument_transform(ctx, src, argc - i, argv + i))) {
+    nvgTransformMultiply(dst, src);
+    i += n;
+  }
+  js_set_transform(ctx, argv[0], dst);
+  return JS_UNDEFINED;
+}
 
+FUNC(TransformPremultiply) {
+  float dst[6], src[6];
+  int i = 1, n;
+  js_get_transform(ctx, argv[0], dst);
+  while(i < argc && (n = js_argument_transform(ctx, src, argc - i, argv + i))) {
+    nvgTransformPremultiply(dst, src);
+    i += n;
+  }
+  js_set_transform(ctx, argv[0], dst);
+  return JS_UNDEFINED;
+}
+
+FUNC(TransformInverse) {
+  float dst[6], src[6];
   js_get_transform(ctx, argv[0], dst);
   js_get_transform(ctx, argv[1], src);
-
-  nvgTransformMultiply(dst, src);
-  for(i = 0; i < 6; i++) JS_SetPropertyUint32(ctx, obj, i, JS_NewFloat64(ctx, dst[i]));
-  return obj;
+  int ret = nvgTransformInverse(dst, src);
+  js_set_transform(ctx, argv[0], dst);
+  return JS_NewInt32(ctx, ret);
 }
 
 FUNC(TransformPoint) {
   float m[6];
-  double srcx, srcy;
-  float dstx, dsty;
-  uint32_t i;
-  JSValue obj = JS_NewArray(ctx);
-
-  js_get_transform(ctx, argv[0], m);
-  JS_ToFloat64(ctx, &srcx, argv[1]);
-  JS_ToFloat64(ctx, &srcy, argv[2]);
-
-  nvgTransformPoint(&dstx, &dsty, m, srcx, srcy);
-  JS_SetPropertyUint32(ctx, obj, 0, JS_NewFloat64(ctx, dstx));
-  JS_SetPropertyUint32(ctx, obj, 1, JS_NewFloat64(ctx, dsty));
-  return obj;
+  float dst[2], src[2];
+  js_get_vector(ctx, argv[0], dst);
+  js_get_transform(ctx, argv[1], m);
+  js_argument_vector(ctx, src, argc - 2, argv + 2);
+  nvgTransformPoint(&dst[0], &dst[1], m, src[0], src[1]);
+  js_set_vector(ctx, argv[0], dst);
+  return JS_UNDEFINED;
 }
 
 FUNC(ImagePattern) {
@@ -838,7 +920,7 @@ static const JSCFunctionListEntry js_nanovg_funcs[] = {
     _JS_CFUNC_DEF(Save, 0),
     _JS_CFUNC_DEF(Restore, 0),
     _JS_CFUNC_DEF(ShapeAntiAlias, 1),
-  _JS_CFUNC_DEF(ClosePath, 0),
+    _JS_CFUNC_DEF(ClosePath, 0),
     _JS_CFUNC_DEF(Scissor, 4),
     _JS_CFUNC_DEF(IntersectScissor, 4),
     _JS_CFUNC_DEF(ResetScissor, 0),
@@ -886,7 +968,9 @@ static const JSCFunctionListEntry js_nanovg_funcs[] = {
     _JS_CFUNC_DEF(TransformScale, 3),
     _JS_CFUNC_DEF(TransformRotate, 2),
     _JS_CFUNC_DEF(TransformMultiply, 2),
-    _JS_CFUNC_DEF(TransformPoint, 3),
+    _JS_CFUNC_DEF(TransformPremultiply, 2),
+    _JS_CFUNC_DEF(TransformInverse, 2),
+    _JS_CFUNC_DEF(TransformPoint, 4),
     _JS_CFUNC_DEF(ImagePattern, 7),
     _JS_CFUNC_DEF(BeginPath, 0),
     _JS_CFUNC_DEF(MoveTo, 2),
