@@ -148,10 +148,12 @@ FUNC(CreateGL3) {
   int32_t flags = 0;
   JS_ToInt32(ctx, &flags, argv[0]);
 
+#ifdef NANOVG_GLEW
   glewExperimental = GL_TRUE;
   if(glewInit() != GLEW_OK) {
     return JS_ThrowInternalError(ctx, "nvg.CreateGL3: Could not init glew.\n");
   }
+#endif
 
   // GLEW generates GL error because it calls glGetString(GL_EXTENSIONS), we'll consume it here.
   glGetError();
