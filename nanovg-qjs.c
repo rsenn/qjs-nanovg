@@ -854,10 +854,12 @@ FUNC(TransformMultiply) {
   float dst[6], src[6];
   int i = 1, n;
   js_get_transform(ctx, argv[0], dst);
+
   while(i < argc && (n = js_argument_transform(ctx, src, argc - i, argv + i))) {
     nvgTransformMultiply(dst, src);
     i += n;
   }
+
   js_set_transform(ctx, argv[0], dst);
   return JS_UNDEFINED;
 }
@@ -876,10 +878,19 @@ FUNC(TransformPremultiply) {
 
 FUNC(TransformInverse) {
   float dst[6], src[6];
-  js_get_transform(ctx, argv[0], dst);
-  js_get_transform(ctx, argv[1], src);
+  int i = 0;
+  if(argc > 1)
+    i++;
+  js_get_transform(ctx, argv[i], src);
+
   int ret = nvgTransformInverse(dst, src);
-  js_set_transform(ctx, argv[0], dst);
+
+  if(ret) {
+    if(argc == 1)
+      return js_new_transform(ctx, dst);
+    js_set_transform(ctx, argv[0], dst);
+  }
+
   return JS_NewInt32(ctx, ret);
 }
 
@@ -892,6 +903,18 @@ FUNC(TransformPoint) {
   nvgTransformPoint(&dst[0], &dst[1], m, src[0], src[1]);
   js_set_vector(ctx, argv[0], dst);
   return JS_UNDEFINED;
+}
+
+FUNC(DegToRad) {
+  double arg;
+  JS_ToFloat64(ctx, &arg, argv[0]);
+  return JS_NewFloat64(ctx, nvgDegToRad(arg));
+}
+
+FUNC(RadToDeg) {
+  double arg;
+  JS_ToFloat64(ctx, &arg, argv[0]);
+  return JS_NewFloat64(ctx, nvgRadToDeg(arg));
 }
 
 FUNC(ImagePattern) {
@@ -992,14 +1015,16 @@ static const JSCFunctionListEntry js_nanovg_funcs[] = {
     _JS_CFUNC_DEF(SkewY, 1),
     _JS_CFUNC_DEF(Scale, 2),
     _JS_CFUNC_DEF(CurrentTransform, 1),
-    _JS_CFUNC_DEF(TransformIdentity, 1),
-    _JS_CFUNC_DEF(TransformTranslate, 3),
-    _JS_CFUNC_DEF(TransformScale, 3),
-    _JS_CFUNC_DEF(TransformRotate, 2),
+    _JS_CFUNC_DEF(TransformIdentity, 0),
+    _JS_CFUNC_DEF(TransformTranslate, 2),
+    _JS_CFUNC_DEF(TransformScale, 2),
+    _JS_CFUNC_DEF(TransformRotate, 1),
     _JS_CFUNC_DEF(TransformMultiply, 2),
     _JS_CFUNC_DEF(TransformPremultiply, 2),
-    _JS_CFUNC_DEF(TransformInverse, 2),
-    _JS_CFUNC_DEF(TransformPoint, 4),
+    _JS_CFUNC_DEF(TransformInverse, 1),
+    _JS_CFUNC_DEF(TransformPoint, 2),
+    _JS_CFUNC_DEF(RadToDeg, 1),
+    _JS_CFUNC_DEF(DegToRad, 1),
     _JS_CFUNC_DEF(ImagePattern, 7),
     _JS_CFUNC_DEF(BeginPath, 0),
     _JS_CFUNC_DEF(MoveTo, 2),
