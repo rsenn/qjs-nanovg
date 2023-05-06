@@ -47,7 +47,8 @@ target_link_libraries(qjs-nanovg PRIVATE #${GLFW_LIBRARY}
                                          ${GLEW_LIBRARY}
                                          OpenGL::GL ${QUICKJS_LIBRARY})
 target_compile_definitions(qjs-nanovg PRIVATE JS_SHARED_LIBRARY=1 NANOVG_GLEW=1
-                                              NANOVG_GL3_IMPLEMENTATION=1)
+                                                NANOVG_GL3_IMPLEMENTATION=1
+                                              )
 
 if(NOT CMAKE_INSTALL_LIBDIR)
   set(CMAKE_INSTALL_LIBDIR lib)

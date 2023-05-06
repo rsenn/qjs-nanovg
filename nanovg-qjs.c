@@ -6,7 +6,8 @@
 #include <GLFW/glfw3.h>*/
 
 #include "nanovg.h"
-//#define NANOVG_GL3_IMPLEMENTATION
+//#define NANOVG_GLES2_IMPLEMENTATION
+
 #include "nanovg_gl.h"
 
 #include "nanovg-qjs.h"
