@@ -1,6 +1,5 @@
 import * as glfw from 'glfw';
 import * as nvg from 'nanovg';
-
 let window;
 
 export function DrawImage(image, pos) {
@@ -209,6 +208,5 @@ const runMain = () => {
     console.log('ERROR:', error);
   }
 };
-
 import('console') .catch(runMain) .then(({ Console }) => ((globalThis.console = new Console({ inspectOptions: {} })), runMain()));
 s;
