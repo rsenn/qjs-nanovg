@@ -208,5 +208,5 @@ const runMain = () => {
     console.log('ERROR:', error);
   }
 };
+
 import('console') .catch(runMain) .then(({ Console }) => ((globalThis.console = new Console({ inspectOptions: {} })), runMain()));
-s;
