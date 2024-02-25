@@ -1,5 +1,6 @@
 import * as glfw from 'glfw';
 import * as nvg from 'nanovg';
+
 let window;
 
 export function DrawImage(image, pos) {
