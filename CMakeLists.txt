@@ -1,5 +1,7 @@
 project(qjs-nanovg C)
 
+cmake_minimum_required(VERSION 3.5)
+
 message("Building project [1;31m${PROJECT_NAME}[0m")
 
 set(PKG_CONFIG_USE_CMAKE_PREFIX_PATH TRUE)
