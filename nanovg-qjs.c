@@ -33,14 +33,20 @@ js_get_NVGcolor(JSContext* ctx, JSValueConst this_obj, NVGcolor* color) {
 
 static JSValue
 js_new_NVGcolor(JSContext* ctx, NVGcolor color) {
-  JSValue obj = JS_NewObject(ctx);
+  JSValue buf = JS_NewArrayBufferCopy(ctx, (const void*)&color, sizeof(color));
+  JSValue obj = JS_CallConstructor(ctx, js_float32array_ctor, 1, &buf);
+  JS_FreeValue(ctx, buf);
+  JS_SetPrototype(ctx, obj, color_proto);
+
+  return obj;
+  /*JSValue obj = JS_NewObject(ctx);
 
   JS_SetPropertyStr(ctx, obj, "r", JS_NewFloat64(ctx, color.r));
   JS_SetPropertyStr(ctx, obj, "g", JS_NewFloat64(ctx, color.g));
   JS_SetPropertyStr(ctx, obj, "b", JS_NewFloat64(ctx, color.b));
   JS_SetPropertyStr(ctx, obj, "a", JS_NewFloat64(ctx, color.a));
 
-  return obj;
+  return obj;*/
 }
 
 static JSValue
