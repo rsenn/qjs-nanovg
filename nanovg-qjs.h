@@ -18,7 +18,7 @@
 #endif
 
 struct NVGcontext;
-void js_nanovg_init_with_context(struct NVGcontext* vg);
+void nvgqjs_init_with_context(struct NVGcontext* vg);
 
 VISIBLE JSModuleDef* js_init_module(JSContext* ctx, const char* module_name);
 

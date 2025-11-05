@@ -7,6 +7,15 @@
 #include <quickjs.h>
 #include <cutils.h>
 
+int js_get_property_str_float32(JSContext*, JSValueConst, const char*, float*);
+int js_get_property_uint_float32(JSContext*, JSValueConst, uint32_t, float*);
+void* js_get_typedarray(JSContext*, JSValueConst, size_t*, size_t*);
+JSValue js_iterator_method(JSContext*, JSValueConst);
+JSValue js_iterator_next(JSContext*, JSValueConst, BOOL*);
+float* js_float32v_ptr(JSContext*, size_t, JSValueConst);
+int js_tofloat32v(JSContext*, float*, size_t, const char* const[], JSValueConst);
+int js_float32v_copy(JSContext*, const float*, size_t, const char* const[], JSValueConst);
+
 static inline int
 js_tofloat32(JSContext* ctx, float* pres, JSValueConst val) {
   double f;
@@ -15,53 +24,6 @@ js_tofloat32(JSContext* ctx, float* pres, JSValueConst val) {
   if(!(ret = JS_ToFloat64(ctx, &f, val)))
     *pres = (float)f;
 
-  return ret;
-}
-
-static inline int
-js_get_property_str_float32(JSContext* ctx, JSValueConst this_obj, const char* prop, float* pres) {
-  JSValue p = JS_GetPropertyStr(ctx, this_obj, prop);
-  int ret = js_tofloat32(ctx, pres, p);
-  JS_FreeValue(ctx, p);
-  return ret;
-}
-
-static inline int
-js_get_property_uint_float32(JSContext* ctx, JSValueConst this_obj, uint32_t idx, float* pres) {
-  JSValue p = JS_GetPropertyUint32(ctx, this_obj, idx);
-  int ret = js_tofloat32(ctx, pres, p);
-  JS_FreeValue(ctx, p);
-  return ret;
-}
-
-static inline void*
-js_get_typedarray(JSContext* ctx, JSValueConst obj, size_t* plength, size_t* pbytes_per_element) {
-  size_t offset = 0, len;
-  uint8_t* ptr;
-  JSValue buf = JS_GetTypedArrayBuffer(ctx, obj, &offset, plength, pbytes_per_element);
-
-  if((ptr = JS_GetArrayBuffer(ctx, &len, buf)))
-    ptr += offset;
-
-  JS_FreeValue(ctx, buf);
-  return ptr;
-}
-
-static inline JSValue
-js_iterator_method(JSContext* ctx, JSValueConst obj) {
-  JSValue ret = JS_UNDEFINED;
-  JSValue global = JS_GetGlobalObject(ctx);
-  JSValue ctor = JS_GetPropertyStr(ctx, global, "Symbol");
-  JS_FreeValue(ctx, global);
-  JSValue sym = JS_GetPropertyStr(ctx, ctor, "iterator");
-  JS_FreeValue(ctx, ctor);
-  JSAtom atom = JS_ValueToAtom(ctx, sym);
-  JS_FreeValue(ctx, sym);
-
-  if(JS_HasProperty(ctx, obj, atom))
-    ret = JS_GetProperty(ctx, obj, atom);
-
-  JS_FreeAtom(ctx, atom);
   return ret;
 }
 
@@ -74,19 +36,6 @@ js_iterator_new(JSContext* ctx, JSValueConst obj) {
 
   JS_FreeValue(ctx, fn);
   return ret;
-}
-
-static inline JSValue
-js_iterator_next(JSContext* ctx, JSValueConst obj, BOOL* done_p) {
-  JSValue fn = JS_GetPropertyStr(ctx, obj, "next");
-  JSValue result = JS_Call(ctx, fn, obj, 0, 0);
-  JS_FreeValue(ctx, fn);
-  JSValue done = JS_GetPropertyStr(ctx, result, "done");
-  JSValue value = JS_GetPropertyStr(ctx, result, "value");
-  JS_FreeValue(ctx, result);
-  *done_p = JS_ToBool(ctx, done);
-  JS_FreeValue(ctx, done);
-  return value;
 }
 
 #endif /* defined JS_UTILS_H */

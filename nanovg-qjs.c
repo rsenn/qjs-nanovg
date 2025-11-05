@@ -1,4 +1,3 @@
-
 #ifdef NANOVG_GLEW
 #include <GL/glew.h>
 #endif
@@ -11,127 +10,22 @@
 
 #include <assert.h>
 
-static const char *const color_obj_props[] = {"r", "g", "b", "a"}, *const matrix_obj_props[] = {"a", "b", "c", "d", "e", "f"}, *const vector_obj_props[] = {"x", "y"};
-
 static NVGcontext* g_NVGcontext;
-static JSClassID js_nanovg_paint_class_id;
+static JSClassID nvgjs_paint_class_id;
 
 static JSValue js_float32array_ctor = JS_UNDEFINED, js_float32array_proto = JS_UNDEFINED;
 static JSValue color_ctor = JS_UNDEFINED, color_proto = JS_UNDEFINED;
 static JSValue matrix_ctor = JS_UNDEFINED, matrix_proto = JS_UNDEFINED;
 
-static float*
-js_ptrvec32(JSContext* ctx, size_t min_len, JSValueConst value) {
-  size_t length = 0, bytes_per_element = 0;
-  float* ptr;
-
-  if((ptr = js_get_typedarray(ctx, value, &length, &bytes_per_element))) {
-    if(length < min_len) {
-      JS_ThrowTypeError(ctx, "TypedArray value must have at least %zu elements (has %zu)", min_len, length);
-      return 0;
-    }
-
-    if(bytes_per_element == sizeof(float))
-      return ptr;
-  }
-
-  return 0;
-}
+static const char* const nvgjs_color_keys[] = {"r", "g", "b", "a"};
 
 static int
-js_tovec32(JSContext* ctx, float* vec, size_t min_len, const char* const prop_map[], JSValueConst value) {
-  float* ptr;
-
-  if((ptr = js_ptrvec32(ctx, min_len, value))) {
-    memcpy(vec, ptr, min_len * sizeof(float));
-    return 0;
-  }
-
-  if(!JS_IsObject(value)) {
-    JS_ThrowTypeError(ctx, "value must be an object");
-    return -1;
-  }
-
-  if(JS_IsArray(ctx, value)) {
-    for(int i = 0; i < min_len; i++)
-      if(js_get_property_uint_float32(ctx, value, i, &vec[i]))
-        return -1;
-
-    return 0;
-  }
-
-  JSValue iter = js_iterator_new(ctx, value);
-
-  if(JS_IsObject(iter)) {
-    for(int i = 0; i < min_len; i++) {
-      BOOL done = FALSE;
-      JSValue val = js_iterator_next(ctx, iter, &done);
-      int ret = 0;
-
-      if(!done)
-        ret = js_tofloat32(ctx, &vec[i], val);
-
-      JS_FreeValue(ctx, val);
-
-      if(ret)
-        return -1;
-
-      if(done) {
-        JS_ThrowRangeError(ctx, "iterable must have at least %zu elements (has %d)", min_len, i);
-        return -1;
-      }
-    }
-
-    JS_FreeValue(ctx, iter);
-    return 0;
-  }
-
-  if(prop_map) {
-    for(int i = 0; i < min_len; i++)
-      if(js_get_property_str_float32(ctx, value, prop_map[i], &vec[i]))
-        return -1;
-
-    return 0;
-  }
-
-  JS_ThrowTypeError(ctx, "value must be iterable");
-  return -1;
-}
-
-int
-js_copyvec32(JSContext* ctx, const float* vec, size_t min_len, const char* const prop_map[], JSValueConst value) {
-  if(js_ptrvec32(ctx, min_len, value))
-    return 0;
-
-  if(!JS_IsObject(value)) {
-    JS_ThrowTypeError(ctx, "value must be an object");
-    return -1;
-  }
-
-  if(JS_IsArray(ctx, value)) {
-    for(int i = 0; i < min_len; i++)
-      JS_SetPropertyUint32(ctx, value, i, JS_NewFloat64(ctx, vec[i]));
-
-    return 1;
-  }
-
-  if(prop_map) {
-    for(int i = 0; i < min_len; i++)
-      JS_SetPropertyStr(ctx, value, prop_map[i], JS_NewFloat64(ctx, vec[i]));
-
-    return 1;
-  }
-
-  return 0;
-}
-
-static int
-js_nanovg_tocolor(JSContext* ctx, NVGcolor* color, JSValueConst value) {
-  return js_tovec32(ctx, color->rgba, 4, NULL, value);
+nvgjs_tocolor(JSContext* ctx, NVGcolor* color, JSValueConst value) {
+  return js_tofloat32v(ctx, color->rgba, 4, NULL, value);
 }
 
 static JSValue
-js_nanovg_color_new(JSContext* ctx, NVGcolor color) {
+nvgjs_color_new(JSContext* ctx, NVGcolor color) {
   JSValue buf = JS_NewArrayBufferCopy(ctx, (const void*)&color, sizeof(color));
   JSValue obj = JS_CallConstructor(ctx, js_float32array_ctor, 1, &buf);
   JS_FreeValue(ctx, buf);
@@ -141,29 +35,28 @@ js_nanovg_color_new(JSContext* ctx, NVGcolor color) {
 }
 
 static JSValue
-js_nanovg_color_get(JSContext* ctx, JSValueConst this_val, int magic) {
+nvgjs_color_get(JSContext* ctx, JSValueConst this_val, int magic) {
   return JS_GetPropertyUint32(ctx, this_val, magic);
 }
 
 static JSValue
-js_nanovg_color_set(JSContext* ctx, JSValueConst this_val, JSValueConst value, int magic) {
+nvgjs_color_set(JSContext* ctx, JSValueConst this_val, JSValueConst value, int magic) {
   JS_SetPropertyUint32(ctx, this_val, magic, JS_DupValue(ctx, value));
   return JS_UNDEFINED;
 }
 
-static const JSCFunctionListEntry js_nanovg_color_methods[] = {
-    JS_CGETSET_MAGIC_DEF("r", js_nanovg_color_get, js_nanovg_color_set, 0),
-    JS_CGETSET_MAGIC_DEF("g", js_nanovg_color_get, js_nanovg_color_set, 1),
-    JS_CGETSET_MAGIC_DEF("b", js_nanovg_color_get, js_nanovg_color_set, 2),
-    JS_CGETSET_MAGIC_DEF("a", js_nanovg_color_get, js_nanovg_color_set, 3),
+static const JSCFunctionListEntry nvgjs_color_methods[] = {
+    JS_CGETSET_MAGIC_DEF("r", nvgjs_color_get, nvgjs_color_set, 0),
+    JS_CGETSET_MAGIC_DEF("g", nvgjs_color_get, nvgjs_color_set, 1),
+    JS_CGETSET_MAGIC_DEF("b", nvgjs_color_get, nvgjs_color_set, 2),
+    JS_CGETSET_MAGIC_DEF("a", nvgjs_color_get, nvgjs_color_set, 3),
     JS_PROP_STRING_DEF("[Symbol.toStringTag]", "nvgColor", JS_PROP_CONFIGURABLE),
 };
 
-static JSValue
-js_nanovg_matrix_new(JSContext* ctx, float matrix[6]) {
-  /*float matrix[6];
-  nvgTransformIdentity(matrix);*/
+static const char* const nvgjs_matrix_keys[] = {"a", "b", "c", "d", "e", "f"};
 
+static JSValue
+nvgjs_matrix_new(JSContext* ctx, float matrix[6]) {
   JSValue buf = JS_NewArrayBufferCopy(ctx, (void*)matrix, 6 * sizeof(float));
   JSValue obj = JS_CallConstructor(ctx, js_float32array_ctor, 1, &buf);
   JS_FreeValue(ctx, buf);
@@ -173,37 +66,37 @@ js_nanovg_matrix_new(JSContext* ctx, float matrix[6]) {
 }
 
 static JSValue
-js_nanovg_matrix_get(JSContext* ctx, JSValueConst this_val, int magic) {
+nvgjs_matrix_get(JSContext* ctx, JSValueConst this_val, int magic) {
   return JS_GetPropertyUint32(ctx, this_val, magic);
 }
 
 static JSValue
-js_nanovg_matrix_set(JSContext* ctx, JSValueConst this_val, JSValueConst value, int magic) {
+nvgjs_matrix_set(JSContext* ctx, JSValueConst this_val, JSValueConst value, int magic) {
   JS_SetPropertyUint32(ctx, this_val, magic, JS_DupValue(ctx, value));
   return JS_UNDEFINED;
 }
 
-static const JSCFunctionListEntry js_nanovg_matrix_methods[] = {
-    JS_CGETSET_MAGIC_DEF("a", js_nanovg_matrix_get, js_nanovg_matrix_set, 0),
-    JS_CGETSET_MAGIC_DEF("b", js_nanovg_matrix_get, js_nanovg_matrix_set, 1),
-    JS_CGETSET_MAGIC_DEF("c", js_nanovg_matrix_get, js_nanovg_matrix_set, 2),
-    JS_CGETSET_MAGIC_DEF("d", js_nanovg_matrix_get, js_nanovg_matrix_set, 3),
-    JS_CGETSET_MAGIC_DEF("e", js_nanovg_matrix_get, js_nanovg_matrix_set, 4),
-    JS_CGETSET_MAGIC_DEF("f", js_nanovg_matrix_get, js_nanovg_matrix_set, 5),
+static const JSCFunctionListEntry nvgjs_matrix_methods[] = {
+    JS_CGETSET_MAGIC_DEF("a", nvgjs_matrix_get, nvgjs_matrix_set, 0),
+    JS_CGETSET_MAGIC_DEF("b", nvgjs_matrix_get, nvgjs_matrix_set, 1),
+    JS_CGETSET_MAGIC_DEF("c", nvgjs_matrix_get, nvgjs_matrix_set, 2),
+    JS_CGETSET_MAGIC_DEF("d", nvgjs_matrix_get, nvgjs_matrix_set, 3),
+    JS_CGETSET_MAGIC_DEF("e", nvgjs_matrix_get, nvgjs_matrix_set, 4),
+    JS_CGETSET_MAGIC_DEF("f", nvgjs_matrix_get, nvgjs_matrix_set, 5),
     JS_PROP_STRING_DEF("[Symbol.toStringTag]", "nvgMatrix", JS_PROP_CONFIGURABLE),
 };
 
 static void
-js_nanovg_paint_finalizer(JSRuntime* rt, JSValue val) {
+nvgjs_paint_finalizer(JSRuntime* rt, JSValue val) {
   NVGpaint* p;
 
-  if((p = JS_GetOpaque(val, js_nanovg_paint_class_id))) {
+  if((p = JS_GetOpaque(val, nvgjs_paint_class_id))) {
     js_free_rt(rt, p);
   }
 }
 
 static JSValue
-js_nanovg_paint_constructor(JSContext* ctx, JSValueConst new_target, int argc, JSValueConst* argv) {
+nvgjs_paint_constructor(JSContext* ctx, JSValueConst new_target, int argc, JSValueConst* argv) {
   NVGpaint* p;
   JSValue proto, obj = JS_UNDEFINED;
 
@@ -214,7 +107,7 @@ js_nanovg_paint_constructor(JSContext* ctx, JSValueConst new_target, int argc, J
   if(JS_IsException(proto))
     goto fail;
 
-  obj = JS_NewObjectProtoClass(ctx, proto, js_nanovg_paint_class_id);
+  obj = JS_NewObjectProtoClass(ctx, proto, nvgjs_paint_class_id);
   JS_FreeValue(ctx, proto);
 
   if(JS_IsException(obj))
@@ -229,13 +122,13 @@ fail:
   return JS_EXCEPTION;
 }
 
-static JSClassDef js_nanovg_paint_class = {
+static JSClassDef nvgjs_paint_class = {
     "Paint",
-    .finalizer = js_nanovg_paint_finalizer,
+    .finalizer = nvgjs_paint_finalizer,
 };
 
 static JSValue
-js_nanovg_wrap(JSContext* ctx, void* s, JSClassID classID) {
+nvgjs_wrap(JSContext* ctx, void* s, JSClassID classID) {
   JSValue obj = JS_NewObjectClass(ctx, classID);
 
   if(JS_IsException(obj))
@@ -246,17 +139,17 @@ js_nanovg_wrap(JSContext* ctx, void* s, JSClassID classID) {
 }
 
 int
-js_nanovg_tomatrix(JSContext* ctx, float matrix[6], JSValueConst value) {
-  return js_tovec32(ctx, matrix, 6, matrix_obj_props, value);
+nvgjs_tomatrix(JSContext* ctx, float matrix[6], JSValueConst value) {
+  return js_tofloat32v(ctx, matrix, 6, nvgjs_matrix_keys, value);
 }
 
 int
-js_nanovg_matrix_copy(JSContext* ctx, JSValueConst value, const float matrix[6]) {
-  return js_copyvec32(ctx, matrix, 6, matrix_obj_props, value);
+nvgjs_matrix_copy(JSContext* ctx, JSValueConst value, const float matrix[6]) {
+  return js_float32v_copy(ctx, matrix, 6, nvgjs_matrix_keys, value);
 }
 
 int
-js_nanovg_matrix_arguments(JSContext* ctx, float matrix[6], int argc, JSValueConst argv[]) {
+nvgjs_matrix_arguments(JSContext* ctx, float matrix[6], int argc, JSValueConst argv[]) {
   int i = 0;
 
   if(argc >= 6)
@@ -267,21 +160,23 @@ js_nanovg_matrix_arguments(JSContext* ctx, float matrix[6], int argc, JSValueCon
   if(i == 6)
     return i;
 
-  return !js_nanovg_tomatrix(ctx, matrix, argv[0]);
+  return !nvgjs_tomatrix(ctx, matrix, argv[0]);
+}
+
+static const char* const nvgjs_vector_keys[] = {"x", "y"};
+
+int
+nvgjs_tovector(JSContext* ctx, float vec[2], JSValueConst value) {
+  return js_tofloat32v(ctx, vec, 2, nvgjs_vector_keys, value);
 }
 
 int
-js_nanovg_tovector(JSContext* ctx, float vec[2], JSValueConst value) {
-  return js_tovec32(ctx, vec, 2, vector_obj_props, value);
+nvgjs_vector_copy(JSContext* ctx, JSValueConst value, const float vec[2]) {
+  return js_float32v_copy(ctx, vec, 2, nvgjs_vector_keys, value);
 }
 
 int
-js_nanovg_vector_copy(JSContext* ctx, JSValueConst value, const float vec[2]) {
-  return js_copyvec32(ctx, vec, 2, vector_obj_props, value);
-}
-
-int
-js_nanovg_vector_arguments(JSContext* ctx, float vec[2], int argc, JSValueConst argv[]) {
+nvgjs_vector_arguments(JSContext* ctx, float vec[2], int argc, JSValueConst argv[]) {
   int i = 0;
 
   if(argc >= 2)
@@ -292,13 +187,13 @@ js_nanovg_vector_arguments(JSContext* ctx, float vec[2], int argc, JSValueConst 
   if(i == 2)
     return i;
 
-  return !js_nanovg_tovector(ctx, vec, argv[0]);
+  return !nvgjs_tovector(ctx, vec, argv[0]);
 }
 
-#define FUNC(fn) static JSValue js_nanovg_##fn(JSContext* ctx, JSValueConst this_value, int argc, JSValueConst* argv)
+#define NVGJS_DECL(fn) static JSValue nvgjs_##fn(JSContext* ctx, JSValueConst this_value, int argc, JSValueConst* argv)
 
 #ifdef NANOVG_GL2
-FUNC(CreateGL2) {
+NVGJS_DECL(CreateGL2) {
   int32_t flags = 0;
 
   if(argc < 1)
@@ -310,7 +205,7 @@ FUNC(CreateGL2) {
   return JS_NewBool(ctx, !!(g_NVGcontext = nvgCreateGL2(flags)));
 }
 
-FUNC(DeleteGL2) {
+NVGJS_DECL(DeleteGL2) {
   if(g_NVGcontext) {
     nvgDeleteGL2(g_NVGcontext);
     g_NVGcontext = 0;
@@ -321,7 +216,7 @@ FUNC(DeleteGL2) {
 #endif
 
 #ifdef NANOVG_GL3
-FUNC(CreateGL3) {
+NVGJS_DECL(CreateGL3) {
   int32_t flags = 0;
 
   if(argc < 1)
@@ -344,7 +239,7 @@ FUNC(CreateGL3) {
   return JS_NewBool(ctx, !!(g_NVGcontext = nvgCreateGL3(flags)));
 }
 
-FUNC(DeleteGL3) {
+NVGJS_DECL(DeleteGL3) {
   if(g_NVGcontext) {
     nvgDeleteGL3(g_NVGcontext);
     g_NVGcontext = 0;
@@ -354,7 +249,7 @@ FUNC(DeleteGL3) {
 }
 #endif
 
-FUNC(CreateFont) {
+NVGJS_DECL(CreateFont) {
   if(argc < 2)
     return JS_ThrowInternalError(ctx, "need 2 arguments");
 
@@ -364,7 +259,7 @@ FUNC(CreateFont) {
   return JS_NewInt32(ctx, nvgCreateFont(g_NVGcontext, name, file));
 }
 
-FUNC(BeginFrame) {
+NVGJS_DECL(BeginFrame) {
   double w, h, ratio;
 
   if(argc < 3)
@@ -377,37 +272,37 @@ FUNC(BeginFrame) {
   return JS_UNDEFINED;
 }
 
-FUNC(EndFrame) {
+NVGJS_DECL(EndFrame) {
   nvgEndFrame(g_NVGcontext);
   return JS_UNDEFINED;
 }
 
-FUNC(CancelFrame) {
+NVGJS_DECL(CancelFrame) {
   nvgCancelFrame(g_NVGcontext);
   return JS_UNDEFINED;
 }
 
-FUNC(Save) {
+NVGJS_DECL(Save) {
   nvgSave(g_NVGcontext);
   return JS_UNDEFINED;
 }
 
-FUNC(Restore) {
+NVGJS_DECL(Restore) {
   nvgRestore(g_NVGcontext);
   return JS_UNDEFINED;
 }
 
-FUNC(Reset) {
+NVGJS_DECL(Reset) {
   nvgReset(g_NVGcontext);
   return JS_UNDEFINED;
 }
 
-FUNC(ShapeAntiAlias) {
+NVGJS_DECL(ShapeAntiAlias) {
   nvgShapeAntiAlias(g_NVGcontext, JS_ToBool(ctx, argv[0]));
   return JS_UNDEFINED;
 }
 
-FUNC(Rect) {
+NVGJS_DECL(Rect) {
   double x, y, w, h;
 
   if(argc < 4)
@@ -420,7 +315,7 @@ FUNC(Rect) {
   return JS_UNDEFINED;
 }
 
-FUNC(Circle) {
+NVGJS_DECL(Circle) {
   double cx, cy, r;
 
   if(argc < 3)
@@ -433,7 +328,7 @@ FUNC(Circle) {
   return JS_UNDEFINED;
 }
 
-FUNC(Ellipse) {
+NVGJS_DECL(Ellipse) {
   double cx, cy, rx, ry;
 
   if(argc < 4)
@@ -446,7 +341,7 @@ FUNC(Ellipse) {
   return JS_UNDEFINED;
 }
 
-FUNC(PathWinding) {
+NVGJS_DECL(PathWinding) {
   int dir;
 
   if(argc < 1)
@@ -459,7 +354,7 @@ FUNC(PathWinding) {
   return JS_UNDEFINED;
 }
 
-FUNC(MoveTo) {
+NVGJS_DECL(MoveTo) {
   double x, y;
 
   if(argc < 2)
@@ -472,7 +367,7 @@ FUNC(MoveTo) {
   return JS_UNDEFINED;
 }
 
-FUNC(LineTo) {
+NVGJS_DECL(LineTo) {
   double x, y;
 
   if(argc < 2)
@@ -485,12 +380,12 @@ FUNC(LineTo) {
   return JS_UNDEFINED;
 }
 
-FUNC(ClosePath) {
+NVGJS_DECL(ClosePath) {
   nvgClosePath(g_NVGcontext);
   return JS_UNDEFINED;
 }
 
-FUNC(FontBlur) {
+NVGJS_DECL(FontBlur) {
   double blur;
 
   if(argc < 1)
@@ -503,12 +398,12 @@ FUNC(FontBlur) {
   return JS_UNDEFINED;
 }
 
-FUNC(BeginPath) {
+NVGJS_DECL(BeginPath) {
   nvgBeginPath(g_NVGcontext);
   return JS_UNDEFINED;
 }
 
-FUNC(RoundedRect) {
+NVGJS_DECL(RoundedRect) {
   double x, y, w, h, r;
 
   if(argc < 5)
@@ -521,7 +416,7 @@ FUNC(RoundedRect) {
   return JS_UNDEFINED;
 }
 
-FUNC(Scissor) {
+NVGJS_DECL(Scissor) {
   double x, y, w, h;
 
   if(argc < 4)
@@ -534,7 +429,7 @@ FUNC(Scissor) {
   return JS_UNDEFINED;
 }
 
-FUNC(IntersectScissor) {
+NVGJS_DECL(IntersectScissor) {
   double x, y, w, h;
 
   if(argc < 4)
@@ -548,29 +443,29 @@ FUNC(IntersectScissor) {
   return JS_UNDEFINED;
 }
 
-FUNC(ResetScissor) {
+NVGJS_DECL(ResetScissor) {
   nvgResetScissor(g_NVGcontext);
 }
 
-FUNC(FillPaint) {
+NVGJS_DECL(FillPaint) {
   NVGpaint* paint;
 
   if(argc < 1)
     return JS_ThrowInternalError(ctx, "need 1 arguments");
 
-  if(!(paint = JS_GetOpaque2(ctx, argv[0], js_nanovg_paint_class_id)))
+  if(!(paint = JS_GetOpaque2(ctx, argv[0], nvgjs_paint_class_id)))
     return JS_EXCEPTION;
 
   nvgFillPaint(g_NVGcontext, *paint);
   return JS_UNDEFINED;
 }
 
-FUNC(Fill) {
+NVGJS_DECL(Fill) {
   nvgFill(g_NVGcontext);
   return JS_UNDEFINED;
 }
 
-FUNC(MiterLimit) {
+NVGJS_DECL(MiterLimit) {
   double miterLimit;
 
   if(JS_ToFloat64(ctx, &miterLimit, argv[0]))
@@ -580,7 +475,7 @@ FUNC(MiterLimit) {
   return JS_UNDEFINED;
 }
 
-FUNC(LineCap) {
+NVGJS_DECL(LineCap) {
   int32_t lineCap;
 
   if(JS_ToInt32(ctx, &lineCap, argv[0]))
@@ -590,7 +485,7 @@ FUNC(LineCap) {
   return JS_UNDEFINED;
 }
 
-FUNC(LineJoin) {
+NVGJS_DECL(LineJoin) {
   int32_t lineJoin;
 
   if(JS_ToInt32(ctx, &lineJoin, argv[0]))
@@ -600,7 +495,7 @@ FUNC(LineJoin) {
   return JS_UNDEFINED;
 }
 
-FUNC(GlobalAlpha) {
+NVGJS_DECL(GlobalAlpha) {
   double alpha;
 
   if(JS_ToFloat64(ctx, &alpha, argv[0]))
@@ -610,100 +505,100 @@ FUNC(GlobalAlpha) {
   return JS_UNDEFINED;
 }
 
-FUNC(StrokeColor) {
+NVGJS_DECL(StrokeColor) {
   NVGcolor color;
 
   if(argc < 1)
     return JS_ThrowInternalError(ctx, "need 1 arguments");
 
-  if(js_nanovg_tocolor(ctx, &color, argv[0]))
+  if(nvgjs_tocolor(ctx, &color, argv[0]))
     return JS_EXCEPTION;
 
   nvgStrokeColor(g_NVGcontext, color);
   return JS_UNDEFINED;
 }
 
-FUNC(Stroke) {
+NVGJS_DECL(Stroke) {
   nvgStroke(g_NVGcontext);
   return JS_UNDEFINED;
 }
 
-FUNC(StrokePaint) {
+NVGJS_DECL(StrokePaint) {
   NVGpaint* paint;
 
   if(argc < 1)
     return JS_ThrowInternalError(ctx, "need 1 arguments");
 
-  if(!(paint = JS_GetOpaque(argv[0], js_nanovg_paint_class_id)))
+  if(!(paint = JS_GetOpaque(argv[0], nvgjs_paint_class_id)))
     return JS_EXCEPTION;
 
   nvgStrokePaint(g_NVGcontext, *paint);
   return JS_UNDEFINED;
 }
 
-FUNC(FillColor) {
+NVGJS_DECL(FillColor) {
   NVGcolor color;
 
   if(argc < 1)
     return JS_ThrowInternalError(ctx, "need 1 arguments");
 
-  if(js_nanovg_tocolor(ctx, &color, argv[0]))
+  if(nvgjs_tocolor(ctx, &color, argv[0]))
     return JS_EXCEPTION;
 
   nvgFillColor(g_NVGcontext, color);
   return JS_UNDEFINED;
 }
 
-FUNC(LinearGradient) {
+NVGJS_DECL(LinearGradient) {
   double sx, sy, ex, ey;
   NVGcolor icol, ocol;
 
   if(argc < 6)
     return JS_ThrowInternalError(ctx, "need 6 arguments");
 
-  if(JS_ToFloat64(ctx, &sx, argv[0]) || JS_ToFloat64(ctx, &sy, argv[1]) || JS_ToFloat64(ctx, &ex, argv[2]) || JS_ToFloat64(ctx, &ey, argv[3]) || js_nanovg_tocolor(ctx, &icol, argv[4]) || js_nanovg_tocolor(ctx, &ocol, argv[5]))
+  if(JS_ToFloat64(ctx, &sx, argv[0]) || JS_ToFloat64(ctx, &sy, argv[1]) || JS_ToFloat64(ctx, &ex, argv[2]) || JS_ToFloat64(ctx, &ey, argv[3]) || nvgjs_tocolor(ctx, &icol, argv[4]) || nvgjs_tocolor(ctx, &ocol, argv[5]))
     return JS_EXCEPTION;
 
   NVGpaint paint = nvgLinearGradient(g_NVGcontext, sx, sy, ex, ey, icol, ocol);
   NVGpaint* p = js_mallocz(ctx, sizeof(NVGpaint));
   *p = paint;
 
-  return js_nanovg_wrap(ctx, p, js_nanovg_paint_class_id);
+  return nvgjs_wrap(ctx, p, nvgjs_paint_class_id);
 }
 
-FUNC(BoxGradient) {
+NVGJS_DECL(BoxGradient) {
   double x, y, w, h, r, f;
   NVGcolor icol, ocol;
 
   if(argc < 8)
     return JS_ThrowInternalError(ctx, "need 8 arguments");
 
-  if(JS_ToFloat64(ctx, &x, argv[0]) || JS_ToFloat64(ctx, &y, argv[1]) || JS_ToFloat64(ctx, &w, argv[2]) || JS_ToFloat64(ctx, &h, argv[3]) || JS_ToFloat64(ctx, &r, argv[4]) || JS_ToFloat64(ctx, &f, argv[5]) || js_nanovg_tocolor(ctx, &icol, argv[6]) || js_nanovg_tocolor(ctx, &ocol, argv[7]))
+  if(JS_ToFloat64(ctx, &x, argv[0]) || JS_ToFloat64(ctx, &y, argv[1]) || JS_ToFloat64(ctx, &w, argv[2]) || JS_ToFloat64(ctx, &h, argv[3]) || JS_ToFloat64(ctx, &r, argv[4]) || JS_ToFloat64(ctx, &f, argv[5]) || nvgjs_tocolor(ctx, &icol, argv[6]) || nvgjs_tocolor(ctx, &ocol, argv[7]))
     return JS_EXCEPTION;
 
   NVGpaint paint = nvgBoxGradient(g_NVGcontext, x, y, w, h, r, f, icol, ocol);
   NVGpaint* p = js_mallocz(ctx, sizeof(NVGpaint));
   *p = paint;
-  return js_nanovg_wrap(ctx, p, js_nanovg_paint_class_id);
+  return nvgjs_wrap(ctx, p, nvgjs_paint_class_id);
 }
 
-FUNC(RadialGradient) {
+NVGJS_DECL(RadialGradient) {
   double cx, cy, inr, outr;
   NVGcolor icol, ocol;
 
   if(argc < 6)
     return JS_ThrowInternalError(ctx, "need 6 arguments");
 
-  if(JS_ToFloat64(ctx, &cx, argv[0]) || JS_ToFloat64(ctx, &cy, argv[1]) || JS_ToFloat64(ctx, &inr, argv[2]) || JS_ToFloat64(ctx, &outr, argv[3]) || js_nanovg_tocolor(ctx, &icol, argv[4]) || js_nanovg_tocolor(ctx, &ocol, argv[5]))
+  if(JS_ToFloat64(ctx, &cx, argv[0]) || JS_ToFloat64(ctx, &cy, argv[1]) || JS_ToFloat64(ctx, &inr, argv[2]) || JS_ToFloat64(ctx, &outr, argv[3]) || nvgjs_tocolor(ctx, &icol, argv[4]) || nvgjs_tocolor(ctx, &ocol, argv[5]))
     return JS_EXCEPTION;
 
   NVGpaint paint = nvgRadialGradient(g_NVGcontext, cx, cy, inr, outr, icol, ocol);
   NVGpaint* p = js_mallocz(ctx, sizeof(NVGpaint));
   *p = paint;
-  return js_nanovg_wrap(ctx, p, js_nanovg_paint_class_id);
+  return nvgjs_wrap(ctx, p, nvgjs_paint_class_id);
 }
 
-FUNC(TextBounds) {
+NVGJS_DECL(TextBounds) {
   double x, y;
   const char* str;
 
@@ -723,7 +618,7 @@ FUNC(TextBounds) {
   return JS_NewFloat64(ctx, ret);
 }
 
-FUNC(TextBounds2) {
+NVGJS_DECL(TextBounds2) {
   double x, y;
   const char* str;
 
@@ -747,7 +642,7 @@ FUNC(TextBounds2) {
   }
 }
 
-FUNC(FontSize) {
+NVGJS_DECL(FontSize) {
   double size;
 
   if(argc < 1)
@@ -760,7 +655,7 @@ FUNC(FontSize) {
   return JS_UNDEFINED;
 }
 
-FUNC(FontFace) {
+NVGJS_DECL(FontFace) {
   const char* str;
 
   if(argc < 1)
@@ -774,7 +669,7 @@ FUNC(FontFace) {
   return JS_UNDEFINED;
 }
 
-FUNC(TextAlign) {
+NVGJS_DECL(TextAlign) {
   int align;
 
   if(argc < 1)
@@ -787,7 +682,7 @@ FUNC(TextAlign) {
   return JS_UNDEFINED;
 }
 
-FUNC(Text) {
+NVGJS_DECL(Text) {
   int x, y;
   const char* str;
 
@@ -807,7 +702,7 @@ FUNC(Text) {
   return JS_NewFloat64(ctx, ret);
 }
 
-FUNC(RGB) {
+NVGJS_DECL(RGB) {
   int32_t r, g, b;
 
   if(argc < 3)
@@ -816,10 +711,10 @@ FUNC(RGB) {
   if(JS_ToInt32(ctx, &r, argv[0]) || JS_ToInt32(ctx, &g, argv[1]) || JS_ToInt32(ctx, &b, argv[2]))
     return JS_EXCEPTION;
 
-  return js_nanovg_color_new(ctx, nvgRGB(r, g, b));
+  return nvgjs_color_new(ctx, nvgRGB(r, g, b));
 }
 
-FUNC(RGBf) {
+NVGJS_DECL(RGBf) {
   double r, g, b;
 
   if(argc < 3)
@@ -828,10 +723,10 @@ FUNC(RGBf) {
   if(JS_ToFloat64(ctx, &r, argv[0]) || JS_ToFloat64(ctx, &g, argv[1]) || JS_ToFloat64(ctx, &b, argv[2]))
     return JS_EXCEPTION;
 
-  return js_nanovg_color_new(ctx, nvgRGBf(r, g, b));
+  return nvgjs_color_new(ctx, nvgRGBf(r, g, b));
 }
 
-FUNC(RGBA) {
+NVGJS_DECL(RGBA) {
   int32_t r, g, b, a;
 
   if(argc < 4)
@@ -840,10 +735,10 @@ FUNC(RGBA) {
   if(JS_ToInt32(ctx, &r, argv[0]) || JS_ToInt32(ctx, &g, argv[1]) || JS_ToInt32(ctx, &b, argv[2]) || JS_ToInt32(ctx, &a, argv[3]))
     return JS_EXCEPTION;
 
-  return js_nanovg_color_new(ctx, nvgRGBA(r, g, b, a));
+  return nvgjs_color_new(ctx, nvgRGBA(r, g, b, a));
 }
 
-FUNC(RGBAf) {
+NVGJS_DECL(RGBAf) {
   double r, g, b, a;
 
   if(argc < 4)
@@ -852,49 +747,49 @@ FUNC(RGBAf) {
   if(JS_ToFloat64(ctx, &r, argv[0]) || JS_ToFloat64(ctx, &g, argv[1]) || JS_ToFloat64(ctx, &b, argv[2]) || JS_ToFloat64(ctx, &a, argv[3]))
     return JS_EXCEPTION;
 
-  return js_nanovg_color_new(ctx, nvgRGBAf(r, g, b, a));
+  return nvgjs_color_new(ctx, nvgRGBAf(r, g, b, a));
 }
 
-FUNC(LerpRGBA) {
+NVGJS_DECL(LerpRGBA) {
   NVGcolor c0, c1;
   double u;
 
   if(argc < 3)
     return JS_ThrowInternalError(ctx, "need 3 arguments");
 
-  if(js_nanovg_tocolor(ctx, &c0, argv[0]) || js_nanovg_tocolor(ctx, &c1, argv[1]) || JS_ToFloat64(ctx, &u, argv[2]))
+  if(nvgjs_tocolor(ctx, &c0, argv[0]) || nvgjs_tocolor(ctx, &c1, argv[1]) || JS_ToFloat64(ctx, &u, argv[2]))
     return JS_EXCEPTION;
 
-  return js_nanovg_color_new(ctx, nvgLerpRGBA(c0, c1, u));
+  return nvgjs_color_new(ctx, nvgLerpRGBA(c0, c1, u));
 }
 
-FUNC(TransRGBA) {
+NVGJS_DECL(TransRGBA) {
   NVGcolor c;
   int32_t a;
 
   if(argc < 2)
     return JS_ThrowInternalError(ctx, "need 2 arguments");
 
-  if(js_nanovg_tocolor(ctx, &c, argv[0]) || JS_ToInt32(ctx, &a, argv[1]))
+  if(nvgjs_tocolor(ctx, &c, argv[0]) || JS_ToInt32(ctx, &a, argv[1]))
     return JS_EXCEPTION;
 
-  return js_nanovg_color_new(ctx, nvgTransRGBA(c, a));
+  return nvgjs_color_new(ctx, nvgTransRGBA(c, a));
 }
 
-FUNC(TransRGBAf) {
+NVGJS_DECL(TransRGBAf) {
   NVGcolor c;
   double a;
 
   if(argc < 2)
     return JS_ThrowInternalError(ctx, "need 2 arguments");
 
-  if(js_nanovg_tocolor(ctx, &c, argv[0]) || JS_ToFloat64(ctx, &a, argv[1]))
+  if(nvgjs_tocolor(ctx, &c, argv[0]) || JS_ToFloat64(ctx, &a, argv[1]))
     return JS_EXCEPTION;
 
-  return js_nanovg_color_new(ctx, nvgTransRGBAf(c, a));
+  return nvgjs_color_new(ctx, nvgTransRGBAf(c, a));
 }
 
-FUNC(HSL) {
+NVGJS_DECL(HSL) {
   double h, s, l;
 
   if(argc < 3)
@@ -903,10 +798,10 @@ FUNC(HSL) {
   if(JS_ToFloat64(ctx, &h, argv[0]) || JS_ToFloat64(ctx, &s, argv[1]) || JS_ToFloat64(ctx, &l, argv[2]))
     return JS_EXCEPTION;
 
-  return js_nanovg_color_new(ctx, nvgHSL(h, s, l));
+  return nvgjs_color_new(ctx, nvgHSL(h, s, l));
 }
 
-FUNC(HSLA) {
+NVGJS_DECL(HSLA) {
   double h, s, l;
   int32_t a;
 
@@ -916,10 +811,10 @@ FUNC(HSLA) {
   if(JS_ToFloat64(ctx, &h, argv[0]) || JS_ToFloat64(ctx, &s, argv[1]) || JS_ToFloat64(ctx, &l, argv[2]) || JS_ToInt32(ctx, &a, argv[3]))
     return JS_EXCEPTION;
 
-  return js_nanovg_color_new(ctx, nvgHSLA(h, s, l, a));
+  return nvgjs_color_new(ctx, nvgHSLA(h, s, l, a));
 }
 
-FUNC(StrokeWidth) {
+NVGJS_DECL(StrokeWidth) {
   double width;
 
   if(argc < 1)
@@ -932,7 +827,7 @@ FUNC(StrokeWidth) {
   return JS_UNDEFINED;
 }
 
-FUNC(CreateImage) {
+NVGJS_DECL(CreateImage) {
   const char* file;
   int32_t flags = 0;
 
@@ -948,7 +843,7 @@ FUNC(CreateImage) {
   return JS_NewInt32(ctx, nvgCreateImage(g_NVGcontext, file, flags));
 }
 
-FUNC(CreateImageRGBA) {
+NVGJS_DECL(CreateImageRGBA) {
   int32_t width, height, flags;
   uint8_t* ptr;
   size_t len;
@@ -965,7 +860,7 @@ FUNC(CreateImageRGBA) {
   return JS_NewInt32(ctx, nvgCreateImageRGBA(g_NVGcontext, width, height, flags, (void*)ptr));
 }
 
-FUNC(UpdateImage) {
+NVGJS_DECL(UpdateImage) {
   int32_t image;
   size_t len;
   uint8_t* ptr;
@@ -984,7 +879,7 @@ FUNC(UpdateImage) {
   return JS_UNDEFINED;
 }
 
-FUNC(ImageSize) {
+NVGJS_DECL(ImageSize) {
   int32_t id = 0;
   int width, height;
   JSValue ret;
@@ -1003,7 +898,7 @@ FUNC(ImageSize) {
   return ret;
 }
 
-FUNC(DeleteImage) {
+NVGJS_DECL(DeleteImage) {
   int32_t id = 0;
 
   if(argc < 1)
@@ -1017,20 +912,20 @@ FUNC(DeleteImage) {
   return JS_UNDEFINED;
 }
 
-FUNC(ResetTransform) {
+NVGJS_DECL(ResetTransform) {
   nvgResetTransform(g_NVGcontext);
 
   return JS_UNDEFINED;
 }
 
-FUNC(Transform) {
+NVGJS_DECL(Transform) {
   float t[6];
   int n;
 
   if(argc < 1)
     return JS_ThrowInternalError(ctx, "need 1/6 arguments");
 
-  while((n = js_nanovg_matrix_arguments(ctx, t, argc, argv))) {
+  while((n = nvgjs_matrix_arguments(ctx, t, argc, argv))) {
     nvgTransform(g_NVGcontext, t[0], t[1], t[2], t[3], t[4], t[5]);
 
     argc -= n;
@@ -1040,7 +935,7 @@ FUNC(Transform) {
   return JS_UNDEFINED;
 }
 
-FUNC(Translate) {
+NVGJS_DECL(Translate) {
   double x, y;
 
   if(argc < 2)
@@ -1054,7 +949,7 @@ FUNC(Translate) {
   return JS_UNDEFINED;
 }
 
-FUNC(Rotate) {
+NVGJS_DECL(Rotate) {
   double angle;
 
   if(argc < 1)
@@ -1068,7 +963,7 @@ FUNC(Rotate) {
   return JS_UNDEFINED;
 }
 
-FUNC(SkewX) {
+NVGJS_DECL(SkewX) {
   double angle;
 
   if(argc < 1)
@@ -1082,7 +977,7 @@ FUNC(SkewX) {
   return JS_UNDEFINED;
 }
 
-FUNC(SkewY) {
+NVGJS_DECL(SkewY) {
   double angle;
 
   if(argc < 1)
@@ -1096,7 +991,7 @@ FUNC(SkewY) {
   return JS_UNDEFINED;
 }
 
-FUNC(Scale) {
+NVGJS_DECL(Scale) {
   double x, y;
 
   if(argc < 2)
@@ -1110,31 +1005,31 @@ FUNC(Scale) {
   return JS_UNDEFINED;
 }
 
-FUNC(CurrentTransform) {
+NVGJS_DECL(CurrentTransform) {
   float t[6];
 
   nvgCurrentTransform(g_NVGcontext, t);
 
   if(argc == 0)
-    return js_nanovg_matrix_new(ctx, t);
+    return nvgjs_matrix_new(ctx, t);
 
-  js_nanovg_matrix_copy(ctx, argv[0], t);
+  nvgjs_matrix_copy(ctx, argv[0], t);
   return JS_UNDEFINED;
 }
 
-FUNC(TransformIdentity) {
+NVGJS_DECL(TransformIdentity) {
   float t[6];
 
   nvgTransformIdentity(t);
 
   if(argc == 0)
-    return js_nanovg_matrix_new(ctx, t);
+    return nvgjs_matrix_new(ctx, t);
 
-  js_nanovg_matrix_copy(ctx, argv[0], t);
+  nvgjs_matrix_copy(ctx, argv[0], t);
   return JS_UNDEFINED;
 }
 
-FUNC(TransformTranslate) {
+NVGJS_DECL(TransformTranslate) {
   float t[6];
   int32_t x, y;
   int i = 0;
@@ -1151,13 +1046,13 @@ FUNC(TransformTranslate) {
   nvgTransformTranslate(t, x, y);
 
   if(i == 0)
-    return js_nanovg_matrix_new(ctx, t);
+    return nvgjs_matrix_new(ctx, t);
 
-  js_nanovg_matrix_copy(ctx, argv[0], t);
+  nvgjs_matrix_copy(ctx, argv[0], t);
   return JS_UNDEFINED;
 }
 
-FUNC(TransformScale) {
+NVGJS_DECL(TransformScale) {
   float t[6];
   double x, y;
   int i = 0;
@@ -1174,13 +1069,13 @@ FUNC(TransformScale) {
   nvgTransformScale(t, x, y);
 
   if(i == 0)
-    return js_nanovg_matrix_new(ctx, t);
+    return nvgjs_matrix_new(ctx, t);
 
-  js_nanovg_matrix_copy(ctx, argv[0], t);
+  nvgjs_matrix_copy(ctx, argv[0], t);
   return JS_UNDEFINED;
 }
 
-FUNC(TransformRotate) {
+NVGJS_DECL(TransformRotate) {
   float t[6];
   double angle;
   int i = 0;
@@ -1197,45 +1092,45 @@ FUNC(TransformRotate) {
   nvgTransformRotate(t, angle);
 
   if(i == 0)
-    return js_nanovg_matrix_new(ctx, t);
+    return nvgjs_matrix_new(ctx, t);
 
-  js_nanovg_matrix_copy(ctx, argv[0], t);
+  nvgjs_matrix_copy(ctx, argv[0], t);
   return JS_UNDEFINED;
 }
 
-FUNC(TransformMultiply) {
+NVGJS_DECL(TransformMultiply) {
   float dst[6], src[6];
 
   if(argc < 2)
     return JS_ThrowInternalError(ctx, "need 2 arguments");
 
-  js_nanovg_tomatrix(ctx, dst, argv[0]);
+  nvgjs_tomatrix(ctx, dst, argv[0]);
 
-  for(int n, i = 1; i < argc && (n = js_nanovg_matrix_arguments(ctx, src, argc - i, argv + i)); i += n) {
+  for(int n, i = 1; i < argc && (n = nvgjs_matrix_arguments(ctx, src, argc - i, argv + i)); i += n) {
     nvgTransformMultiply(dst, src);
   }
 
-  js_nanovg_matrix_copy(ctx, argv[0], dst);
+  nvgjs_matrix_copy(ctx, argv[0], dst);
   return JS_UNDEFINED;
 }
 
-FUNC(TransformPremultiply) {
+NVGJS_DECL(TransformPremultiply) {
   float dst[6], src[6];
 
   if(argc < 2)
     return JS_ThrowInternalError(ctx, "need 2 arguments");
 
-  js_nanovg_tomatrix(ctx, dst, argv[0]);
+  nvgjs_tomatrix(ctx, dst, argv[0]);
 
-  for(int n, i = 1; i < argc && (n = js_nanovg_matrix_arguments(ctx, src, argc - i, argv + i)); i += n) {
+  for(int n, i = 1; i < argc && (n = nvgjs_matrix_arguments(ctx, src, argc - i, argv + i)); i += n) {
     nvgTransformPremultiply(dst, src);
   }
 
-  js_nanovg_matrix_copy(ctx, argv[0], dst);
+  nvgjs_matrix_copy(ctx, argv[0], dst);
   return JS_UNDEFINED;
 }
 
-FUNC(TransformInverse) {
+NVGJS_DECL(TransformInverse) {
   float dst[6], src[6];
   int i = 0;
 
@@ -1245,36 +1140,36 @@ FUNC(TransformInverse) {
   if(argc > 1)
     i++;
 
-  js_nanovg_tomatrix(ctx, src, argv[i]);
+  nvgjs_tomatrix(ctx, src, argv[i]);
 
   int ret = nvgTransformInverse(dst, src);
 
   if(ret) {
     if(argc == 1)
-      return js_nanovg_matrix_new(ctx, dst);
+      return nvgjs_matrix_new(ctx, dst);
 
-    js_nanovg_matrix_copy(ctx, argv[0], dst);
+    nvgjs_matrix_copy(ctx, argv[0], dst);
   }
 
   return JS_NewInt32(ctx, ret);
 }
 
-FUNC(TransformPoint) {
+NVGJS_DECL(TransformPoint) {
   float m[6], dst[2], src[2];
 
   if(argc < 3)
     return JS_ThrowInternalError(ctx, "need 3 arguments");
 
-  js_nanovg_tovector(ctx, dst, argv[0]);
-  js_nanovg_tomatrix(ctx, m, argv[1]);
-  js_nanovg_vector_arguments(ctx, src, argc - 2, argv + 2);
+  nvgjs_tovector(ctx, dst, argv[0]);
+  nvgjs_tomatrix(ctx, m, argv[1]);
+  nvgjs_vector_arguments(ctx, src, argc - 2, argv + 2);
   nvgTransformPoint(&dst[0], &dst[1], m, src[0], src[1]);
-  js_nanovg_vector_copy(ctx, argv[0], dst);
+  nvgjs_vector_copy(ctx, argv[0], dst);
 
   return JS_UNDEFINED;
 }
 
-FUNC(DegToRad) {
+NVGJS_DECL(DegToRad) {
   double arg;
 
   if(argc < 1)
@@ -1286,7 +1181,7 @@ FUNC(DegToRad) {
   return JS_NewFloat64(ctx, nvgDegToRad(arg));
 }
 
-FUNC(RadToDeg) {
+NVGJS_DECL(RadToDeg) {
   double arg;
 
   if(argc < 1)
@@ -1298,7 +1193,7 @@ FUNC(RadToDeg) {
   return JS_NewFloat64(ctx, nvgRadToDeg(arg));
 }
 
-FUNC(ImagePattern) {
+NVGJS_DECL(ImagePattern) {
   double ox, oy, ex, ey;
   double angle, alpha;
   int32_t image;
@@ -1314,167 +1209,167 @@ FUNC(ImagePattern) {
   p = js_malloc(ctx, sizeof(NVGpaint));
 
   *p = paint;
-  return js_nanovg_wrap(ctx, p, js_nanovg_paint_class_id);
+  return nvgjs_wrap(ctx, p, nvgjs_paint_class_id);
 }
 
-/*FUNC(SetNextFillHoverable)
+/*NVGJS_DECL(SetNextFillHoverable)
 {
     nvgSetNextFillHoverable(g_NVGcontext);
     return JS_UNDEFINED;
 }
 
-FUNC(IsFillHovered)
+NVGJS_DECL(IsFillHovered)
 {
     int ret = nvgIsFillHovered(g_NVGcontext);
     return JS_NewBool(ctx, ret);
 }
 
-FUNC(IsNextFillClicked)
+NVGJS_DECL(IsNextFillClicked)
 {
     int ret = nvgIsNextFillClicked(g_NVGcontext);
     return JS_NewBool(ctx, ret);
 }
 */
 
-#define _JS_CFUNC_DEF(fn, length) JS_CFUNC_DEF(#fn, length, js_nanovg_##fn)
-#define _JS_NANOVG_FLAG(name) JS_PROP_INT32_DEF(#name, NVG_##name, JS_PROP_CONFIGURABLE)
+#define NVGJS_FUNC(fn, length) JS_CFUNC_DEF(#fn, length, nvgjs_##fn)
+#define NVGJS_FLAG(name) JS_PROP_INT32_DEF(#name, NVG_##name, JS_PROP_CONFIGURABLE)
 
-static const JSCFunctionListEntry js_nanovg_funcs[] = {
+static const JSCFunctionListEntry nvgjs_funcs[] = {
 #ifdef NANOVG_GL2
-    _JS_CFUNC_DEF(CreateGL2, 1),
+    NVGJS_FUNC(CreateGL2, 1),
 #endif
 #ifdef NANOVG_GL3
-    _JS_CFUNC_DEF(CreateGL3, 1),
+    NVGJS_FUNC(CreateGL3, 1),
 #endif
-    _JS_CFUNC_DEF(CreateFont, 2),
-    _JS_CFUNC_DEF(BeginFrame, 3),
-    _JS_CFUNC_DEF(CancelFrame, 0),
-    _JS_CFUNC_DEF(EndFrame, 0),
-    _JS_CFUNC_DEF(Save, 0),
-    _JS_CFUNC_DEF(Restore, 0),
-    _JS_CFUNC_DEF(Reset, 0),
-    _JS_CFUNC_DEF(ShapeAntiAlias, 1),
-    _JS_CFUNC_DEF(ClosePath, 0),
-    _JS_CFUNC_DEF(Scissor, 4),
-    _JS_CFUNC_DEF(IntersectScissor, 4),
-    _JS_CFUNC_DEF(ResetScissor, 0),
+    NVGJS_FUNC(CreateFont, 2),
+    NVGJS_FUNC(BeginFrame, 3),
+    NVGJS_FUNC(CancelFrame, 0),
+    NVGJS_FUNC(EndFrame, 0),
+    NVGJS_FUNC(Save, 0),
+    NVGJS_FUNC(Restore, 0),
+    NVGJS_FUNC(Reset, 0),
+    NVGJS_FUNC(ShapeAntiAlias, 1),
+    NVGJS_FUNC(ClosePath, 0),
+    NVGJS_FUNC(Scissor, 4),
+    NVGJS_FUNC(IntersectScissor, 4),
+    NVGJS_FUNC(ResetScissor, 0),
 
-    _JS_CFUNC_DEF(MiterLimit, 1),
-    _JS_CFUNC_DEF(LineCap, 1),
-    _JS_CFUNC_DEF(LineJoin, 1),
-    _JS_CFUNC_DEF(GlobalAlpha, 1),
-    _JS_CFUNC_DEF(StrokeColor, 1),
-    _JS_CFUNC_DEF(StrokeWidth, 1),
-    _JS_CFUNC_DEF(StrokePaint, 1),
-    _JS_CFUNC_DEF(FillColor, 1),
-    _JS_CFUNC_DEF(FillPaint, 1),
-    _JS_CFUNC_DEF(LinearGradient, 6),
-    _JS_CFUNC_DEF(BoxGradient, 8),
-    _JS_CFUNC_DEF(RadialGradient, 6),
-    _JS_CFUNC_DEF(TextBounds, 3),
-    _JS_CFUNC_DEF(TextBounds2, 3),
-    _JS_CFUNC_DEF(FontBlur, 1),
-    _JS_CFUNC_DEF(FontSize, 1),
-    _JS_CFUNC_DEF(FontFace, 1),
-    _JS_CFUNC_DEF(TextAlign, 1),
-    _JS_CFUNC_DEF(Text, 3),
-    _JS_CFUNC_DEF(RGB, 3),
-    _JS_CFUNC_DEF(RGBf, 3),
-    _JS_CFUNC_DEF(RGBA, 4),
-    _JS_CFUNC_DEF(RGBAf, 4),
-    _JS_CFUNC_DEF(LerpRGBA, 3),
-    _JS_CFUNC_DEF(TransRGBA, 2),
-    _JS_CFUNC_DEF(TransRGBAf, 2),
-    _JS_CFUNC_DEF(HSL, 3),
-    _JS_CFUNC_DEF(HSLA, 4),
-    _JS_CFUNC_DEF(CreateImage, 2),
-    _JS_CFUNC_DEF(CreateImageRGBA, 4),
-    _JS_CFUNC_DEF(UpdateImage, 2),
-    _JS_CFUNC_DEF(ImageSize, 1),
-    _JS_CFUNC_DEF(DeleteImage, 1),
-    _JS_CFUNC_DEF(ResetTransform, 0),
-    _JS_CFUNC_DEF(Transform, 6),
-    _JS_CFUNC_DEF(Translate, 2),
-    _JS_CFUNC_DEF(Rotate, 1),
-    _JS_CFUNC_DEF(SkewX, 1),
-    _JS_CFUNC_DEF(SkewY, 1),
-    _JS_CFUNC_DEF(Scale, 2),
-    _JS_CFUNC_DEF(CurrentTransform, 1),
-    _JS_CFUNC_DEF(TransformIdentity, 0),
-    _JS_CFUNC_DEF(TransformTranslate, 2),
-    _JS_CFUNC_DEF(TransformScale, 2),
-    _JS_CFUNC_DEF(TransformRotate, 1),
-    _JS_CFUNC_DEF(TransformMultiply, 2),
-    _JS_CFUNC_DEF(TransformPremultiply, 2),
-    _JS_CFUNC_DEF(TransformInverse, 1),
-    _JS_CFUNC_DEF(TransformPoint, 2),
-    _JS_CFUNC_DEF(RadToDeg, 1),
-    _JS_CFUNC_DEF(DegToRad, 1),
-    _JS_CFUNC_DEF(ImagePattern, 7),
-    _JS_CFUNC_DEF(BeginPath, 0),
-    _JS_CFUNC_DEF(MoveTo, 2),
-    _JS_CFUNC_DEF(LineTo, 2),
-    _JS_CFUNC_DEF(Rect, 4),
-    _JS_CFUNC_DEF(Circle, 3),
-    _JS_CFUNC_DEF(Ellipse, 4),
-    _JS_CFUNC_DEF(RoundedRect, 5),
-    _JS_CFUNC_DEF(PathWinding, 1),
-    _JS_CFUNC_DEF(Stroke, 0),
-    _JS_CFUNC_DEF(Fill, 0),
-    /*_JS_CFUNC_DEF(SetNextFillHoverable, 0),
-    _JS_CFUNC_DEF(IsFillHovered, 0),
-    _JS_CFUNC_DEF(IsNextFillClicked, 0),*/
-    _JS_NANOVG_FLAG(PI),
-    _JS_NANOVG_FLAG(CCW),
-    _JS_NANOVG_FLAG(CW),
-    _JS_NANOVG_FLAG(SOLID),
-    _JS_NANOVG_FLAG(HOLE),
-    _JS_NANOVG_FLAG(BUTT),
-    _JS_NANOVG_FLAG(ROUND),
-    _JS_NANOVG_FLAG(SQUARE),
-    _JS_NANOVG_FLAG(BEVEL),
-    _JS_NANOVG_FLAG(MITER),
-    _JS_NANOVG_FLAG(ALIGN_LEFT),
-    _JS_NANOVG_FLAG(ALIGN_CENTER),
-    _JS_NANOVG_FLAG(ALIGN_RIGHT),
-    _JS_NANOVG_FLAG(ALIGN_TOP),
-    _JS_NANOVG_FLAG(ALIGN_MIDDLE),
-    _JS_NANOVG_FLAG(ALIGN_BOTTOM),
-    _JS_NANOVG_FLAG(ALIGN_BASELINE),
-    _JS_NANOVG_FLAG(ZERO),
-    _JS_NANOVG_FLAG(ONE),
-    _JS_NANOVG_FLAG(SRC_COLOR),
-    _JS_NANOVG_FLAG(ONE_MINUS_SRC_COLOR),
-    _JS_NANOVG_FLAG(DST_COLOR),
-    _JS_NANOVG_FLAG(ONE_MINUS_DST_COLOR),
-    _JS_NANOVG_FLAG(SRC_ALPHA),
-    _JS_NANOVG_FLAG(ONE_MINUS_SRC_ALPHA),
-    _JS_NANOVG_FLAG(DST_ALPHA),
-    _JS_NANOVG_FLAG(ONE_MINUS_DST_ALPHA),
-    _JS_NANOVG_FLAG(SRC_ALPHA_SATURATE),
-    _JS_NANOVG_FLAG(SOURCE_OVER),
-    _JS_NANOVG_FLAG(SOURCE_IN),
-    _JS_NANOVG_FLAG(SOURCE_OUT),
-    _JS_NANOVG_FLAG(ATOP),
-    _JS_NANOVG_FLAG(DESTINATION_OVER),
-    _JS_NANOVG_FLAG(DESTINATION_IN),
-    _JS_NANOVG_FLAG(DESTINATION_OUT),
-    _JS_NANOVG_FLAG(DESTINATION_ATOP),
-    _JS_NANOVG_FLAG(LIGHTER),
-    _JS_NANOVG_FLAG(COPY),
-    _JS_NANOVG_FLAG(XOR),
-    _JS_NANOVG_FLAG(IMAGE_GENERATE_MIPMAPS),
-    _JS_NANOVG_FLAG(IMAGE_REPEATX),
-    _JS_NANOVG_FLAG(IMAGE_REPEATY),
-    _JS_NANOVG_FLAG(IMAGE_FLIPY),
-    _JS_NANOVG_FLAG(IMAGE_PREMULTIPLIED),
-    _JS_NANOVG_FLAG(IMAGE_NEAREST),
-    _JS_NANOVG_FLAG(TEXTURE_ALPHA),
-    _JS_NANOVG_FLAG(TEXTURE_RGBA),
+    NVGJS_FUNC(MiterLimit, 1),
+    NVGJS_FUNC(LineCap, 1),
+    NVGJS_FUNC(LineJoin, 1),
+    NVGJS_FUNC(GlobalAlpha, 1),
+    NVGJS_FUNC(StrokeColor, 1),
+    NVGJS_FUNC(StrokeWidth, 1),
+    NVGJS_FUNC(StrokePaint, 1),
+    NVGJS_FUNC(FillColor, 1),
+    NVGJS_FUNC(FillPaint, 1),
+    NVGJS_FUNC(LinearGradient, 6),
+    NVGJS_FUNC(BoxGradient, 8),
+    NVGJS_FUNC(RadialGradient, 6),
+    NVGJS_FUNC(TextBounds, 3),
+    NVGJS_FUNC(TextBounds2, 3),
+    NVGJS_FUNC(FontBlur, 1),
+    NVGJS_FUNC(FontSize, 1),
+    NVGJS_FUNC(FontFace, 1),
+    NVGJS_FUNC(TextAlign, 1),
+    NVGJS_FUNC(Text, 3),
+    NVGJS_FUNC(RGB, 3),
+    NVGJS_FUNC(RGBf, 3),
+    NVGJS_FUNC(RGBA, 4),
+    NVGJS_FUNC(RGBAf, 4),
+    NVGJS_FUNC(LerpRGBA, 3),
+    NVGJS_FUNC(TransRGBA, 2),
+    NVGJS_FUNC(TransRGBAf, 2),
+    NVGJS_FUNC(HSL, 3),
+    NVGJS_FUNC(HSLA, 4),
+    NVGJS_FUNC(CreateImage, 2),
+    NVGJS_FUNC(CreateImageRGBA, 4),
+    NVGJS_FUNC(UpdateImage, 2),
+    NVGJS_FUNC(ImageSize, 1),
+    NVGJS_FUNC(DeleteImage, 1),
+    NVGJS_FUNC(ResetTransform, 0),
+    NVGJS_FUNC(Transform, 6),
+    NVGJS_FUNC(Translate, 2),
+    NVGJS_FUNC(Rotate, 1),
+    NVGJS_FUNC(SkewX, 1),
+    NVGJS_FUNC(SkewY, 1),
+    NVGJS_FUNC(Scale, 2),
+    NVGJS_FUNC(CurrentTransform, 1),
+    NVGJS_FUNC(TransformIdentity, 0),
+    NVGJS_FUNC(TransformTranslate, 2),
+    NVGJS_FUNC(TransformScale, 2),
+    NVGJS_FUNC(TransformRotate, 1),
+    NVGJS_FUNC(TransformMultiply, 2),
+    NVGJS_FUNC(TransformPremultiply, 2),
+    NVGJS_FUNC(TransformInverse, 1),
+    NVGJS_FUNC(TransformPoint, 2),
+    NVGJS_FUNC(RadToDeg, 1),
+    NVGJS_FUNC(DegToRad, 1),
+    NVGJS_FUNC(ImagePattern, 7),
+    NVGJS_FUNC(BeginPath, 0),
+    NVGJS_FUNC(MoveTo, 2),
+    NVGJS_FUNC(LineTo, 2),
+    NVGJS_FUNC(Rect, 4),
+    NVGJS_FUNC(Circle, 3),
+    NVGJS_FUNC(Ellipse, 4),
+    NVGJS_FUNC(RoundedRect, 5),
+    NVGJS_FUNC(PathWinding, 1),
+    NVGJS_FUNC(Stroke, 0),
+    NVGJS_FUNC(Fill, 0),
+    /*NVGJS_FUNC(SetNextFillHoverable, 0),
+    NVGJS_FUNC(IsFillHovered, 0),
+    NVGJS_FUNC(IsNextFillClicked, 0),*/
+    NVGJS_FLAG(PI),
+    NVGJS_FLAG(CCW),
+    NVGJS_FLAG(CW),
+    NVGJS_FLAG(SOLID),
+    NVGJS_FLAG(HOLE),
+    NVGJS_FLAG(BUTT),
+    NVGJS_FLAG(ROUND),
+    NVGJS_FLAG(SQUARE),
+    NVGJS_FLAG(BEVEL),
+    NVGJS_FLAG(MITER),
+    NVGJS_FLAG(ALIGN_LEFT),
+    NVGJS_FLAG(ALIGN_CENTER),
+    NVGJS_FLAG(ALIGN_RIGHT),
+    NVGJS_FLAG(ALIGN_TOP),
+    NVGJS_FLAG(ALIGN_MIDDLE),
+    NVGJS_FLAG(ALIGN_BOTTOM),
+    NVGJS_FLAG(ALIGN_BASELINE),
+    NVGJS_FLAG(ZERO),
+    NVGJS_FLAG(ONE),
+    NVGJS_FLAG(SRC_COLOR),
+    NVGJS_FLAG(ONE_MINUS_SRC_COLOR),
+    NVGJS_FLAG(DST_COLOR),
+    NVGJS_FLAG(ONE_MINUS_DST_COLOR),
+    NVGJS_FLAG(SRC_ALPHA),
+    NVGJS_FLAG(ONE_MINUS_SRC_ALPHA),
+    NVGJS_FLAG(DST_ALPHA),
+    NVGJS_FLAG(ONE_MINUS_DST_ALPHA),
+    NVGJS_FLAG(SRC_ALPHA_SATURATE),
+    NVGJS_FLAG(SOURCE_OVER),
+    NVGJS_FLAG(SOURCE_IN),
+    NVGJS_FLAG(SOURCE_OUT),
+    NVGJS_FLAG(ATOP),
+    NVGJS_FLAG(DESTINATION_OVER),
+    NVGJS_FLAG(DESTINATION_IN),
+    NVGJS_FLAG(DESTINATION_OUT),
+    NVGJS_FLAG(DESTINATION_ATOP),
+    NVGJS_FLAG(LIGHTER),
+    NVGJS_FLAG(COPY),
+    NVGJS_FLAG(XOR),
+    NVGJS_FLAG(IMAGE_GENERATE_MIPMAPS),
+    NVGJS_FLAG(IMAGE_REPEATX),
+    NVGJS_FLAG(IMAGE_REPEATY),
+    NVGJS_FLAG(IMAGE_FLIPY),
+    NVGJS_FLAG(IMAGE_PREMULTIPLIED),
+    NVGJS_FLAG(IMAGE_NEAREST),
+    NVGJS_FLAG(TEXTURE_ALPHA),
+    NVGJS_FLAG(TEXTURE_RGBA),
 };
 
 static int
-js_nanovg_init(JSContext* ctx, JSModuleDef* m) {
+nvgjs_init(JSContext* ctx, JSModuleDef* m) {
   JSValue paint_proto, paint_class;
 
   JSValue global = JS_GetGlobalObject(ctx);
@@ -1483,28 +1378,28 @@ js_nanovg_init(JSContext* ctx, JSModuleDef* m) {
   JS_FreeValue(ctx, global);
 
   color_proto = JS_NewObjectProto(ctx, js_float32array_proto);
-  JS_SetPropertyFunctionList(ctx, color_proto, js_nanovg_color_methods, countof(js_nanovg_color_methods));
-  // JS_SetClassProto(ctx, js_nanovg_color_class_id, color_proto);
+  JS_SetPropertyFunctionList(ctx, color_proto, nvgjs_color_methods, countof(nvgjs_color_methods));
+  // JS_SetClassProto(ctx, nvgjs_color_class_id, color_proto);
   color_ctor = JS_NewObjectProto(ctx, JS_NULL);
   JS_SetConstructor(ctx, color_ctor, color_proto);
   JS_SetModuleExport(ctx, m, "Color", color_ctor);
 
   matrix_proto = JS_NewObjectProto(ctx, js_float32array_proto);
-  JS_SetPropertyFunctionList(ctx, matrix_proto, js_nanovg_matrix_methods, countof(js_nanovg_matrix_methods));
+  JS_SetPropertyFunctionList(ctx, matrix_proto, nvgjs_matrix_methods, countof(nvgjs_matrix_methods));
   matrix_ctor = JS_NewObjectProto(ctx, JS_NULL);
   JS_SetConstructor(ctx, matrix_ctor, matrix_proto);
   JS_SetModuleExport(ctx, m, "Matrix", matrix_ctor);
 
-  JS_NewClassID(&js_nanovg_paint_class_id);
-  JS_NewClass(JS_GetRuntime(ctx), js_nanovg_paint_class_id, &js_nanovg_paint_class);
+  JS_NewClassID(&nvgjs_paint_class_id);
+  JS_NewClass(JS_GetRuntime(ctx), nvgjs_paint_class_id, &nvgjs_paint_class);
 
   paint_proto = JS_NewObject(ctx);
-  JS_SetClassProto(ctx, js_nanovg_paint_class_id, paint_proto);
-  paint_class = JS_NewCFunction2(ctx, js_nanovg_paint_constructor, "Paint", 0, JS_CFUNC_constructor, 0);
+  JS_SetClassProto(ctx, nvgjs_paint_class_id, paint_proto);
+  paint_class = JS_NewCFunction2(ctx, nvgjs_paint_constructor, "Paint", 0, JS_CFUNC_constructor, 0);
   JS_SetConstructor(ctx, paint_class, paint_proto);
   JS_SetModuleExport(ctx, m, "Paint", paint_class);
 
-  JS_SetModuleExportList(ctx, m, js_nanovg_funcs, countof(js_nanovg_funcs));
+  JS_SetModuleExportList(ctx, m, nvgjs_funcs, countof(nvgjs_funcs));
   return 0;
 }
 
@@ -1512,13 +1407,13 @@ static JSModuleDef*
 js_init_module_nanovg(JSContext* ctx, const char* module_name) {
   JSModuleDef* m;
 
-  if(!(m = JS_NewCModule(ctx, module_name, js_nanovg_init)))
+  if(!(m = JS_NewCModule(ctx, module_name, nvgjs_init)))
     return NULL;
 
   JS_AddModuleExport(ctx, m, "Color");
   JS_AddModuleExport(ctx, m, "Matrix");
   JS_AddModuleExport(ctx, m, "Paint");
-  JS_AddModuleExportList(ctx, m, js_nanovg_funcs, countof(js_nanovg_funcs));
+  JS_AddModuleExportList(ctx, m, nvgjs_funcs, countof(nvgjs_funcs));
   return m;
 }
 
@@ -1530,6 +1425,6 @@ js_init_module(JSContext* ctx, const char* module_name) {
 #endif
 
 void
-js_nanovg_init_with_context(struct NVGcontext* vg) {
+nvgjs_init_with_context(struct NVGcontext* vg) {
   g_NVGcontext = vg;
 }
