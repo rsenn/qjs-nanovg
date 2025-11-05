@@ -20,21 +20,31 @@ static JSValue js_float32array_ctor = JS_UNDEFINED, js_float32array_proto = JS_U
 static JSValue color_ctor = JS_UNDEFINED, color_proto = JS_UNDEFINED;
 static JSValue matrix_ctor = JS_UNDEFINED, matrix_proto = JS_UNDEFINED;
 
-static int
-js_to_float32vec(JSContext* ctx, float* vec, size_t min_len, const char* const prop_map[], JSValueConst value) {
+static float*
+js_ptrvec32(JSContext* ctx, size_t min_len, JSValueConst value) {
   size_t length = 0, bytes_per_element = 0;
   float* ptr;
 
   if((ptr = js_get_typedarray(ctx, value, &length, &bytes_per_element))) {
     if(length < min_len) {
       JS_ThrowTypeError(ctx, "TypedArray value must have at least %zu elements (has %zu)", min_len, length);
-      return -1;
-    }
-
-    if(bytes_per_element == sizeof(float)) {
-      memcpy(vec, ptr, min_len * sizeof(float));
       return 0;
     }
+
+    if(bytes_per_element == sizeof(float))
+      return ptr;
+  }
+
+  return 0;
+}
+
+static int
+js_tovec32(JSContext* ctx, float* vec, size_t min_len, const char* const prop_map[], JSValueConst value) {
+  float* ptr;
+
+  if((ptr = js_ptrvec32(ctx, min_len, value))) {
+    memcpy(vec, ptr, min_len * sizeof(float));
+    return 0;
   }
 
   if(!JS_IsObject(value)) {
@@ -89,19 +99,9 @@ js_to_float32vec(JSContext* ctx, float* vec, size_t min_len, const char* const p
 }
 
 int
-js_copy_float32vec(JSContext* ctx, const float* vec, size_t min_len, const char* const prop_map[], JSValueConst value) {
-  size_t length = 0, bytes_per_element = 0;
-  float* ptr;
-
-  if((ptr = js_get_typedarray(ctx, value, &length, &bytes_per_element))) {
-    if(length < min_len) {
-      JS_ThrowTypeError(ctx, "TypedArray value must have at least %zu elements (has %zu)", min_len, length);
-      return -1;
-    }
-
-    if(bytes_per_element == sizeof(float))
-      return 0;
-  }
+js_copyvec32(JSContext* ctx, const float* vec, size_t min_len, const char* const prop_map[], JSValueConst value) {
+  if(js_ptrvec32(ctx, min_len, value))
+    return 0;
 
   if(!JS_IsObject(value)) {
     JS_ThrowTypeError(ctx, "value must be an object");
@@ -127,7 +127,7 @@ js_copy_float32vec(JSContext* ctx, const float* vec, size_t min_len, const char*
 
 static int
 js_nanovg_tocolor(JSContext* ctx, NVGcolor* color, JSValueConst value) {
-  return js_to_float32vec(ctx, color->rgba, 4, NULL, value);
+  return js_tovec32(ctx, color->rgba, 4, NULL, value);
 }
 
 static JSValue
@@ -247,12 +247,12 @@ js_nanovg_wrap(JSContext* ctx, void* s, JSClassID classID) {
 
 int
 js_nanovg_tomatrix(JSContext* ctx, float matrix[6], JSValueConst value) {
-  return js_to_float32vec(ctx, matrix, 6, matrix_obj_props, value);
+  return js_tovec32(ctx, matrix, 6, matrix_obj_props, value);
 }
 
 int
 js_nanovg_matrix_copy(JSContext* ctx, JSValueConst value, const float matrix[6]) {
-  return js_copy_float32vec(ctx, matrix, 6, matrix_obj_props, value);
+  return js_copyvec32(ctx, matrix, 6, matrix_obj_props, value);
 }
 
 int
@@ -271,23 +271,17 @@ js_nanovg_matrix_arguments(JSContext* ctx, float matrix[6], int argc, JSValueCon
 }
 
 int
-js_get_vector(JSContext* ctx, JSValueConst value, float vec[2]) {
-  return js_to_float32vec(ctx, vec, 2, vector_obj_props, value);
-}
-
-void
-js_set_vector(JSContext* ctx, JSValueConst value, const float vec[2]) {
-  if(JS_IsArray(ctx, value)) {
-    JS_SetPropertyUint32(ctx, value, 0, JS_NewFloat64(ctx, vec[0]));
-    JS_SetPropertyUint32(ctx, value, 1, JS_NewFloat64(ctx, vec[1]));
-  } else {
-    JS_SetPropertyStr(ctx, value, "x", JS_NewFloat64(ctx, vec[0]));
-    JS_SetPropertyStr(ctx, value, "y", JS_NewFloat64(ctx, vec[1]));
-  }
+js_nanovg_tovector(JSContext* ctx, float vec[2], JSValueConst value) {
+  return js_tovec32(ctx, vec, 2, vector_obj_props, value);
 }
 
 int
-js_argument_vector(JSContext* ctx, float vec[2], int argc, JSValueConst argv[]) {
+js_nanovg_vector_copy(JSContext* ctx, JSValueConst value, const float vec[2]) {
+  return js_copyvec32(ctx, vec, 2, vector_obj_props, value);
+}
+
+int
+js_nanovg_vector_arguments(JSContext* ctx, float vec[2], int argc, JSValueConst argv[]) {
   int i = 0;
 
   if(argc >= 2)
@@ -298,7 +292,7 @@ js_argument_vector(JSContext* ctx, float vec[2], int argc, JSValueConst argv[]) 
   if(i == 2)
     return i;
 
-  return !js_get_vector(ctx, argv[0], vec);
+  return !js_nanovg_tovector(ctx, vec, argv[0]);
 }
 
 #define FUNC(fn) static JSValue js_nanovg_##fn(JSContext* ctx, JSValueConst this_value, int argc, JSValueConst* argv)
@@ -307,7 +301,11 @@ js_argument_vector(JSContext* ctx, float vec[2], int argc, JSValueConst argv[]) 
 FUNC(CreateGL2) {
   int32_t flags = 0;
 
-  JS_ToInt32(ctx, &flags, argv[0]);
+  if(argc < 1)
+    return JS_ThrowInternalError(ctx, "need 1 arguments");
+
+  if(JS_ToInt32(ctx, &flags, argv[0]))
+    return JS_EXCEPTION;
 
   return JS_NewBool(ctx, !!(g_NVGcontext = nvgCreateGL2(flags)));
 }
@@ -325,7 +323,12 @@ FUNC(DeleteGL2) {
 #ifdef NANOVG_GL3
 FUNC(CreateGL3) {
   int32_t flags = 0;
-  JS_ToInt32(ctx, &flags, argv[0]);
+
+  if(argc < 1)
+    return JS_ThrowInternalError(ctx, "need 1 arguments");
+
+  if(JS_ToInt32(ctx, &flags, argv[0]))
+    return JS_EXCEPTION;
 
 #ifdef NANOVG_GLEW
   glewExperimental = GL_TRUE;
@@ -352,6 +355,9 @@ FUNC(DeleteGL3) {
 #endif
 
 FUNC(CreateFont) {
+  if(argc < 2)
+    return JS_ThrowInternalError(ctx, "need 2 arguments");
+
   const char* name = JS_ToCString(ctx, argv[0]);
   const char* file = JS_ToCString(ctx, argv[1]);
 
@@ -360,6 +366,9 @@ FUNC(CreateFont) {
 
 FUNC(BeginFrame) {
   double w, h, ratio;
+
+  if(argc < 3)
+    return JS_ThrowInternalError(ctx, "need 3 arguments");
 
   if(JS_ToFloat64(ctx, &w, argv[0]) || JS_ToFloat64(ctx, &h, argv[1]) || JS_ToFloat64(ctx, &ratio, argv[2]))
     return JS_EXCEPTION;
@@ -401,8 +410,8 @@ FUNC(ShapeAntiAlias) {
 FUNC(Rect) {
   double x, y, w, h;
 
-  if(argc != 4)
-    return JS_EXCEPTION;
+  if(argc < 4)
+    return JS_ThrowInternalError(ctx, "need 4 arguments");
 
   if(JS_ToFloat64(ctx, &x, argv[0]) || JS_ToFloat64(ctx, &y, argv[1]) || JS_ToFloat64(ctx, &w, argv[2]) || JS_ToFloat64(ctx, &h, argv[3]))
     return JS_EXCEPTION;
@@ -414,8 +423,8 @@ FUNC(Rect) {
 FUNC(Circle) {
   double cx, cy, r;
 
-  if(argc != 3)
-    return JS_EXCEPTION;
+  if(argc < 3)
+    return JS_ThrowInternalError(ctx, "need 3 arguments");
 
   if(JS_ToFloat64(ctx, &cx, argv[0]) || JS_ToFloat64(ctx, &cy, argv[1]) || JS_ToFloat64(ctx, &r, argv[2]))
     return JS_EXCEPTION;
@@ -427,8 +436,8 @@ FUNC(Circle) {
 FUNC(Ellipse) {
   double cx, cy, rx, ry;
 
-  if(argc != 4)
-    return JS_EXCEPTION;
+  if(argc < 4)
+    return JS_ThrowInternalError(ctx, "need 4 arguments");
 
   if(JS_ToFloat64(ctx, &cx, argv[0]) || JS_ToFloat64(ctx, &cy, argv[1]) || JS_ToFloat64(ctx, &rx, argv[2]) || JS_ToFloat64(ctx, &ry, argv[3]))
     return JS_EXCEPTION;
@@ -440,8 +449,8 @@ FUNC(Ellipse) {
 FUNC(PathWinding) {
   int dir;
 
-  if(argc != 1)
-    return JS_EXCEPTION;
+  if(argc < 1)
+    return JS_ThrowInternalError(ctx, "need 1 arguments");
 
   if(JS_ToInt32(ctx, &dir, argv[0]))
     return JS_EXCEPTION;
@@ -453,8 +462,8 @@ FUNC(PathWinding) {
 FUNC(MoveTo) {
   double x, y;
 
-  if(argc != 2)
-    return JS_EXCEPTION;
+  if(argc < 2)
+    return JS_ThrowInternalError(ctx, "need 2 arguments");
 
   if(JS_ToFloat64(ctx, &x, argv[0]) || JS_ToFloat64(ctx, &y, argv[1]))
     return JS_EXCEPTION;
@@ -466,8 +475,8 @@ FUNC(MoveTo) {
 FUNC(LineTo) {
   double x, y;
 
-  if(argc != 2)
-    return JS_EXCEPTION;
+  if(argc < 2)
+    return JS_ThrowInternalError(ctx, "need 2 arguments");
 
   if(JS_ToFloat64(ctx, &x, argv[0]) || JS_ToFloat64(ctx, &y, argv[1]))
     return JS_EXCEPTION;
@@ -484,8 +493,8 @@ FUNC(ClosePath) {
 FUNC(FontBlur) {
   double blur;
 
-  if(argc != 1)
-    return JS_EXCEPTION;
+  if(argc < 1)
+    return JS_ThrowInternalError(ctx, "need 1 arguments");
 
   if(JS_ToFloat64(ctx, &blur, argv[0]))
     return JS_EXCEPTION;
@@ -502,8 +511,8 @@ FUNC(BeginPath) {
 FUNC(RoundedRect) {
   double x, y, w, h, r;
 
-  if(argc != 5)
-    return JS_EXCEPTION;
+  if(argc < 5)
+    return JS_ThrowInternalError(ctx, "need 5 arguments");
 
   if(JS_ToFloat64(ctx, &x, argv[0]) || JS_ToFloat64(ctx, &y, argv[1]) || JS_ToFloat64(ctx, &w, argv[2]) || JS_ToFloat64(ctx, &h, argv[3]) || JS_ToFloat64(ctx, &r, argv[4]))
     return JS_EXCEPTION;
@@ -515,6 +524,9 @@ FUNC(RoundedRect) {
 FUNC(Scissor) {
   double x, y, w, h;
 
+  if(argc < 4)
+    return JS_ThrowInternalError(ctx, "need 4 arguments");
+
   if(JS_ToFloat64(ctx, &x, argv[0]) || JS_ToFloat64(ctx, &y, argv[1]) || JS_ToFloat64(ctx, &w, argv[2]) || JS_ToFloat64(ctx, &h, argv[3]))
     return JS_EXCEPTION;
 
@@ -524,6 +536,9 @@ FUNC(Scissor) {
 
 FUNC(IntersectScissor) {
   double x, y, w, h;
+
+  if(argc < 4)
+    return JS_ThrowInternalError(ctx, "need 4 arguments");
 
   if(JS_ToFloat64(ctx, &x, argv[0]) || JS_ToFloat64(ctx, &y, argv[1]) || JS_ToFloat64(ctx, &w, argv[2]) || JS_ToFloat64(ctx, &h, argv[3]))
     return JS_EXCEPTION;
@@ -540,8 +555,8 @@ FUNC(ResetScissor) {
 FUNC(FillPaint) {
   NVGpaint* paint;
 
-  if(argc != 1)
-    return JS_EXCEPTION;
+  if(argc < 1)
+    return JS_ThrowInternalError(ctx, "need 1 arguments");
 
   if(!(paint = JS_GetOpaque2(ctx, argv[0], js_nanovg_paint_class_id)))
     return JS_EXCEPTION;
@@ -598,8 +613,8 @@ FUNC(GlobalAlpha) {
 FUNC(StrokeColor) {
   NVGcolor color;
 
-  if(argc != 1)
-    return JS_EXCEPTION;
+  if(argc < 1)
+    return JS_ThrowInternalError(ctx, "need 1 arguments");
 
   if(js_nanovg_tocolor(ctx, &color, argv[0]))
     return JS_EXCEPTION;
@@ -614,11 +629,12 @@ FUNC(Stroke) {
 }
 
 FUNC(StrokePaint) {
-  if(argc != 1)
-    return JS_EXCEPTION;
+  NVGpaint* paint;
 
-  NVGpaint* paint = JS_GetOpaque(argv[0], js_nanovg_paint_class_id);
-  if(!paint)
+  if(argc < 1)
+    return JS_ThrowInternalError(ctx, "need 1 arguments");
+
+  if(!(paint = JS_GetOpaque(argv[0], js_nanovg_paint_class_id)))
     return JS_EXCEPTION;
 
   nvgStrokePaint(g_NVGcontext, *paint);
@@ -626,10 +642,11 @@ FUNC(StrokePaint) {
 }
 
 FUNC(FillColor) {
-  if(argc != 1)
-    return JS_EXCEPTION;
-
   NVGcolor color;
+
+  if(argc < 1)
+    return JS_ThrowInternalError(ctx, "need 1 arguments");
+
   if(js_nanovg_tocolor(ctx, &color, argv[0]))
     return JS_EXCEPTION;
 
@@ -641,8 +658,8 @@ FUNC(LinearGradient) {
   double sx, sy, ex, ey;
   NVGcolor icol, ocol;
 
-  if(argc != 6)
-    return JS_EXCEPTION;
+  if(argc < 6)
+    return JS_ThrowInternalError(ctx, "need 6 arguments");
 
   if(JS_ToFloat64(ctx, &sx, argv[0]) || JS_ToFloat64(ctx, &sy, argv[1]) || JS_ToFloat64(ctx, &ex, argv[2]) || JS_ToFloat64(ctx, &ey, argv[3]) || js_nanovg_tocolor(ctx, &icol, argv[4]) || js_nanovg_tocolor(ctx, &ocol, argv[5]))
     return JS_EXCEPTION;
@@ -658,8 +675,8 @@ FUNC(BoxGradient) {
   double x, y, w, h, r, f;
   NVGcolor icol, ocol;
 
-  if(argc != 8)
-    return JS_EXCEPTION;
+  if(argc < 8)
+    return JS_ThrowInternalError(ctx, "need 8 arguments");
 
   if(JS_ToFloat64(ctx, &x, argv[0]) || JS_ToFloat64(ctx, &y, argv[1]) || JS_ToFloat64(ctx, &w, argv[2]) || JS_ToFloat64(ctx, &h, argv[3]) || JS_ToFloat64(ctx, &r, argv[4]) || JS_ToFloat64(ctx, &f, argv[5]) || js_nanovg_tocolor(ctx, &icol, argv[6]) || js_nanovg_tocolor(ctx, &ocol, argv[7]))
     return JS_EXCEPTION;
@@ -674,8 +691,8 @@ FUNC(RadialGradient) {
   double cx, cy, inr, outr;
   NVGcolor icol, ocol;
 
-  if(argc != 6)
-    return JS_EXCEPTION;
+  if(argc < 6)
+    return JS_ThrowInternalError(ctx, "need 6 arguments");
 
   if(JS_ToFloat64(ctx, &cx, argv[0]) || JS_ToFloat64(ctx, &cy, argv[1]) || JS_ToFloat64(ctx, &inr, argv[2]) || JS_ToFloat64(ctx, &outr, argv[3]) || js_nanovg_tocolor(ctx, &icol, argv[4]) || js_nanovg_tocolor(ctx, &ocol, argv[5]))
     return JS_EXCEPTION;
@@ -690,8 +707,8 @@ FUNC(TextBounds) {
   double x, y;
   const char* str;
 
-  if(argc != 3)
-    return JS_EXCEPTION;
+  if(argc < 3)
+    return JS_ThrowInternalError(ctx, "need 3 arguments");
 
   if(JS_ToFloat64(ctx, &x, argv[0]) || JS_ToFloat64(ctx, &y, argv[1]))
     return JS_EXCEPTION;
@@ -710,8 +727,8 @@ FUNC(TextBounds2) {
   double x, y;
   const char* str;
 
-  if(argc != 3)
-    return JS_EXCEPTION;
+  if(argc < 3)
+    return JS_ThrowInternalError(ctx, "need 3 arguments");
 
   if(JS_ToFloat64(ctx, &x, argv[0]) || JS_ToFloat64(ctx, &y, argv[1]))
     return JS_EXCEPTION;
@@ -733,8 +750,8 @@ FUNC(TextBounds2) {
 FUNC(FontSize) {
   double size;
 
-  if(argc != 1)
-    return JS_EXCEPTION;
+  if(argc < 1)
+    return JS_ThrowInternalError(ctx, "need 1 arguments");
 
   if(JS_ToFloat64(ctx, &size, argv[0]))
     return JS_EXCEPTION;
@@ -746,8 +763,8 @@ FUNC(FontSize) {
 FUNC(FontFace) {
   const char* str;
 
-  if(argc != 1)
-    return JS_EXCEPTION;
+  if(argc < 1)
+    return JS_ThrowInternalError(ctx, "need 1 arguments");
 
   if(!(str = JS_ToCString(ctx, argv[0])))
     return JS_EXCEPTION;
@@ -760,8 +777,8 @@ FUNC(FontFace) {
 FUNC(TextAlign) {
   int align;
 
-  if(argc != 1)
-    return JS_EXCEPTION;
+  if(argc < 1)
+    return JS_ThrowInternalError(ctx, "need 1 arguments");
 
   if(JS_ToInt32(ctx, &align, argv[0]))
     return JS_EXCEPTION;
@@ -774,8 +791,8 @@ FUNC(Text) {
   int x, y;
   const char* str;
 
-  if(argc != 3)
-    return JS_EXCEPTION;
+  if(argc < 3)
+    return JS_ThrowInternalError(ctx, "need 3 arguments");
 
   if(JS_ToInt32(ctx, &x, argv[0]) || JS_ToInt32(ctx, &y, argv[1]))
     return JS_EXCEPTION;
@@ -905,6 +922,9 @@ FUNC(HSLA) {
 FUNC(StrokeWidth) {
   double width;
 
+  if(argc < 1)
+    return JS_ThrowInternalError(ctx, "need 1 arguments");
+
   if(JS_ToFloat64(ctx, &width, argv[0]))
     return JS_EXCEPTION;
 
@@ -913,8 +933,14 @@ FUNC(StrokeWidth) {
 }
 
 FUNC(CreateImage) {
-  const char* file = JS_ToCString(ctx, argv[0]);
+  const char* file;
   int32_t flags = 0;
+
+  if(argc < 2)
+    return JS_ThrowInternalError(ctx, "need 2 arguments");
+
+  if(!(file = JS_ToCString(ctx, argv[0])))
+    return JS_EXCEPTION;
 
   if(JS_ToInt32(ctx, &flags, argv[1]))
     return JS_EXCEPTION;
@@ -923,10 +949,12 @@ FUNC(CreateImage) {
 }
 
 FUNC(CreateImageRGBA) {
-  const char* file = JS_ToCString(ctx, argv[0]);
   int32_t width, height, flags;
   uint8_t* ptr;
   size_t len;
+
+  if(argc < 4)
+    return JS_ThrowInternalError(ctx, "need 4 arguments");
 
   if(JS_ToInt32(ctx, &width, argv[0]) || JS_ToInt32(ctx, &height, argv[1]) || JS_ToInt32(ctx, &flags, argv[2]))
     return JS_EXCEPTION;
@@ -941,6 +969,9 @@ FUNC(UpdateImage) {
   int32_t image;
   size_t len;
   uint8_t* ptr;
+
+  if(argc < 2)
+    return JS_ThrowInternalError(ctx, "need 2 arguments");
 
   if(JS_ToInt32(ctx, &image, argv[0]))
     return JS_EXCEPTION;
@@ -958,6 +989,9 @@ FUNC(ImageSize) {
   int width, height;
   JSValue ret;
 
+  if(argc < 1)
+    return JS_ThrowInternalError(ctx, "need 1 arguments");
+
   if(JS_ToInt32(ctx, &id, argv[0]))
     return JS_EXCEPTION;
 
@@ -971,6 +1005,9 @@ FUNC(ImageSize) {
 
 FUNC(DeleteImage) {
   int32_t id = 0;
+
+  if(argc < 1)
+    return JS_ThrowInternalError(ctx, "need 1 arguments");
 
   if(JS_ToInt32(ctx, &id, argv[0]))
     return JS_EXCEPTION;
@@ -990,6 +1027,9 @@ FUNC(Transform) {
   float t[6];
   int n;
 
+  if(argc < 1)
+    return JS_ThrowInternalError(ctx, "need 1/6 arguments");
+
   while((n = js_nanovg_matrix_arguments(ctx, t, argc, argv))) {
     nvgTransform(g_NVGcontext, t[0], t[1], t[2], t[3], t[4], t[5]);
 
@@ -1003,6 +1043,9 @@ FUNC(Transform) {
 FUNC(Translate) {
   double x, y;
 
+  if(argc < 2)
+    return JS_ThrowInternalError(ctx, "need 2 arguments");
+
   if(JS_ToFloat64(ctx, &x, argv[0]) || JS_ToFloat64(ctx, &y, argv[1]))
     return JS_EXCEPTION;
 
@@ -1013,6 +1056,9 @@ FUNC(Translate) {
 
 FUNC(Rotate) {
   double angle;
+
+  if(argc < 1)
+    return JS_ThrowInternalError(ctx, "need 1 arguments");
 
   if(JS_ToFloat64(ctx, &angle, argv[0]))
     return JS_EXCEPTION;
@@ -1025,6 +1071,9 @@ FUNC(Rotate) {
 FUNC(SkewX) {
   double angle;
 
+  if(argc < 1)
+    return JS_ThrowInternalError(ctx, "need 1 arguments");
+
   if(JS_ToFloat64(ctx, &angle, argv[0]))
     return JS_EXCEPTION;
 
@@ -1036,6 +1085,9 @@ FUNC(SkewX) {
 FUNC(SkewY) {
   double angle;
 
+  if(argc < 1)
+    return JS_ThrowInternalError(ctx, "need 1 arguments");
+
   if(JS_ToFloat64(ctx, &angle, argv[0]))
     return JS_EXCEPTION;
 
@@ -1046,6 +1098,9 @@ FUNC(SkewY) {
 
 FUNC(Scale) {
   double x, y;
+
+  if(argc < 2)
+    return JS_ThrowInternalError(ctx, "need 2 arguments");
 
   if(JS_ToFloat64(ctx, &x, argv[0]) || JS_ToFloat64(ctx, &y, argv[1]))
     return JS_EXCEPTION;
@@ -1059,8 +1114,11 @@ FUNC(CurrentTransform) {
   float t[6];
 
   nvgCurrentTransform(g_NVGcontext, t);
-  js_nanovg_matrix_copy(ctx, argv[0], t);
 
+  if(argc == 0)
+    return js_nanovg_matrix_new(ctx, t);
+
+  js_nanovg_matrix_copy(ctx, argv[0], t);
   return JS_UNDEFINED;
 }
 
@@ -1084,6 +1142,9 @@ FUNC(TransformTranslate) {
   if(argc >= 3 && JS_IsObject(argv[0]))
     i++;
 
+  if(argc < 2 + i)
+    return JS_ThrowInternalError(ctx, "need %d arguments", 2 + i);
+
   if(JS_ToInt32(ctx, &x, argv[i]) || JS_ToInt32(ctx, &y, argv[i + 1]))
     return JS_EXCEPTION;
 
@@ -1103,6 +1164,9 @@ FUNC(TransformScale) {
 
   if(argc >= 3 && JS_IsObject(argv[0]))
     i++;
+
+  if(argc < 2 + i)
+    return JS_ThrowInternalError(ctx, "need %d arguments", 2 + i);
 
   if(JS_ToFloat64(ctx, &x, argv[i]) || JS_ToFloat64(ctx, &y, argv[i + 1]))
     return JS_EXCEPTION;
@@ -1124,6 +1188,9 @@ FUNC(TransformRotate) {
   if(argc >= 2 && JS_IsObject(argv[0]))
     i++;
 
+  if(argc < 1 + i)
+    return JS_ThrowInternalError(ctx, "need %d arguments", 1 + i);
+
   if(JS_ToFloat64(ctx, &angle, argv[i]))
     return JS_EXCEPTION;
 
@@ -1139,6 +1206,9 @@ FUNC(TransformRotate) {
 FUNC(TransformMultiply) {
   float dst[6], src[6];
 
+  if(argc < 2)
+    return JS_ThrowInternalError(ctx, "need 2 arguments");
+
   js_nanovg_tomatrix(ctx, dst, argv[0]);
 
   for(int n, i = 1; i < argc && (n = js_nanovg_matrix_arguments(ctx, src, argc - i, argv + i)); i += n) {
@@ -1151,6 +1221,9 @@ FUNC(TransformMultiply) {
 
 FUNC(TransformPremultiply) {
   float dst[6], src[6];
+
+  if(argc < 2)
+    return JS_ThrowInternalError(ctx, "need 2 arguments");
 
   js_nanovg_tomatrix(ctx, dst, argv[0]);
 
@@ -1166,6 +1239,9 @@ FUNC(TransformInverse) {
   float dst[6], src[6];
   int i = 0;
 
+  if(argc < 1)
+    return JS_ThrowInternalError(ctx, "need 1 arguments");
+
   if(argc > 1)
     i++;
 
@@ -1176,6 +1252,7 @@ FUNC(TransformInverse) {
   if(ret) {
     if(argc == 1)
       return js_nanovg_matrix_new(ctx, dst);
+
     js_nanovg_matrix_copy(ctx, argv[0], dst);
   }
 
@@ -1185,17 +1262,23 @@ FUNC(TransformInverse) {
 FUNC(TransformPoint) {
   float m[6], dst[2], src[2];
 
-  js_get_vector(ctx, argv[0], dst);
+  if(argc < 3)
+    return JS_ThrowInternalError(ctx, "need 3 arguments");
+
+  js_nanovg_tovector(ctx, dst, argv[0]);
   js_nanovg_tomatrix(ctx, m, argv[1]);
-  js_argument_vector(ctx, src, argc - 2, argv + 2);
+  js_nanovg_vector_arguments(ctx, src, argc - 2, argv + 2);
   nvgTransformPoint(&dst[0], &dst[1], m, src[0], src[1]);
-  js_set_vector(ctx, argv[0], dst);
+  js_nanovg_vector_copy(ctx, argv[0], dst);
 
   return JS_UNDEFINED;
 }
 
 FUNC(DegToRad) {
   double arg;
+
+  if(argc < 1)
+    return JS_ThrowInternalError(ctx, "need 1 arguments");
 
   if(JS_ToFloat64(ctx, &arg, argv[0]))
     return JS_EXCEPTION;
@@ -1205,6 +1288,9 @@ FUNC(DegToRad) {
 
 FUNC(RadToDeg) {
   double arg;
+
+  if(argc < 1)
+    return JS_ThrowInternalError(ctx, "need 1 arguments");
 
   if(JS_ToFloat64(ctx, &arg, argv[0]))
     return JS_EXCEPTION;
@@ -1217,6 +1303,9 @@ FUNC(ImagePattern) {
   double angle, alpha;
   int32_t image;
   NVGpaint paint, *p;
+
+  if(argc < 7)
+    return JS_ThrowInternalError(ctx, "need 7 arguments");
 
   if(JS_ToFloat64(ctx, &ox, argv[0]) || JS_ToFloat64(ctx, &oy, argv[1]) || JS_ToFloat64(ctx, &ex, argv[2]) || JS_ToFloat64(ctx, &ey, argv[3]) || JS_ToFloat64(ctx, &angle, argv[4]) || JS_ToInt32(ctx, &image, argv[5]) || JS_ToFloat64(ctx, &alpha, argv[6]))
     return JS_EXCEPTION;
