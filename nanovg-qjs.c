@@ -21,9 +21,9 @@ static JSValue js_float32array_ctor = JS_UNDEFINED, js_float32array_proto = JS_U
 static JSValue color_proto = JS_UNDEFINED;
 
 static int
-js_get_NVGcolor(JSContext* ctx, JSValueConst this_obj, NVGcolor* color) {
+js_nanovg_tocolor(JSContext* ctx, NVGcolor* color, JSValueConst value) {
   size_t offset = 0, length = 0, bytes_per_element = 0;
-  JSValue buf = JS_GetTypedArrayBuffer(ctx, this_obj, &offset, &length, &bytes_per_element);
+  JSValue buf = JS_GetTypedArrayBuffer(ctx, value, &offset, &length, &bytes_per_element);
 
   if(!JS_IsException(buf) && bytes_per_element == sizeof(float) && length >= 4) {
     size_t len;
@@ -36,33 +36,38 @@ js_get_NVGcolor(JSContext* ctx, JSValueConst this_obj, NVGcolor* color) {
     }
   }
 
-  JSValue iter = js_iterator_new(ctx, this_obj);
+  JSValue iter = js_iterator_new(ctx, value);
+  int ret = 0;
 
   if(JS_IsObject(iter)) {
     for(int i = 0; i < 4; i++) {
       BOOL done = FALSE;
       JSValue val = js_iterator_next(ctx, iter, &done);
+
       if(!done)
-        js_tofloat32(ctx, &color->rgba[i], val);
+        ret |= js_tofloat32(ctx, &color->rgba[i], val);
+
       JS_FreeValue(ctx, val);
 
       if(done) {
-        if(i < 3)
-          return 1;
+        if(i < 3) {
+          ret = 1;
+          break;
+        }
 
         color->a = 1.0;
       }
     }
+
+    JS_FreeValue(ctx, iter);
+  } else if(JS_IsObject(value)) {
+    ret |= js_get_property_str_float32(ctx, value, "r", &color->r);
+    ret |= js_get_property_str_float32(ctx, value, "g", &color->g);
+    ret |= js_get_property_str_float32(ctx, value, "b", &color->b);
+    ret |= js_get_property_str_float32(ctx, value, "a", &color->a);
   }
 
-  JS_FreeValue(ctx, iter);
-
-  /*ret = ret || js_get_property_str_float32(ctx, this_obj, "r", &color->r);
-    ret = ret || js_get_property_str_float32(ctx, this_obj, "g", &color->g);
-    ret = ret || js_get_property_str_float32(ctx, this_obj, "b", &color->b);
-    ret = ret || js_get_property_str_float32(ctx, this_obj, "a", &color->a);*/
-
-  return 0;
+  return ret;
 }
 
 static JSValue
@@ -537,7 +542,7 @@ FUNC(StrokeColor) {
   if(argc != 1)
     return JS_EXCEPTION;
 
-  if(js_get_NVGcolor(ctx, argv[0], &color))
+  if(js_nanovg_tocolor(ctx, &color, argv[0]))
     return JS_EXCEPTION;
 
   nvgStrokeColor(g_NVGcontext, color);
@@ -566,7 +571,7 @@ FUNC(FillColor) {
     return JS_EXCEPTION;
 
   NVGcolor color;
-  if(js_get_NVGcolor(ctx, argv[0], &color))
+  if(js_nanovg_tocolor(ctx, &color, argv[0]))
     return JS_EXCEPTION;
 
   nvgFillColor(g_NVGcontext, color);
@@ -580,7 +585,7 @@ FUNC(LinearGradient) {
   if(argc != 6)
     return JS_EXCEPTION;
 
-  if(JS_ToFloat64(ctx, &sx, argv[0]) || JS_ToFloat64(ctx, &sy, argv[1]) || JS_ToFloat64(ctx, &ex, argv[2]) || JS_ToFloat64(ctx, &ey, argv[3]) || js_get_NVGcolor(ctx, argv[4], &icol) || js_get_NVGcolor(ctx, argv[5], &ocol))
+  if(JS_ToFloat64(ctx, &sx, argv[0]) || JS_ToFloat64(ctx, &sy, argv[1]) || JS_ToFloat64(ctx, &ex, argv[2]) || JS_ToFloat64(ctx, &ey, argv[3]) || js_nanovg_tocolor(ctx, &icol, argv[4]) || js_nanovg_tocolor(ctx, &ocol, argv[5]))
     return JS_EXCEPTION;
 
   NVGpaint paint = nvgLinearGradient(g_NVGcontext, sx, sy, ex, ey, icol, ocol);
@@ -597,7 +602,7 @@ FUNC(BoxGradient) {
   if(argc != 8)
     return JS_EXCEPTION;
 
-  if(JS_ToFloat64(ctx, &x, argv[0]) || JS_ToFloat64(ctx, &y, argv[1]) || JS_ToFloat64(ctx, &w, argv[2]) || JS_ToFloat64(ctx, &h, argv[3]) || JS_ToFloat64(ctx, &r, argv[4]) || JS_ToFloat64(ctx, &f, argv[5]) || js_get_NVGcolor(ctx, argv[6], &icol) || js_get_NVGcolor(ctx, argv[7], &ocol))
+  if(JS_ToFloat64(ctx, &x, argv[0]) || JS_ToFloat64(ctx, &y, argv[1]) || JS_ToFloat64(ctx, &w, argv[2]) || JS_ToFloat64(ctx, &h, argv[3]) || JS_ToFloat64(ctx, &r, argv[4]) || JS_ToFloat64(ctx, &f, argv[5]) || js_nanovg_tocolor(ctx, &icol, argv[6]) || js_nanovg_tocolor(ctx, &ocol, argv[7]))
     return JS_EXCEPTION;
 
   NVGpaint paint = nvgBoxGradient(g_NVGcontext, x, y, w, h, r, f, icol, ocol);
@@ -613,7 +618,7 @@ FUNC(RadialGradient) {
   if(argc != 6)
     return JS_EXCEPTION;
 
-  if(JS_ToFloat64(ctx, &cx, argv[0]) || JS_ToFloat64(ctx, &cy, argv[1]) || JS_ToFloat64(ctx, &inr, argv[2]) || JS_ToFloat64(ctx, &outr, argv[3]) || js_get_NVGcolor(ctx, argv[4], &icol) || js_get_NVGcolor(ctx, argv[5], &ocol))
+  if(JS_ToFloat64(ctx, &cx, argv[0]) || JS_ToFloat64(ctx, &cy, argv[1]) || JS_ToFloat64(ctx, &inr, argv[2]) || JS_ToFloat64(ctx, &outr, argv[3]) || js_nanovg_tocolor(ctx, &icol, argv[4]) || js_nanovg_tocolor(ctx, &ocol, argv[5]))
     return JS_EXCEPTION;
 
   NVGpaint paint = nvgRadialGradient(g_NVGcontext, cx, cy, inr, outr, icol, ocol);
