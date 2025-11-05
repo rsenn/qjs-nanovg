@@ -101,7 +101,9 @@ static const JSCFunctionListEntry js_nanovg_color_methods[] = {
 };
 
 static JSValue
-js_nanovg_matrix_new(JSContext* ctx, float matrix[6]) {
+js_nanovg_matrix_new(JSContext* ctx) {
+  float matrix[6] /* = {.0f, .0f, .0f, .0f, .0f, .0f}*/;
+  nvgTransformIdentity(matrix);
   JSValue buf = JS_NewArrayBufferCopy(ctx, (const void*)matrix, sizeof(*matrix));
   JSValue obj = JS_CallConstructor(ctx, js_float32array_ctor, 1, &buf);
   JS_FreeValue(ctx, buf);
