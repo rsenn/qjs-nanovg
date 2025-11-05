@@ -10,7 +10,6 @@
 #include "js-utils.h"
 
 #include <assert.h>
-#include <cutils.h>
 
 static const char* const transform_obj_props[] = {"a", "b", "c", "d", "e", "f"};
 static const int transform_arg_index[] = {0, 1, 2, 3, 4, 5};
@@ -24,29 +23,40 @@ static JSValue color_proto = JS_UNDEFINED;
 static int
 js_get_NVGcolor(JSContext* ctx, JSValueConst this_obj, NVGcolor* color) {
   int ret = 0;
-  ret = ret || js_get_property_str_float32(ctx, this_obj, "r", &color->r);
-  ret = ret || js_get_property_str_float32(ctx, this_obj, "g", &color->g);
-  ret = ret || js_get_property_str_float32(ctx, this_obj, "b", &color->b);
-  ret = ret || js_get_property_str_float32(ctx, this_obj, "a", &color->a);
+
+  JSValue iter = js_iterator_new(ctx, this_obj);
+
+  if(JS_IsObject(iter)) {
+    for(int i = 0; i < 4; i++) {
+      BOOL done = FALSE;
+      JSValue val = js_iterator_next(ctx, iter, &done);
+      if(!done)
+        js_tofloat32(ctx, &color->rgba[i], val);
+      JS_FreeValue(ctx, val);
+
+      if(done)
+        return 1;
+    }
+  }
+
+  JS_FreeValue(ctx, iter);
+
+  /*ret = ret || js_get_property_str_float32(ctx, this_obj, "r", &color->r);
+    ret = ret || js_get_property_str_float32(ctx, this_obj, "g", &color->g);
+    ret = ret || js_get_property_str_float32(ctx, this_obj, "b", &color->b);
+    ret = ret || js_get_property_str_float32(ctx, this_obj, "a", &color->a);*/
+
   return ret;
 }
 
 static JSValue
-js_new_NVGcolor(JSContext* ctx, NVGcolor color) {
+js_nanovg_color_new(JSContext* ctx, NVGcolor color) {
   JSValue buf = JS_NewArrayBufferCopy(ctx, (const void*)&color, sizeof(color));
   JSValue obj = JS_CallConstructor(ctx, js_float32array_ctor, 1, &buf);
   JS_FreeValue(ctx, buf);
   JS_SetPrototype(ctx, obj, color_proto);
 
   return obj;
-  /*JSValue obj = JS_NewObject(ctx);
-
-  JS_SetPropertyStr(ctx, obj, "r", JS_NewFloat64(ctx, color.r));
-  JS_SetPropertyStr(ctx, obj, "g", JS_NewFloat64(ctx, color.g));
-  JS_SetPropertyStr(ctx, obj, "b", JS_NewFloat64(ctx, color.b));
-  JS_SetPropertyStr(ctx, obj, "a", JS_NewFloat64(ctx, color.a));
-
-  return obj;*/
 }
 
 static JSValue
@@ -59,6 +69,14 @@ js_nanovg_color_set(JSContext* ctx, JSValueConst this_val, JSValueConst value, i
   JS_SetPropertyUint32(ctx, this_val, magic, JS_DupValue(ctx, value));
   return JS_UNDEFINED;
 }
+
+static const JSCFunctionListEntry js_nanovg_color_methods[] = {
+    JS_CGETSET_MAGIC_DEF("r", js_nanovg_color_get, js_nanovg_color_set, 0),
+    JS_CGETSET_MAGIC_DEF("g", js_nanovg_color_get, js_nanovg_color_set, 1),
+    JS_CGETSET_MAGIC_DEF("b", js_nanovg_color_get, js_nanovg_color_set, 2),
+    JS_CGETSET_MAGIC_DEF("a", js_nanovg_color_get, js_nanovg_color_set, 3),
+    JS_PROP_STRING_DEF("[Symbol.toStringTag]", "nvgColor", JS_PROP_CONFIGURABLE),
+};
 
 static void
 js_nanovg_paint_finalizer(JSRuntime* rt, JSValue val) {
@@ -698,7 +716,7 @@ FUNC(RGB) {
   if(JS_ToInt32(ctx, &r, argv[0]) || JS_ToInt32(ctx, &g, argv[1]) || JS_ToInt32(ctx, &b, argv[2]))
     return JS_EXCEPTION;
 
-  return js_new_NVGcolor(ctx, nvgRGB(r, g, b));
+  return js_nanovg_color_new(ctx, nvgRGB(r, g, b));
 }
 
 FUNC(RGBf) {
@@ -707,7 +725,7 @@ FUNC(RGBf) {
   if(JS_ToFloat64(ctx, &r, argv[0]) || JS_ToFloat64(ctx, &g, argv[1]) || JS_ToFloat64(ctx, &b, argv[2]))
     return JS_EXCEPTION;
 
-  return js_new_NVGcolor(ctx, nvgRGBf(r, g, b));
+  return js_nanovg_color_new(ctx, nvgRGBf(r, g, b));
 }
 
 FUNC(RGBA) {
@@ -716,7 +734,7 @@ FUNC(RGBA) {
   if(JS_ToInt32(ctx, &r, argv[0]) || JS_ToInt32(ctx, &g, argv[1]) || JS_ToInt32(ctx, &b, argv[2]) || JS_ToInt32(ctx, &a, argv[3]))
     return JS_EXCEPTION;
 
-  return js_new_NVGcolor(ctx, nvgRGBA(r, g, b, a));
+  return js_nanovg_color_new(ctx, nvgRGBA(r, g, b, a));
 }
 
 FUNC(RGBAf) {
@@ -725,7 +743,7 @@ FUNC(RGBAf) {
   if(JS_ToFloat64(ctx, &r, argv[0]) || JS_ToFloat64(ctx, &g, argv[1]) || JS_ToFloat64(ctx, &b, argv[2]) || JS_ToFloat64(ctx, &a, argv[3]))
     return JS_EXCEPTION;
 
-  return js_new_NVGcolor(ctx, nvgRGBAf(r, g, b, a));
+  return js_nanovg_color_new(ctx, nvgRGBAf(r, g, b, a));
 }
 
 FUNC(HSL) {
@@ -734,7 +752,7 @@ FUNC(HSL) {
   if(JS_ToInt32(ctx, &h, argv[0]) || JS_ToInt32(ctx, &s, argv[1]) || JS_ToInt32(ctx, &l, argv[2]))
     return JS_EXCEPTION;
 
-  return js_new_NVGcolor(ctx, nvgHSL(h, s, l));
+  return js_nanovg_color_new(ctx, nvgHSL(h, s, l));
 }
 
 FUNC(HSLA) {
@@ -743,7 +761,7 @@ FUNC(HSLA) {
   if(JS_ToInt32(ctx, &h, argv[0]) || JS_ToInt32(ctx, &s, argv[1]) || JS_ToInt32(ctx, &l, argv[2]) || JS_ToInt32(ctx, &a, argv[2]))
     return JS_EXCEPTION;
 
-  return js_new_NVGcolor(ctx, nvgHSLA(h, s, l, a));
+  return js_nanovg_color_new(ctx, nvgHSLA(h, s, l, a));
 }
 
 FUNC(StrokeWidth) {
@@ -1097,14 +1115,6 @@ FUNC(IsNextFillClicked)
 
 #define _JS_CFUNC_DEF(fn, length) JS_CFUNC_DEF(#fn, length, js_nanovg_##fn)
 #define _JS_NANOVG_FLAG(name) JS_PROP_INT32_DEF(#name, NVG_##name, JS_PROP_CONFIGURABLE)
-
-static const JSCFunctionListEntry js_nanovg_color_methods[] = {
-    JS_CGETSET_MAGIC_DEF("r", js_nanovg_color_get, js_nanovg_color_set, 0),
-    JS_CGETSET_MAGIC_DEF("g", js_nanovg_color_get, js_nanovg_color_set, 1),
-    JS_CGETSET_MAGIC_DEF("b", js_nanovg_color_get, js_nanovg_color_set, 2),
-    JS_CGETSET_MAGIC_DEF("a", js_nanovg_color_get, js_nanovg_color_set, 3),
-    JS_PROP_STRING_DEF("[Symbol.toStringTag]", "nvgColor", JS_PROP_CONFIGURABLE),
-};
 
 static const JSCFunctionListEntry js_nanovg_funcs[] = {
 #ifdef NANOVG_GL2
