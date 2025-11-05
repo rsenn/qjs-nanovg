@@ -11,16 +11,15 @@
 
 #include <assert.h>
 #include <cutils.h>
-#include <quickjs.h>
-#include <quickjs-libc.h>
-#include <stdlib.h>
-#include <string.h>
 
 static const char* const transform_obj_props[] = {"a", "b", "c", "d", "e", "f"};
 static const int transform_arg_index[] = {0, 1, 2, 3, 4, 5};
 
 static NVGcontext* g_NVGcontext;
-static JSClassID js_nanovg_paint_class_id;
+static JSClassID js_nanovg_color_class_id, js_nanovg_paint_class_id;
+
+static JSValue js_float32array_ctor = JS_UNDEFINED, js_float32array_proto = JS_UNDEFINED;
+static JSValue color_proto = JS_UNDEFINED;
 
 static int
 js_get_NVGcolor(JSContext* ctx, JSValueConst this_obj, NVGcolor* color) {
@@ -42,6 +41,17 @@ js_new_NVGcolor(JSContext* ctx, NVGcolor color) {
   JS_SetPropertyStr(ctx, obj, "a", JS_NewFloat64(ctx, color.a));
 
   return obj;
+}
+
+static JSValue
+js_nanovg_color_get(JSContext* ctx, JSValueConst this_val, int magic) {
+  return JS_GetPropertyUint32(ctx, this_val, magic);
+}
+
+static JSValue
+js_nanovg_color_set(JSContext* ctx, JSValueConst this_val, JSValueConst value, int magic) {
+  JS_SetPropertyUint32(ctx, this_val, magic, JS_DupValue(ctx, value));
+  return JS_UNDEFINED;
 }
 
 static void
@@ -1082,6 +1092,14 @@ FUNC(IsNextFillClicked)
 #define _JS_CFUNC_DEF(fn, length) JS_CFUNC_DEF(#fn, length, js_nanovg_##fn)
 #define _JS_NANOVG_FLAG(name) JS_PROP_INT32_DEF(#name, NVG_##name, JS_PROP_CONFIGURABLE)
 
+static const JSCFunctionListEntry js_nanovg_color_methods[] = {
+    JS_CGETSET_MAGIC_DEF("r", js_nanovg_color_get, js_nanovg_color_set, 0),
+    JS_CGETSET_MAGIC_DEF("g", js_nanovg_color_get, js_nanovg_color_set, 1),
+    JS_CGETSET_MAGIC_DEF("b", js_nanovg_color_get, js_nanovg_color_set, 2),
+    JS_CGETSET_MAGIC_DEF("a", js_nanovg_color_get, js_nanovg_color_set, 3),
+    JS_PROP_STRING_DEF("[Symbol.toStringTag]", "nvgColor", JS_PROP_CONFIGURABLE),
+};
+
 static const JSCFunctionListEntry js_nanovg_funcs[] = {
 #ifdef NANOVG_GL2
     _JS_CFUNC_DEF(CreateGL2, 1),
@@ -1215,6 +1233,18 @@ static const JSCFunctionListEntry js_nanovg_funcs[] = {
 static int
 js_nanovg_init(JSContext* ctx, JSModuleDef* m) {
   JSValue paint_proto, paint_class;
+
+  JSValue global = JS_GetGlobalObject(ctx);
+  js_float32array_ctor = JS_GetPropertyStr(ctx, global, "Float32Array");
+  js_float32array_proto = JS_GetPropertyStr(ctx, js_float32array_ctor, "prototype");
+  JS_FreeValue(ctx, global);
+
+  JS_NewClassID(&js_nanovg_color_class_id);
+
+  color_proto = JS_NewObjectProto(ctx, js_float32array_proto);
+  JS_SetPropertyFunctionList(ctx, color_proto, js_nanovg_color_methods, countof(js_nanovg_color_methods));
+
+  JS_SetClassProto(ctx, js_nanovg_color_class_id, color_proto);
 
   JS_NewClassID(&js_nanovg_paint_class_id);
   JS_NewClass(JS_GetRuntime(ctx), js_nanovg_paint_class_id, &js_nanovg_paint_class);
