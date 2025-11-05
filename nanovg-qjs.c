@@ -15,10 +15,11 @@ static const char* const transform_obj_props[] = {"a", "b", "c", "d", "e", "f"};
 static const int transform_arg_index[] = {0, 1, 2, 3, 4, 5};
 
 static NVGcontext* g_NVGcontext;
-static JSClassID js_nanovg_color_class_id, js_nanovg_paint_class_id;
+static JSClassID /*js_nanovg_color_class_id,*/ js_nanovg_paint_class_id;
 
 static JSValue js_float32array_ctor = JS_UNDEFINED, js_float32array_proto = JS_UNDEFINED;
-static JSValue color_proto = JS_UNDEFINED;
+static JSValue color_ctor = JS_UNDEFINED, color_proto = JS_UNDEFINED;
+static JSValue matrix_ctor = JS_UNDEFINED, matrix_proto = JS_UNDEFINED;
 
 static int
 js_nanovg_tocolor(JSContext* ctx, NVGcolor* color, JSValueConst value) {
@@ -97,6 +98,37 @@ static const JSCFunctionListEntry js_nanovg_color_methods[] = {
     JS_CGETSET_MAGIC_DEF("b", js_nanovg_color_get, js_nanovg_color_set, 2),
     JS_CGETSET_MAGIC_DEF("a", js_nanovg_color_get, js_nanovg_color_set, 3),
     JS_PROP_STRING_DEF("[Symbol.toStringTag]", "nvgColor", JS_PROP_CONFIGURABLE),
+};
+
+static JSValue
+js_nanovg_matrix_new(JSContext* ctx, float matrix[6]) {
+  JSValue buf = JS_NewArrayBufferCopy(ctx, (const void*)matrix, sizeof(*matrix));
+  JSValue obj = JS_CallConstructor(ctx, js_float32array_ctor, 1, &buf);
+  JS_FreeValue(ctx, buf);
+  JS_SetPrototype(ctx, obj, matrix_proto);
+
+  return obj;
+}
+
+static JSValue
+js_nanovg_matrix_get(JSContext* ctx, JSValueConst this_val, int magic) {
+  return JS_GetPropertyUint32(ctx, this_val, magic);
+}
+
+static JSValue
+js_nanovg_matrix_set(JSContext* ctx, JSValueConst this_val, JSValueConst value, int magic) {
+  JS_SetPropertyUint32(ctx, this_val, magic, JS_DupValue(ctx, value));
+  return JS_UNDEFINED;
+}
+
+static const JSCFunctionListEntry js_nanovg_matrix_methods[] = {
+    JS_CGETSET_MAGIC_DEF("a", js_nanovg_matrix_get, js_nanovg_matrix_set, 0),
+    JS_CGETSET_MAGIC_DEF("b", js_nanovg_matrix_get, js_nanovg_matrix_set, 1),
+    JS_CGETSET_MAGIC_DEF("c", js_nanovg_matrix_get, js_nanovg_matrix_set, 2),
+    JS_CGETSET_MAGIC_DEF("d", js_nanovg_matrix_get, js_nanovg_matrix_set, 3),
+    JS_CGETSET_MAGIC_DEF("e", js_nanovg_matrix_get, js_nanovg_matrix_set, 4),
+    JS_CGETSET_MAGIC_DEF("f", js_nanovg_matrix_get, js_nanovg_matrix_set, 5),
+    JS_PROP_STRING_DEF("[Symbol.toStringTag]", "nvgMatrix", JS_PROP_CONFIGURABLE),
 };
 
 static void
@@ -330,6 +362,11 @@ FUNC(Save) {
 }
 
 FUNC(Restore) {
+  nvgRestore(g_NVGcontext);
+  return JS_UNDEFINED;
+}
+
+FUNC(Reset) {
   nvgReset(g_NVGcontext);
   return JS_UNDEFINED;
 }
@@ -734,6 +771,9 @@ FUNC(Text) {
 FUNC(RGB) {
   int32_t r, g, b;
 
+  if(argc < 3)
+    return JS_ThrowInternalError(ctx, "need 3 arguments");
+
   if(JS_ToInt32(ctx, &r, argv[0]) || JS_ToInt32(ctx, &g, argv[1]) || JS_ToInt32(ctx, &b, argv[2]))
     return JS_EXCEPTION;
 
@@ -742,6 +782,9 @@ FUNC(RGB) {
 
 FUNC(RGBf) {
   double r, g, b;
+
+  if(argc < 3)
+    return JS_ThrowInternalError(ctx, "need 3 arguments");
 
   if(JS_ToFloat64(ctx, &r, argv[0]) || JS_ToFloat64(ctx, &g, argv[1]) || JS_ToFloat64(ctx, &b, argv[2]))
     return JS_EXCEPTION;
@@ -752,6 +795,9 @@ FUNC(RGBf) {
 FUNC(RGBA) {
   int32_t r, g, b, a;
 
+  if(argc < 4)
+    return JS_ThrowInternalError(ctx, "need 4 arguments");
+
   if(JS_ToInt32(ctx, &r, argv[0]) || JS_ToInt32(ctx, &g, argv[1]) || JS_ToInt32(ctx, &b, argv[2]) || JS_ToInt32(ctx, &a, argv[3]))
     return JS_EXCEPTION;
 
@@ -761,25 +807,74 @@ FUNC(RGBA) {
 FUNC(RGBAf) {
   double r, g, b, a;
 
+  if(argc < 4)
+    return JS_ThrowInternalError(ctx, "need 4 arguments");
+
   if(JS_ToFloat64(ctx, &r, argv[0]) || JS_ToFloat64(ctx, &g, argv[1]) || JS_ToFloat64(ctx, &b, argv[2]) || JS_ToFloat64(ctx, &a, argv[3]))
     return JS_EXCEPTION;
 
   return js_nanovg_color_new(ctx, nvgRGBAf(r, g, b, a));
 }
 
-FUNC(HSL) {
-  int32_t h, s, l;
+FUNC(LerpRGBA) {
+  NVGcolor c0, c1;
+  double u;
 
-  if(JS_ToInt32(ctx, &h, argv[0]) || JS_ToInt32(ctx, &s, argv[1]) || JS_ToInt32(ctx, &l, argv[2]))
+  if(argc < 3)
+    return JS_ThrowInternalError(ctx, "need 3 arguments");
+
+  if(js_nanovg_tocolor(ctx, &c0, argv[0]) || js_nanovg_tocolor(ctx, &c1, argv[1]) || JS_ToFloat64(ctx, &u, argv[2]))
+    return JS_EXCEPTION;
+
+  return js_nanovg_color_new(ctx, nvgLerpRGBA(c0, c1, u));
+}
+
+FUNC(TransRGBA) {
+  NVGcolor c;
+  int32_t a;
+
+  if(argc < 2)
+    return JS_ThrowInternalError(ctx, "need 2 arguments");
+
+  if(js_nanovg_tocolor(ctx, &c, argv[0]) || JS_ToInt32(ctx, &a, argv[1]))
+    return JS_EXCEPTION;
+
+  return js_nanovg_color_new(ctx, nvgTransRGBA(c, a));
+}
+
+FUNC(TransRGBAf) {
+  NVGcolor c;
+  double a;
+
+  if(argc < 2)
+    return JS_ThrowInternalError(ctx, "need 2 arguments");
+
+  if(js_nanovg_tocolor(ctx, &c, argv[0]) || JS_ToFloat64(ctx, &a, argv[1]))
+    return JS_EXCEPTION;
+
+  return js_nanovg_color_new(ctx, nvgTransRGBAf(c, a));
+}
+
+FUNC(HSL) {
+  double h, s, l;
+
+  if(argc < 3)
+    return JS_ThrowInternalError(ctx, "need 3 arguments");
+
+  if(JS_ToFloat64(ctx, &h, argv[0]) || JS_ToFloat64(ctx, &s, argv[1]) || JS_ToFloat64(ctx, &l, argv[2]))
     return JS_EXCEPTION;
 
   return js_nanovg_color_new(ctx, nvgHSL(h, s, l));
 }
 
 FUNC(HSLA) {
-  int32_t h, s, l, a;
+  double h, s, l;
+  int32_t a;
 
-  if(JS_ToInt32(ctx, &h, argv[0]) || JS_ToInt32(ctx, &s, argv[1]) || JS_ToInt32(ctx, &l, argv[2]) || JS_ToInt32(ctx, &a, argv[2]))
+  if(argc < 4)
+    return JS_ThrowInternalError(ctx, "need 4 arguments");
+
+  if(JS_ToFloat64(ctx, &h, argv[0]) || JS_ToFloat64(ctx, &s, argv[1]) || JS_ToFloat64(ctx, &l, argv[2]) || JS_ToInt32(ctx, &a, argv[3]))
     return JS_EXCEPTION;
 
   return js_nanovg_color_new(ctx, nvgHSLA(h, s, l, a));
@@ -1150,6 +1245,7 @@ static const JSCFunctionListEntry js_nanovg_funcs[] = {
     _JS_CFUNC_DEF(EndFrame, 0),
     _JS_CFUNC_DEF(Save, 0),
     _JS_CFUNC_DEF(Restore, 0),
+    _JS_CFUNC_DEF(Reset, 0),
     _JS_CFUNC_DEF(ShapeAntiAlias, 1),
     _JS_CFUNC_DEF(ClosePath, 0),
     _JS_CFUNC_DEF(Scissor, 4),
@@ -1179,6 +1275,9 @@ static const JSCFunctionListEntry js_nanovg_funcs[] = {
     _JS_CFUNC_DEF(RGBf, 3),
     _JS_CFUNC_DEF(RGBA, 4),
     _JS_CFUNC_DEF(RGBAf, 4),
+    _JS_CFUNC_DEF(LerpRGBA, 3),
+    _JS_CFUNC_DEF(TransRGBA, 2),
+    _JS_CFUNC_DEF(TransRGBAf, 2),
     _JS_CFUNC_DEF(HSL, 3),
     _JS_CFUNC_DEF(HSLA, 4),
     _JS_CFUNC_DEF(CreateImage, 2),
@@ -1276,12 +1375,25 @@ js_nanovg_init(JSContext* ctx, JSModuleDef* m) {
   js_float32array_proto = JS_GetPropertyStr(ctx, js_float32array_ctor, "prototype");
   JS_FreeValue(ctx, global);
 
-  JS_NewClassID(&js_nanovg_color_class_id);
+  // JS_NewClassID(&js_nanovg_color_class_id);
 
   color_proto = JS_NewObjectProto(ctx, js_float32array_proto);
   JS_SetPropertyFunctionList(ctx, color_proto, js_nanovg_color_methods, countof(js_nanovg_color_methods));
+  // JS_SetClassProto(ctx, js_nanovg_color_class_id, color_proto);
+  color_ctor = JS_NewObjectProto(ctx, JS_NULL);
+  JS_SetConstructor(ctx, color_ctor, color_proto);
 
-  JS_SetClassProto(ctx, js_nanovg_color_class_id, color_proto);
+  JS_SetModuleExport(ctx, m, "Color", color_ctor);
+
+  // JS_NewClassID(&js_nanovg_matrix_class_id);
+
+  matrix_proto = JS_NewObjectProto(ctx, js_float32array_proto);
+  JS_SetPropertyFunctionList(ctx, matrix_proto, js_nanovg_matrix_methods, countof(js_nanovg_matrix_methods));
+  // JS_SetClassProto(ctx, js_nanovg_matrix_class_id, matrix_proto);
+  matrix_ctor = JS_NewObjectProto(ctx, JS_NULL);
+  JS_SetConstructor(ctx, matrix_ctor, matrix_proto);
+
+  JS_SetModuleExport(ctx, m, "Matrix", matrix_ctor);
 
   JS_NewClassID(&js_nanovg_paint_class_id);
   JS_NewClass(JS_GetRuntime(ctx), js_nanovg_paint_class_id, &js_nanovg_paint_class);
@@ -1303,6 +1415,8 @@ js_init_module_nanovg(JSContext* ctx, const char* module_name) {
   if(!(m = JS_NewCModule(ctx, module_name, js_nanovg_init)))
     return NULL;
 
+  JS_AddModuleExport(ctx, m, "Color");
+  JS_AddModuleExport(ctx, m, "Matrix");
   JS_AddModuleExport(ctx, m, "Paint");
   JS_AddModuleExportList(ctx, m, js_nanovg_funcs, countof(js_nanovg_funcs));
   return m;
