@@ -68,7 +68,7 @@ function main(...args) {
       nvg.EndFrame();
       window.swapBuffers();
       glfw.poll();
-    }
+    },
   });
 
   Object.assign(window, {
@@ -91,7 +91,7 @@ function main(...args) {
     },
     handleCursorPos(x, y) {
       //console.log(`handleCursorPos`, { x, y });
-    }
+    },
   });
 
   nvg.CreateGL3(nvg.STENCIL_STROKES | nvg.ANTIALIAS | nvg.DEBUG);
@@ -152,7 +152,7 @@ function main(...args) {
           const [x, y] = this.position;
 
           return y;
-        }
+        },
       });
     }
 
@@ -163,7 +163,7 @@ function main(...args) {
         nvg.RGBA(255, 192, 0, 255),
         () => phi(i + 240),
         () => phi(i * 0.01),
-        a => vec(20, 10, a)
+        a => vec(20, 10, a),
       ),
       new Planet(
         20,
@@ -171,7 +171,7 @@ function main(...args) {
         nvg.RGBA(255, 0, 0, 0.8 * 255),
         () => phi(i),
         () => phi(i * -0.01),
-        a => vec(300, 100, a)
+        a => vec(300, 100, a),
       ),
       new Planet(
         30,
@@ -179,7 +179,7 @@ function main(...args) {
         nvg.RGBA(0, 120, 255, 0.8 * 255),
         () => phi(i * 0.8 + 120),
         () => phi(i * 0.02),
-        a => vec(180, 40, a)
+        a => vec(180, 40, a),
       ),
       new Planet(
         10,
@@ -187,8 +187,8 @@ function main(...args) {
         nvg.RGBA(120, 0, 255, 0.8 * 255),
         () => phi(i * 0.4 - 120),
         () => phi(i * 0.001),
-        a => vec(320, 200, a)
-      )
+        a => vec(320, 200, a),
+      ),
     ];
 
     planets.sort((a, b) => a.zpos - b.zpos);
@@ -210,4 +210,4 @@ const runMain = () => {
   }
 };
 
-import('console') .catch(runMain) .then(({ Console }) => ((globalThis.console = new Console({ inspectOptions: {} })), runMain()));
+import('console').catch(runMain).then(({ Console }) => ((globalThis.console = new Console({ inspectOptions: {} })), runMain()));

@@ -20,6 +20,6 @@
 struct NVGcontext;
 void js_nanovg_init_with_context(struct NVGcontext* vg);
 
-VISIBLE JSModuleDef* JS_INIT_MODULE(JSContext* ctx, const char* module_name);
+VISIBLE JSModuleDef* js_init_module(JSContext* ctx, const char* module_name);
 
 #endif /* NANOVG_QJS_H */
