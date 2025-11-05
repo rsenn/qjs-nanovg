@@ -21,61 +21,113 @@ static JSValue color_ctor = JS_UNDEFINED, color_proto = JS_UNDEFINED;
 static JSValue matrix_ctor = JS_UNDEFINED, matrix_proto = JS_UNDEFINED;
 
 static int
-js_tofloat32vec(JSContext* ctx, float* vec, size_t min_len, const char* const prop_map[], JSValueConst value) {
+js_to_float32vec(JSContext* ctx, float* vec, size_t min_len, const char* const prop_map[], JSValueConst value) {
   size_t length = 0, bytes_per_element = 0;
   float* ptr;
 
   if((ptr = js_get_typedarray(ctx, value, &length, &bytes_per_element))) {
-    if(bytes_per_element == sizeof(float) && length >= min_len) {
+    if(length < min_len) {
+      JS_ThrowTypeError(ctx, "TypedArray value must have at least %zu elements (has %zu)", min_len, length);
+      return -1;
+    }
+
+    if(bytes_per_element == sizeof(float)) {
       memcpy(vec, ptr, min_len * sizeof(float));
       return 0;
     }
   }
 
-  int ret = 0;
+  if(!JS_IsObject(value)) {
+    JS_ThrowTypeError(ctx, "value must be an object");
+    return -1;
+  }
 
   if(JS_IsArray(ctx, value)) {
     for(int i = 0; i < min_len; i++)
-      ret |= js_get_property_uint_float32(ctx, value, i, &vec[i]);
-  } else if(JS_IsObject(value)) {
+      if(js_get_property_uint_float32(ctx, value, i, &vec[i]))
+        return -1;
 
-    JSValue iter = js_iterator_new(ctx, value);
-
-    if(JS_IsObject(iter)) {
-      for(int i = 0; i < min_len; i++) {
-        BOOL done = FALSE;
-        JSValue val = js_iterator_next(ctx, iter, &done);
-
-        if(!done)
-          ret |= js_tofloat32(ctx, &vec[i], val);
-
-        JS_FreeValue(ctx, val);
-
-        if(done) {
-          ret = 1;
-          break;
-        }
-      }
-
-      JS_FreeValue(ctx, iter);
-    } else if(prop_map) {
-      for(int i = 0; i < min_len; i++)
-        ret |= js_get_property_str_float32(ctx, value, prop_map[i], &vec[i]);
-    } else {
-      JS_ThrowTypeError(ctx, "value must be iterable");
-      ret = 1;
-    }
-  } else {
-    JS_ThrowTypeError(ctx, "value must be an object");
-    ret = 1;
+    return 0;
   }
 
-  return ret;
+  JSValue iter = js_iterator_new(ctx, value);
+
+  if(JS_IsObject(iter)) {
+    for(int i = 0; i < min_len; i++) {
+      BOOL done = FALSE;
+      JSValue val = js_iterator_next(ctx, iter, &done);
+      int ret = 0;
+
+      if(!done)
+        ret = js_tofloat32(ctx, &vec[i], val);
+
+      JS_FreeValue(ctx, val);
+
+      if(ret)
+        return -1;
+
+      if(done) {
+        JS_ThrowRangeError(ctx, "iterable must have at least %zu elements (has %d)", min_len, i);
+        return -1;
+      }
+    }
+
+    JS_FreeValue(ctx, iter);
+    return 0;
+  }
+
+  if(prop_map) {
+    for(int i = 0; i < min_len; i++)
+      if(js_get_property_str_float32(ctx, value, prop_map[i], &vec[i]))
+        return -1;
+
+    return 0;
+  }
+
+  JS_ThrowTypeError(ctx, "value must be iterable");
+  return -1;
+}
+
+int
+js_copy_float32vec(JSContext* ctx, const float* vec, size_t min_len, const char* const prop_map[], JSValueConst value) {
+  size_t length = 0, bytes_per_element = 0;
+  float* ptr;
+
+  if((ptr = js_get_typedarray(ctx, value, &length, &bytes_per_element))) {
+    if(length < min_len) {
+      JS_ThrowTypeError(ctx, "TypedArray value must have at least %zu elements (has %zu)", min_len, length);
+      return -1;
+    }
+
+    if(bytes_per_element == sizeof(float))
+      return 0;
+  }
+
+  if(!JS_IsObject(value)) {
+    JS_ThrowTypeError(ctx, "value must be an object");
+    return -1;
+  }
+
+  if(JS_IsArray(ctx, value)) {
+    for(int i = 0; i < min_len; i++)
+      JS_SetPropertyUint32(ctx, value, i, JS_NewFloat64(ctx, vec[i]));
+
+    return 1;
+  }
+
+  if(prop_map) {
+    for(int i = 0; i < min_len; i++)
+      JS_SetPropertyStr(ctx, value, prop_map[i], JS_NewFloat64(ctx, vec[i]));
+
+    return 1;
+  }
+
+  return 0;
 }
 
 static int
 js_nanovg_tocolor(JSContext* ctx, NVGcolor* color, JSValueConst value) {
-  return js_tofloat32vec(ctx, color->rgba, 4, NULL, value);
+  return js_to_float32vec(ctx, color->rgba, 4, NULL, value);
 }
 
 static JSValue
@@ -195,17 +247,12 @@ js_nanovg_wrap(JSContext* ctx, void* s, JSClassID classID) {
 
 int
 js_nanovg_tomatrix(JSContext* ctx, float matrix[6], JSValueConst value) {
-  return js_tofloat32vec(ctx, matrix, 6, matrix_obj_props, value);
+  return js_to_float32vec(ctx, matrix, 6, matrix_obj_props, value);
 }
 
-void
+int
 js_nanovg_matrix_copy(JSContext* ctx, JSValueConst value, const float matrix[6]) {
-  if(JS_IsArray(ctx, value))
-    for(int i = 0; i < 6; i++)
-      JS_SetPropertyUint32(ctx, value, i, JS_NewFloat64(ctx, matrix[i]));
-  else
-    for(int i = 0; i < 6; i++)
-      JS_SetPropertyStr(ctx, value, matrix_obj_props[i], JS_NewFloat64(ctx, matrix[i]));
+  return js_copy_float32vec(ctx, matrix, 6, matrix_obj_props, value);
 }
 
 int
@@ -225,7 +272,7 @@ js_nanovg_matrix_arguments(JSContext* ctx, float matrix[6], int argc, JSValueCon
 
 int
 js_get_vector(JSContext* ctx, JSValueConst value, float vec[2]) {
-  return js_tofloat32vec(ctx, vec, 2, vector_obj_props, value);
+  return js_to_float32vec(ctx, vec, 2, vector_obj_props, value);
 }
 
 void
