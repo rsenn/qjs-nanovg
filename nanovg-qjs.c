@@ -23,16 +23,12 @@ static JSValue matrix_ctor = JS_UNDEFINED, matrix_proto = JS_UNDEFINED;
 
 static int
 js_nanovg_tocolor(JSContext* ctx, NVGcolor* color, JSValueConst value) {
-  size_t offset = 0, length = 0, bytes_per_element = 0;
-  JSValue buf = JS_GetTypedArrayBuffer(ctx, value, &offset, &length, &bytes_per_element);
+  size_t length = 0, bytes_per_element = 0;
+  float* ptr;
 
-  if(!JS_IsException(buf) && bytes_per_element == sizeof(float) && length >= 4) {
-    size_t len;
-    uint8_t* ptr = JS_GetArrayBuffer(ctx, &len, buf);
-    JS_FreeValue(ctx, buf);
-
-    if(ptr) {
-      memcpy(color, ptr + offset, sizeof(*color));
+  if((ptr = js_get_typedarray(ctx, value, &length, &bytes_per_element))) {
+    if(bytes_per_element == sizeof(float) && length >= 4) {
+      memcpy(color->rgba, ptr, sizeof(*color));
       return 0;
     }
   }
@@ -102,8 +98,10 @@ static const JSCFunctionListEntry js_nanovg_color_methods[] = {
 
 static JSValue
 js_nanovg_matrix_new(JSContext* ctx) {
-  float matrix[6] /* = {.0f, .0f, .0f, .0f, .0f, .0f}*/;
+  float matrix[6];
+
   nvgTransformIdentity(matrix);
+
   JSValue buf = JS_NewArrayBufferCopy(ctx, (const void*)matrix, sizeof(*matrix));
   JSValue obj = JS_CallConstructor(ctx, js_float32array_ctor, 1, &buf);
   JS_FreeValue(ctx, buf);
@@ -186,17 +184,46 @@ js_nanovg_wrap(JSContext* ctx, void* s, JSClassID classID) {
 }
 
 int
-js_get_transform(JSContext* ctx, JSValueConst this_obj, float* xform) {
+js_get_transform(JSContext* ctx, JSValueConst value, float matrix[6]) {
+  size_t length = 0, bytes_per_element = 0;
+  float* ptr;
+
+  if((ptr = js_get_typedarray(ctx, value, &length, &bytes_per_element))) {
+    if(bytes_per_element == sizeof(float) && length >= 6) {
+      memcpy(matrix, ptr, sizeof(*matrix));
+      return 0;
+    }
+  }
+
   int ret = 0;
 
-  if(JS_IsArray(ctx, this_obj)) {
+  if(JS_IsArray(ctx, value)) {
     for(int i = 0; i < 6; i++)
-      if(ret = js_get_property_uint_float32(ctx, this_obj, i, &xform[i]))
-        break;
-  } else if(JS_IsObject(this_obj)) {
-    for(int i = 0; i < 6; i++)
-      if(ret = js_get_property_str_float32(ctx, this_obj, transform_obj_props[i], &xform[i]))
-        break;
+      ret |= js_get_property_uint_float32(ctx, value, i, &matrix[i]);
+  } else if(JS_IsObject(value)) {
+
+    JSValue iter = js_iterator_new(ctx, value);
+
+    if(JS_IsObject(iter)) {
+      for(int i = 0; i < 6; i++) {
+        BOOL done = FALSE;
+        JSValue val = js_iterator_next(ctx, iter, &done);
+
+        if(!done)
+          ret |= js_tofloat32(ctx, &matrix[i], val);
+
+        JS_FreeValue(ctx, val);
+
+        if(done) {
+          ret = 1;
+          break;
+        }
+      }
+
+      JS_FreeValue(ctx, iter);
+    } else
+      for(int i = 0; i < 6; i++)
+        ret |= js_get_property_str_float32(ctx, value, transform_obj_props[i], &matrix[i]);
   } else {
     ret = 1;
   }
@@ -205,35 +232,35 @@ js_get_transform(JSContext* ctx, JSValueConst this_obj, float* xform) {
 }
 
 void
-js_set_transform(JSContext* ctx, JSValueConst this_obj, const float* xform) {
-  if(JS_IsArray(ctx, this_obj))
+js_set_transform(JSContext* ctx, JSValueConst value, const float* matrix) {
+  if(JS_IsArray(ctx, value))
     for(int i = 0; i < 6; i++)
-      JS_SetPropertyUint32(ctx, this_obj, i, JS_NewFloat64(ctx, xform[i]));
+      JS_SetPropertyUint32(ctx, value, i, JS_NewFloat64(ctx, matrix[i]));
   else
     for(int i = 0; i < 6; i++)
-      JS_SetPropertyStr(ctx, this_obj, transform_obj_props[i], JS_NewFloat64(ctx, xform[i]));
+      JS_SetPropertyStr(ctx, value, transform_obj_props[i], JS_NewFloat64(ctx, matrix[i]));
 }
 
 JSValue
-js_new_transform(JSContext* ctx, const float* xform) {
+js_new_transform(JSContext* ctx, const float* matrix) {
   JSValue ret = JS_NewArray(ctx);
-  js_set_transform(ctx, ret, xform);
+  js_set_transform(ctx, ret, matrix);
   return ret;
 }
 
 int
-js_argument_transform(JSContext* ctx, float* xform, int argc, JSValueConst argv[]) {
+js_argument_transform(JSContext* ctx, float* matrix, int argc, JSValueConst argv[]) {
   int i = 0;
 
   if(argc >= 6)
     for(i = 0; i < 6; i++)
-      if(js_tofloat32(ctx, &xform[transform_arg_index[i]], argv[i]))
+      if(js_tofloat32(ctx, &matrix[transform_arg_index[i]], argv[i]))
         break;
 
   if(i == 6)
     return i;
 
-  return !js_get_transform(ctx, argv[0], xform);
+  return !js_get_transform(ctx, argv[0], matrix);
 }
 
 int
@@ -1377,24 +1404,17 @@ js_nanovg_init(JSContext* ctx, JSModuleDef* m) {
   js_float32array_proto = JS_GetPropertyStr(ctx, js_float32array_ctor, "prototype");
   JS_FreeValue(ctx, global);
 
-  // JS_NewClassID(&js_nanovg_color_class_id);
-
   color_proto = JS_NewObjectProto(ctx, js_float32array_proto);
   JS_SetPropertyFunctionList(ctx, color_proto, js_nanovg_color_methods, countof(js_nanovg_color_methods));
   // JS_SetClassProto(ctx, js_nanovg_color_class_id, color_proto);
   color_ctor = JS_NewObjectProto(ctx, JS_NULL);
   JS_SetConstructor(ctx, color_ctor, color_proto);
-
   JS_SetModuleExport(ctx, m, "Color", color_ctor);
-
-  // JS_NewClassID(&js_nanovg_matrix_class_id);
 
   matrix_proto = JS_NewObjectProto(ctx, js_float32array_proto);
   JS_SetPropertyFunctionList(ctx, matrix_proto, js_nanovg_matrix_methods, countof(js_nanovg_matrix_methods));
-  // JS_SetClassProto(ctx, js_nanovg_matrix_class_id, matrix_proto);
   matrix_ctor = JS_NewObjectProto(ctx, JS_NULL);
   JS_SetConstructor(ctx, matrix_ctor, matrix_proto);
-
   JS_SetModuleExport(ctx, m, "Matrix", matrix_ctor);
 
   JS_NewClassID(&js_nanovg_paint_class_id);
@@ -1404,8 +1424,8 @@ js_nanovg_init(JSContext* ctx, JSModuleDef* m) {
   JS_SetClassProto(ctx, js_nanovg_paint_class_id, paint_proto);
   paint_class = JS_NewCFunction2(ctx, js_nanovg_paint_constructor, "Paint", 0, JS_CFUNC_constructor, 0);
   JS_SetConstructor(ctx, paint_class, paint_proto);
-
   JS_SetModuleExport(ctx, m, "Paint", paint_class);
+
   JS_SetModuleExportList(ctx, m, js_nanovg_funcs, countof(js_nanovg_funcs));
   return 0;
 }

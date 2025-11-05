@@ -34,6 +34,19 @@ js_get_property_uint_float32(JSContext* ctx, JSValueConst this_obj, uint32_t idx
   return ret;
 }
 
+static inline void*
+js_get_typedarray(JSContext* ctx, JSValueConst obj, size_t* plength, size_t* pbytes_per_element) {
+  size_t offset = 0, len;
+  uint8_t* ptr;
+  JSValue buf = JS_GetTypedArrayBuffer(ctx, obj, &offset, plength, pbytes_per_element);
+
+  if((ptr = JS_GetArrayBuffer(ctx, &len, buf)))
+    ptr += offset;
+
+  JS_FreeValue(ctx, buf);
+  return ptr;
+}
+
 static inline JSValue
 js_iterator_method(JSContext* ctx, JSValueConst obj) {
   JSValue ret = JS_UNDEFINED;
