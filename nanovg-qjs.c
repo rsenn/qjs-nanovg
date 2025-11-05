@@ -22,8 +22,6 @@ static JSValue color_proto = JS_UNDEFINED;
 
 static int
 js_get_NVGcolor(JSContext* ctx, JSValueConst this_obj, NVGcolor* color) {
-  int ret = 0;
-
   JSValue iter = js_iterator_new(ctx, this_obj);
 
   if(JS_IsObject(iter)) {
@@ -34,8 +32,12 @@ js_get_NVGcolor(JSContext* ctx, JSValueConst this_obj, NVGcolor* color) {
         js_tofloat32(ctx, &color->rgba[i], val);
       JS_FreeValue(ctx, val);
 
-      if(done)
-        return 1;
+      if(done) {
+        if(i < 3)
+          return 1;
+
+        color->a = 1.0;
+      }
     }
   }
 
@@ -46,7 +48,7 @@ js_get_NVGcolor(JSContext* ctx, JSValueConst this_obj, NVGcolor* color) {
     ret = ret || js_get_property_str_float32(ctx, this_obj, "b", &color->b);
     ret = ret || js_get_property_str_float32(ctx, this_obj, "a", &color->a);*/
 
-  return ret;
+  return 0;
 }
 
 static JSValue
