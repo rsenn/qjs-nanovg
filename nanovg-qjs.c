@@ -289,12 +289,12 @@ FUNC(ShapeAntiAlias) {
 }
 
 FUNC(Rect) {
-  float x, y, w, h;
+  double x, y, w, h;
 
   if(argc != 4)
     return JS_EXCEPTION;
 
-  if(js_tofloat32(ctx, &x, argv[0]) || js_tofloat32(ctx, &y, argv[1]) || js_tofloat32(ctx, &w, argv[2]) || js_tofloat32(ctx, &h, argv[3]))
+  if(JS_ToFloat64(ctx, &x, argv[0]) || JS_ToFloat64(ctx, &y, argv[1]) || JS_ToFloat64(ctx, &w, argv[2]) || JS_ToFloat64(ctx, &h, argv[3]))
     return JS_EXCEPTION;
 
   nvgRect(g_NVGcontext, x, y, w, h);
@@ -302,12 +302,12 @@ FUNC(Rect) {
 }
 
 FUNC(Circle) {
-  float cx, cy, r;
+  double cx, cy, r;
 
   if(argc != 3)
     return JS_EXCEPTION;
 
-  if(js_tofloat32(ctx, &cx, argv[0]) || js_tofloat32(ctx, &cy, argv[1]) || js_tofloat32(ctx, &r, argv[2]))
+  if(JS_ToFloat64(ctx, &cx, argv[0]) || JS_ToFloat64(ctx, &cy, argv[1]) || JS_ToFloat64(ctx, &r, argv[2]))
     return JS_EXCEPTION;
 
   nvgCircle(g_NVGcontext, cx, cy, r);
@@ -315,12 +315,12 @@ FUNC(Circle) {
 }
 
 FUNC(Ellipse) {
-  float cx, cy, rx, ry;
+  double cx, cy, rx, ry;
 
   if(argc != 4)
     return JS_EXCEPTION;
 
-  if(js_tofloat32(ctx, &cx, argv[0]) || js_tofloat32(ctx, &cy, argv[1]) || js_tofloat32(ctx, &rx, argv[2]) || js_tofloat32(ctx, &ry, argv[3]))
+  if(JS_ToFloat64(ctx, &cx, argv[0]) || JS_ToFloat64(ctx, &cy, argv[1]) || JS_ToFloat64(ctx, &rx, argv[2]) || JS_ToFloat64(ctx, &ry, argv[3]))
     return JS_EXCEPTION;
 
   nvgEllipse(g_NVGcontext, cx, cy, rx, ry);
@@ -341,12 +341,12 @@ FUNC(PathWinding) {
 }
 
 FUNC(MoveTo) {
-  float x, y;
+  double x, y;
 
   if(argc != 2)
     return JS_EXCEPTION;
 
-  if(js_tofloat32(ctx, &x, argv[0]) || js_tofloat32(ctx, &y, argv[1]))
+  if(JS_ToFloat64(ctx, &x, argv[0]) || JS_ToFloat64(ctx, &y, argv[1]))
     return JS_EXCEPTION;
 
   nvgMoveTo(g_NVGcontext, x, y);
@@ -354,12 +354,12 @@ FUNC(MoveTo) {
 }
 
 FUNC(LineTo) {
-  float x, y;
+  double x, y;
 
   if(argc != 2)
     return JS_EXCEPTION;
 
-  if(js_tofloat32(ctx, &x, argv[0]) || js_tofloat32(ctx, &y, argv[1]))
+  if(JS_ToFloat64(ctx, &x, argv[0]) || JS_ToFloat64(ctx, &y, argv[1]))
     return JS_EXCEPTION;
 
   nvgLineTo(g_NVGcontext, x, y);
@@ -372,12 +372,12 @@ FUNC(ClosePath) {
 }
 
 FUNC(FontBlur) {
-  float blur;
+  double blur;
 
   if(argc != 1)
     return JS_EXCEPTION;
 
-  if(js_tofloat32(ctx, &blur, argv[0]))
+  if(JS_ToFloat64(ctx, &blur, argv[0]))
     return JS_EXCEPTION;
 
   nvgFontBlur(g_NVGcontext, blur);
@@ -390,12 +390,12 @@ FUNC(BeginPath) {
 }
 
 FUNC(RoundedRect) {
-  float x, y, w, h, r;
+  double x, y, w, h, r;
 
   if(argc != 5)
     return JS_EXCEPTION;
 
-  if(js_tofloat32(ctx, &x, argv[0]) || js_tofloat32(ctx, &y, argv[1]) || js_tofloat32(ctx, &w, argv[2]) || js_tofloat32(ctx, &h, argv[3]) || js_tofloat32(ctx, &r, argv[4]))
+  if(JS_ToFloat64(ctx, &x, argv[0]) || JS_ToFloat64(ctx, &y, argv[1]) || JS_ToFloat64(ctx, &w, argv[2]) || JS_ToFloat64(ctx, &h, argv[3]) || JS_ToFloat64(ctx, &r, argv[4]))
     return JS_EXCEPTION;
 
   nvgRoundedRect(g_NVGcontext, x, y, w, h, r);
@@ -438,12 +438,14 @@ FUNC(IntersectScissor) {
 FUNC(ResetScissor) {
   nvgResetScissor(g_NVGcontext);
 }
+
 FUNC(FillPaint) {
+  NVGpaint* paint;
+
   if(argc != 1)
     return JS_EXCEPTION;
 
-  NVGpaint* paint = JS_GetOpaque(argv[0], js_nanovg_paint_class_id);
-  if(!paint)
+  if(!(paint = JS_GetOpaque2(ctx, argv[0], js_nanovg_paint_class_id)))
     return JS_EXCEPTION;
 
   nvgFillPaint(g_NVGcontext, *paint);
@@ -538,27 +540,30 @@ FUNC(FillColor) {
 }
 
 FUNC(LinearGradient) {
-  float sx, sy, ex, ey;
+  double sx, sy, ex, ey;
   NVGcolor icol, ocol;
+
   if(argc != 6)
     return JS_EXCEPTION;
 
-  if(js_tofloat32(ctx, &sx, argv[0]) || js_tofloat32(ctx, &sy, argv[1]) || js_tofloat32(ctx, &ex, argv[2]) || js_tofloat32(ctx, &ey, argv[3]) || js_get_NVGcolor(ctx, argv[4], &icol) || js_get_NVGcolor(ctx, argv[5], &ocol))
+  if(JS_ToFloat64(ctx, &sx, argv[0]) || JS_ToFloat64(ctx, &sy, argv[1]) || JS_ToFloat64(ctx, &ex, argv[2]) || JS_ToFloat64(ctx, &ey, argv[3]) || js_get_NVGcolor(ctx, argv[4], &icol) || js_get_NVGcolor(ctx, argv[5], &ocol))
     return JS_EXCEPTION;
 
   NVGpaint paint = nvgLinearGradient(g_NVGcontext, sx, sy, ex, ey, icol, ocol);
   NVGpaint* p = js_mallocz(ctx, sizeof(NVGpaint));
   *p = paint;
+
   return js_nanovg_wrap(ctx, p, js_nanovg_paint_class_id);
 }
 
 FUNC(BoxGradient) {
-  float x, y, w, h, r, f;
+  double x, y, w, h, r, f;
   NVGcolor icol, ocol;
+
   if(argc != 8)
     return JS_EXCEPTION;
 
-  if(js_tofloat32(ctx, &x, argv[0]) || js_tofloat32(ctx, &y, argv[1]) || js_tofloat32(ctx, &w, argv[2]) || js_tofloat32(ctx, &h, argv[3]) || js_tofloat32(ctx, &r, argv[4]) || js_tofloat32(ctx, &f, argv[5]) || js_get_NVGcolor(ctx, argv[6], &icol) || js_get_NVGcolor(ctx, argv[7], &ocol))
+  if(JS_ToFloat64(ctx, &x, argv[0]) || JS_ToFloat64(ctx, &y, argv[1]) || JS_ToFloat64(ctx, &w, argv[2]) || JS_ToFloat64(ctx, &h, argv[3]) || JS_ToFloat64(ctx, &r, argv[4]) || JS_ToFloat64(ctx, &f, argv[5]) || js_get_NVGcolor(ctx, argv[6], &icol) || js_get_NVGcolor(ctx, argv[7], &ocol))
     return JS_EXCEPTION;
 
   NVGpaint paint = nvgBoxGradient(g_NVGcontext, x, y, w, h, r, f, icol, ocol);
@@ -568,12 +573,13 @@ FUNC(BoxGradient) {
 }
 
 FUNC(RadialGradient) {
-  float cx, cy, inr, outr;
+  double cx, cy, inr, outr;
   NVGcolor icol, ocol;
+
   if(argc != 6)
     return JS_EXCEPTION;
 
-  if(js_tofloat32(ctx, &cx, argv[0]) || js_tofloat32(ctx, &cy, argv[1]) || js_tofloat32(ctx, &inr, argv[2]) || js_tofloat32(ctx, &outr, argv[3]) || js_get_NVGcolor(ctx, argv[4], &icol) || js_get_NVGcolor(ctx, argv[5], &ocol))
+  if(JS_ToFloat64(ctx, &cx, argv[0]) || JS_ToFloat64(ctx, &cy, argv[1]) || JS_ToFloat64(ctx, &inr, argv[2]) || JS_ToFloat64(ctx, &outr, argv[3]) || js_get_NVGcolor(ctx, argv[4], &icol) || js_get_NVGcolor(ctx, argv[5], &ocol))
     return JS_EXCEPTION;
 
   NVGpaint paint = nvgRadialGradient(g_NVGcontext, cx, cy, inr, outr, icol, ocol);
@@ -583,61 +589,69 @@ FUNC(RadialGradient) {
 }
 
 FUNC(TextBounds) {
-  float x, y;
-  const char* str = NULL;
+  double x, y;
+  const char* str;
+
   if(argc != 3)
     return JS_EXCEPTION;
 
-  if(js_tofloat32(ctx, &x, argv[0]) || js_tofloat32(ctx, &y, argv[1]))
+  if(JS_ToFloat64(ctx, &x, argv[0]) || JS_ToFloat64(ctx, &y, argv[1]))
     return JS_EXCEPTION;
 
-  str = JS_ToCString(ctx, argv[2]);
-  if(!str)
+  if(!(str = JS_ToCString(ctx, argv[2])))
     return JS_EXCEPTION;
 
   float ret = nvgTextBounds(g_NVGcontext, x, y, str, NULL, NULL);
+
+  JS_FreeCString(ctx, str);
+
   return JS_NewFloat64(ctx, ret);
 }
 
 FUNC(TextBounds2) {
-  float x, y;
-  const char* str = NULL;
+  double x, y;
+  const char* str;
+
   if(argc != 3)
     return JS_EXCEPTION;
 
-  if(js_tofloat32(ctx, &x, argv[0]) || js_tofloat32(ctx, &y, argv[1]))
+  if(JS_ToFloat64(ctx, &x, argv[0]) || JS_ToFloat64(ctx, &y, argv[1]))
     return JS_EXCEPTION;
 
-  str = JS_ToCString(ctx, argv[2]);
-  if(!str)
+  if(!(str = JS_ToCString(ctx, argv[2])))
     return JS_EXCEPTION;
 
-  float bounds[4] = {};
-  float tw = nvgTextBounds(g_NVGcontext, x, y, str, NULL, bounds);
-  JSValue e = JS_NewObject(ctx);
-  JS_DefinePropertyValueStr(ctx, e, "width", JS_NewFloat64(ctx, tw), JS_PROP_C_W_E);
-  JS_DefinePropertyValueStr(ctx, e, "height", JS_NewFloat64(ctx, bounds[3] - bounds[1]), JS_PROP_C_W_E);
-  return e;
+  {
+    float bounds[4] = {};
+    float tw = nvgTextBounds(g_NVGcontext, x, y, str, NULL, bounds);
+
+    JSValue e = JS_NewObject(ctx);
+    JS_DefinePropertyValueStr(ctx, e, "width", JS_NewFloat64(ctx, tw), JS_PROP_C_W_E);
+    JS_DefinePropertyValueStr(ctx, e, "height", JS_NewFloat64(ctx, bounds[3] - bounds[1]), JS_PROP_C_W_E);
+    return e;
+  }
 }
 
 FUNC(FontSize) {
+  double size;
+
   if(argc != 1)
     return JS_EXCEPTION;
 
-  double size;
   if(JS_ToFloat64(ctx, &size, argv[0]))
     return JS_EXCEPTION;
 
-  nvgFontSize(g_NVGcontext, (float)size);
+  nvgFontSize(g_NVGcontext, size);
   return JS_UNDEFINED;
 }
 
 FUNC(FontFace) {
+  const char* str;
+
   if(argc != 1)
     return JS_EXCEPTION;
 
-  const char* str = JS_ToCString(ctx, argv[0]);
-  if(!str)
+  if(!(str = JS_ToCString(ctx, argv[0])))
     return JS_EXCEPTION;
 
   nvgFontFace(g_NVGcontext, str);
@@ -646,10 +660,11 @@ FUNC(FontFace) {
 }
 
 FUNC(TextAlign) {
+  int align;
+
   if(argc != 1)
     return JS_EXCEPTION;
 
-  int align;
   if(JS_ToInt32(ctx, &align, argv[0]))
     return JS_EXCEPTION;
 
@@ -659,20 +674,24 @@ FUNC(TextAlign) {
 
 FUNC(Text) {
   int x, y;
-  const char* str = NULL;
+  const char* str;
+
   if(argc != 3)
     return JS_EXCEPTION;
 
   if(JS_ToInt32(ctx, &x, argv[0]))
-    goto fail;
+    return JS_EXCEPTION;
   if(JS_ToInt32(ctx, &y, argv[1]))
-    goto fail;
-  str = JS_ToCString(ctx, argv[2]);
+    return JS_EXCEPTION;
+
+  if(!(str = JS_ToCString(ctx, argv[2])))
+    return JS_EXCEPTION;
+
   float ret = nvgText(g_NVGcontext, x, y, str, NULL);
-  return JS_NewFloat64(ctx, ret);
-fail:
+
   JS_FreeCString(ctx, str);
-  return JS_EXCEPTION;
+
+  return JS_NewFloat64(ctx, ret);
 }
 
 FUNC(RGB) {
@@ -764,8 +783,8 @@ FUNC(StrokeWidth) {
 
   if(JS_ToFloat64(ctx, &width, argv[0]))
     return JS_EXCEPTION;
-  nvgStrokeWidth(g_NVGcontext, width);
 
+  nvgStrokeWidth(g_NVGcontext, width);
   return JS_UNDEFINED;
 }
 
@@ -791,7 +810,9 @@ FUNC(CreateImageRGBA) {
     return JS_EXCEPTION;
   if(JS_ToInt32(ctx, &flags, argv[2]))
     return JS_EXCEPTION;
-  ptr = JS_GetArrayBuffer(ctx, &len, argv[3]);
+
+  if(!(ptr = JS_GetArrayBuffer(ctx, &len, argv[3])))
+    return JS_EXCEPTION;
 
   return JS_NewInt32(ctx, nvgCreateImageRGBA(g_NVGcontext, width, height, flags, (const unsigned char*)ptr));
 }
@@ -803,7 +824,10 @@ FUNC(UpdateImage) {
 
   if(JS_ToInt32(ctx, &image, argv[0]))
     return JS_EXCEPTION;
-  ptr = JS_GetArrayBuffer(ctx, &len, argv[1]);
+
+  if(!(ptr = JS_GetArrayBuffer(ctx, &len, argv[1])))
+    return JS_EXCEPTION;
+
   nvgUpdateImage(g_NVGcontext, image, (const unsigned char*)ptr);
 
   return JS_UNDEFINED;
@@ -848,6 +872,7 @@ FUNC(Transform) {
 
   while((n = js_argument_transform(ctx, t, argc, argv))) {
     nvgTransform(g_NVGcontext, t[transform_arg_index[0]], t[transform_arg_index[1]], t[transform_arg_index[2]], t[transform_arg_index[3]], t[transform_arg_index[4]], t[transform_arg_index[5]]);
+
     argc -= n;
     argv += n;
   }
@@ -878,6 +903,7 @@ FUNC(Rotate) {
 
   return JS_UNDEFINED;
 }
+
 FUNC(SkewX) {
   double angle;
 
@@ -888,6 +914,7 @@ FUNC(SkewX) {
 
   return JS_UNDEFINED;
 }
+
 FUNC(SkewY) {
   double angle;
 
@@ -898,6 +925,7 @@ FUNC(SkewY) {
 
   return JS_UNDEFINED;
 }
+
 FUNC(Scale) {
   double x, y;
 
@@ -905,6 +933,7 @@ FUNC(Scale) {
     return JS_EXCEPTION;
   if(JS_ToFloat64(ctx, &y, argv[1]))
     return JS_EXCEPTION;
+
   nvgScale(g_NVGcontext, x, y);
 
   return JS_UNDEFINED;
@@ -965,6 +994,7 @@ FUNC(TransformScale) {
     return JS_EXCEPTION;
   if(JS_ToFloat64(ctx, &y, argv[i + 1]))
     return JS_EXCEPTION;
+
   nvgTransformScale(t, x, y);
 
   if(i == 0)
@@ -984,6 +1014,7 @@ FUNC(TransformRotate) {
 
   if(JS_ToFloat64(ctx, &angle, argv[i]))
     return JS_EXCEPTION;
+
   nvgTransformRotate(t, angle);
 
   if(i == 0)
