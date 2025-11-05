@@ -11,60 +11,71 @@
 
 #include <assert.h>
 
-static const char* const transform_obj_props[] = {"a", "b", "c", "d", "e", "f"};
-static const int transform_arg_index[] = {0, 1, 2, 3, 4, 5};
+static const char *const color_obj_props[] = {"r", "g", "b", "a"}, *const matrix_obj_props[] = {"a", "b", "c", "d", "e", "f"}, *const vector_obj_props[] = {"x", "y"};
 
 static NVGcontext* g_NVGcontext;
-static JSClassID /*js_nanovg_color_class_id,*/ js_nanovg_paint_class_id;
+static JSClassID js_nanovg_paint_class_id;
 
 static JSValue js_float32array_ctor = JS_UNDEFINED, js_float32array_proto = JS_UNDEFINED;
 static JSValue color_ctor = JS_UNDEFINED, color_proto = JS_UNDEFINED;
 static JSValue matrix_ctor = JS_UNDEFINED, matrix_proto = JS_UNDEFINED;
 
 static int
-js_nanovg_tocolor(JSContext* ctx, NVGcolor* color, JSValueConst value) {
+js_tofloat32vec(JSContext* ctx, float* vec, size_t min_len, const char* const prop_map[], JSValueConst value) {
   size_t length = 0, bytes_per_element = 0;
   float* ptr;
 
   if((ptr = js_get_typedarray(ctx, value, &length, &bytes_per_element))) {
-    if(bytes_per_element == sizeof(float) && length >= 4) {
-      memcpy(color->rgba, ptr, sizeof(*color));
+    if(bytes_per_element == sizeof(float) && length >= min_len) {
+      memcpy(vec, ptr, min_len * sizeof(float));
       return 0;
     }
   }
 
-  JSValue iter = js_iterator_new(ctx, value);
   int ret = 0;
 
-  if(JS_IsObject(iter)) {
-    for(int i = 0; i < 4; i++) {
-      BOOL done = FALSE;
-      JSValue val = js_iterator_next(ctx, iter, &done);
+  if(JS_IsArray(ctx, value)) {
+    for(int i = 0; i < min_len; i++)
+      ret |= js_get_property_uint_float32(ctx, value, i, &vec[i]);
+  } else if(JS_IsObject(value)) {
 
-      if(!done)
-        ret |= js_tofloat32(ctx, &color->rgba[i], val);
+    JSValue iter = js_iterator_new(ctx, value);
 
-      JS_FreeValue(ctx, val);
+    if(JS_IsObject(iter)) {
+      for(int i = 0; i < min_len; i++) {
+        BOOL done = FALSE;
+        JSValue val = js_iterator_next(ctx, iter, &done);
 
-      if(done) {
-        if(i < 3) {
+        if(!done)
+          ret |= js_tofloat32(ctx, &vec[i], val);
+
+        JS_FreeValue(ctx, val);
+
+        if(done) {
           ret = 1;
           break;
         }
-
-        color->a = 1.0;
       }
-    }
 
-    JS_FreeValue(ctx, iter);
-  } else if(JS_IsObject(value)) {
-    ret |= js_get_property_str_float32(ctx, value, "r", &color->r);
-    ret |= js_get_property_str_float32(ctx, value, "g", &color->g);
-    ret |= js_get_property_str_float32(ctx, value, "b", &color->b);
-    ret |= js_get_property_str_float32(ctx, value, "a", &color->a);
+      JS_FreeValue(ctx, iter);
+    } else if(prop_map) {
+      for(int i = 0; i < min_len; i++)
+        ret |= js_get_property_str_float32(ctx, value, prop_map[i], &vec[i]);
+    } else {
+      JS_ThrowTypeError(ctx, "value must be iterable");
+      ret = 1;
+    }
+  } else {
+    JS_ThrowTypeError(ctx, "value must be an object");
+    ret = 1;
   }
 
   return ret;
+}
+
+static int
+js_nanovg_tocolor(JSContext* ctx, NVGcolor* color, JSValueConst value) {
+  return js_tofloat32vec(ctx, color->rgba, 4, NULL, value);
 }
 
 static JSValue
@@ -97,12 +108,11 @@ static const JSCFunctionListEntry js_nanovg_color_methods[] = {
 };
 
 static JSValue
-js_nanovg_matrix_new(JSContext* ctx) {
-  float matrix[6];
+js_nanovg_matrix_new(JSContext* ctx, float matrix[6]) {
+  /*float matrix[6];
+  nvgTransformIdentity(matrix);*/
 
-  nvgTransformIdentity(matrix);
-
-  JSValue buf = JS_NewArrayBufferCopy(ctx, (const void*)matrix, sizeof(*matrix));
+  JSValue buf = JS_NewArrayBufferCopy(ctx, (void*)matrix, 6 * sizeof(float));
   JSValue obj = JS_CallConstructor(ctx, js_float32array_ctor, 1, &buf);
   JS_FreeValue(ctx, buf);
   JS_SetPrototype(ctx, obj, matrix_proto);
@@ -185,76 +195,26 @@ js_nanovg_wrap(JSContext* ctx, void* s, JSClassID classID) {
 
 int
 js_nanovg_tomatrix(JSContext* ctx, float matrix[6], JSValueConst value) {
-  size_t length = 0, bytes_per_element = 0;
-  float* ptr;
-
-  if((ptr = js_get_typedarray(ctx, value, &length, &bytes_per_element))) {
-    if(bytes_per_element == sizeof(float) && length >= 6) {
-      memcpy(matrix, ptr, sizeof(*matrix));
-      return 0;
-    }
-  }
-
-  int ret = 0;
-
-  if(JS_IsArray(ctx, value)) {
-    for(int i = 0; i < 6; i++)
-      ret |= js_get_property_uint_float32(ctx, value, i, &matrix[i]);
-  } else if(JS_IsObject(value)) {
-
-    JSValue iter = js_iterator_new(ctx, value);
-
-    if(JS_IsObject(iter)) {
-      for(int i = 0; i < 6; i++) {
-        BOOL done = FALSE;
-        JSValue val = js_iterator_next(ctx, iter, &done);
-
-        if(!done)
-          ret |= js_tofloat32(ctx, &matrix[i], val);
-
-        JS_FreeValue(ctx, val);
-
-        if(done) {
-          ret = 1;
-          break;
-        }
-      }
-
-      JS_FreeValue(ctx, iter);
-    } else
-      for(int i = 0; i < 6; i++)
-        ret |= js_get_property_str_float32(ctx, value, transform_obj_props[i], &matrix[i]);
-  } else {
-    ret = 1;
-  }
-
-  return ret;
+  return js_tofloat32vec(ctx, matrix, 6, matrix_obj_props, value);
 }
 
 void
-js_set_transform(JSContext* ctx, JSValueConst value, const float* matrix) {
+js_nanovg_matrix_copy(JSContext* ctx, JSValueConst value, const float matrix[6]) {
   if(JS_IsArray(ctx, value))
     for(int i = 0; i < 6; i++)
       JS_SetPropertyUint32(ctx, value, i, JS_NewFloat64(ctx, matrix[i]));
   else
     for(int i = 0; i < 6; i++)
-      JS_SetPropertyStr(ctx, value, transform_obj_props[i], JS_NewFloat64(ctx, matrix[i]));
-}
-
-JSValue
-js_new_transform(JSContext* ctx, const float* matrix) {
-  JSValue ret = JS_NewArray(ctx);
-  js_set_transform(ctx, ret, matrix);
-  return ret;
+      JS_SetPropertyStr(ctx, value, matrix_obj_props[i], JS_NewFloat64(ctx, matrix[i]));
 }
 
 int
-js_argument_transform(JSContext* ctx, float* matrix, int argc, JSValueConst argv[]) {
+js_nanovg_matrix_arguments(JSContext* ctx, float matrix[6], int argc, JSValueConst argv[]) {
   int i = 0;
 
   if(argc >= 6)
     for(i = 0; i < 6; i++)
-      if(js_tofloat32(ctx, &matrix[transform_arg_index[i]], argv[i]))
+      if(js_tofloat32(ctx, &matrix[i], argv[i]))
         break;
 
   if(i == 6)
@@ -264,32 +224,18 @@ js_argument_transform(JSContext* ctx, float* matrix, int argc, JSValueConst argv
 }
 
 int
-js_get_vector(JSContext* ctx, JSValueConst this_obj, float vec[2]) {
-  int ret = 0;
-
-  if(JS_IsArray(ctx, this_obj)) {
-    for(int i = 0; i < 2; i++)
-      if((ret = js_get_property_uint_float32(ctx, this_obj, i, &vec[i])))
-        break;
-  } else if(JS_IsObject(this_obj)) {
-    for(int i = 0; i < 2; i++)
-      if((ret = js_get_property_str_float32(ctx, this_obj, i ? "y" : "x", &vec[i])))
-        break;
-  } else {
-    ret = 1;
-  }
-
-  return ret;
+js_get_vector(JSContext* ctx, JSValueConst value, float vec[2]) {
+  return js_tofloat32vec(ctx, vec, 2, vector_obj_props, value);
 }
 
 void
-js_set_vector(JSContext* ctx, JSValueConst this_obj, const float vec[2]) {
-  if(JS_IsArray(ctx, this_obj)) {
-    JS_SetPropertyUint32(ctx, this_obj, 0, JS_NewFloat64(ctx, vec[0]));
-    JS_SetPropertyUint32(ctx, this_obj, 1, JS_NewFloat64(ctx, vec[1]));
+js_set_vector(JSContext* ctx, JSValueConst value, const float vec[2]) {
+  if(JS_IsArray(ctx, value)) {
+    JS_SetPropertyUint32(ctx, value, 0, JS_NewFloat64(ctx, vec[0]));
+    JS_SetPropertyUint32(ctx, value, 1, JS_NewFloat64(ctx, vec[1]));
   } else {
-    JS_SetPropertyStr(ctx, this_obj, "x", JS_NewFloat64(ctx, vec[0]));
-    JS_SetPropertyStr(ctx, this_obj, "y", JS_NewFloat64(ctx, vec[1]));
+    JS_SetPropertyStr(ctx, value, "x", JS_NewFloat64(ctx, vec[0]));
+    JS_SetPropertyStr(ctx, value, "y", JS_NewFloat64(ctx, vec[1]));
   }
 }
 
@@ -997,8 +943,8 @@ FUNC(Transform) {
   float t[6];
   int n;
 
-  while((n = js_argument_transform(ctx, t, argc, argv))) {
-    nvgTransform(g_NVGcontext, t[transform_arg_index[0]], t[transform_arg_index[1]], t[transform_arg_index[2]], t[transform_arg_index[3]], t[transform_arg_index[4]], t[transform_arg_index[5]]);
+  while((n = js_nanovg_matrix_arguments(ctx, t, argc, argv))) {
+    nvgTransform(g_NVGcontext, t[0], t[1], t[2], t[3], t[4], t[5]);
 
     argc -= n;
     argv += n;
@@ -1066,7 +1012,7 @@ FUNC(CurrentTransform) {
   float t[6];
 
   nvgCurrentTransform(g_NVGcontext, t);
-  js_set_transform(ctx, argv[0], t);
+  js_nanovg_matrix_copy(ctx, argv[0], t);
 
   return JS_UNDEFINED;
 }
@@ -1077,9 +1023,9 @@ FUNC(TransformIdentity) {
   nvgTransformIdentity(t);
 
   if(argc == 0)
-    return js_new_transform(ctx, t);
+    return js_nanovg_matrix_new(ctx, t);
 
-  js_set_transform(ctx, argv[0], t);
+  js_nanovg_matrix_copy(ctx, argv[0], t);
   return JS_UNDEFINED;
 }
 
@@ -1097,9 +1043,9 @@ FUNC(TransformTranslate) {
   nvgTransformTranslate(t, x, y);
 
   if(i == 0)
-    return js_new_transform(ctx, t);
+    return js_nanovg_matrix_new(ctx, t);
 
-  js_set_transform(ctx, argv[0], t);
+  js_nanovg_matrix_copy(ctx, argv[0], t);
   return JS_UNDEFINED;
 }
 
@@ -1117,9 +1063,9 @@ FUNC(TransformScale) {
   nvgTransformScale(t, x, y);
 
   if(i == 0)
-    return js_new_transform(ctx, t);
+    return js_nanovg_matrix_new(ctx, t);
 
-  js_set_transform(ctx, argv[0], t);
+  js_nanovg_matrix_copy(ctx, argv[0], t);
   return JS_UNDEFINED;
 }
 
@@ -1137,39 +1083,35 @@ FUNC(TransformRotate) {
   nvgTransformRotate(t, angle);
 
   if(i == 0)
-    return js_new_transform(ctx, t);
+    return js_nanovg_matrix_new(ctx, t);
 
-  js_set_transform(ctx, argv[0], t);
+  js_nanovg_matrix_copy(ctx, argv[0], t);
   return JS_UNDEFINED;
 }
 
 FUNC(TransformMultiply) {
   float dst[6], src[6];
-  int i = 1, n;
 
   js_nanovg_tomatrix(ctx, dst, argv[0]);
 
-  while(i < argc && (n = js_argument_transform(ctx, src, argc - i, argv + i))) {
+  for(int n, i = 1; i < argc && (n = js_nanovg_matrix_arguments(ctx, src, argc - i, argv + i)); i += n) {
     nvgTransformMultiply(dst, src);
-    i += n;
   }
 
-  js_set_transform(ctx, argv[0], dst);
+  js_nanovg_matrix_copy(ctx, argv[0], dst);
   return JS_UNDEFINED;
 }
 
 FUNC(TransformPremultiply) {
   float dst[6], src[6];
-  int i = 1, n;
 
   js_nanovg_tomatrix(ctx, dst, argv[0]);
 
-  while(i < argc && (n = js_argument_transform(ctx, src, argc - i, argv + i))) {
+  for(int n, i = 1; i < argc && (n = js_nanovg_matrix_arguments(ctx, src, argc - i, argv + i)); i += n) {
     nvgTransformPremultiply(dst, src);
-    i += n;
   }
 
-  js_set_transform(ctx, argv[0], dst);
+  js_nanovg_matrix_copy(ctx, argv[0], dst);
   return JS_UNDEFINED;
 }
 
@@ -1186,8 +1128,8 @@ FUNC(TransformInverse) {
 
   if(ret) {
     if(argc == 1)
-      return js_new_transform(ctx, dst);
-    js_set_transform(ctx, argv[0], dst);
+      return js_nanovg_matrix_new(ctx, dst);
+    js_nanovg_matrix_copy(ctx, argv[0], dst);
   }
 
   return JS_NewInt32(ctx, ret);
