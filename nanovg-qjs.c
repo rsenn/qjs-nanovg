@@ -184,7 +184,7 @@ js_nanovg_wrap(JSContext* ctx, void* s, JSClassID classID) {
 }
 
 int
-js_get_transform(JSContext* ctx, JSValueConst value, float matrix[6]) {
+js_nanovg_tomatrix(JSContext* ctx, float matrix[6], JSValueConst value) {
   size_t length = 0, bytes_per_element = 0;
   float* ptr;
 
@@ -260,7 +260,7 @@ js_argument_transform(JSContext* ctx, float* matrix, int argc, JSValueConst argv
   if(i == 6)
     return i;
 
-  return !js_get_transform(ctx, argv[0], matrix);
+  return !js_nanovg_tomatrix(ctx, matrix, argv[0]);
 }
 
 int
@@ -1147,7 +1147,7 @@ FUNC(TransformMultiply) {
   float dst[6], src[6];
   int i = 1, n;
 
-  js_get_transform(ctx, argv[0], dst);
+  js_nanovg_tomatrix(ctx, dst, argv[0]);
 
   while(i < argc && (n = js_argument_transform(ctx, src, argc - i, argv + i))) {
     nvgTransformMultiply(dst, src);
@@ -1162,7 +1162,7 @@ FUNC(TransformPremultiply) {
   float dst[6], src[6];
   int i = 1, n;
 
-  js_get_transform(ctx, argv[0], dst);
+  js_nanovg_tomatrix(ctx, dst, argv[0]);
 
   while(i < argc && (n = js_argument_transform(ctx, src, argc - i, argv + i))) {
     nvgTransformPremultiply(dst, src);
@@ -1180,7 +1180,7 @@ FUNC(TransformInverse) {
   if(argc > 1)
     i++;
 
-  js_get_transform(ctx, argv[i], src);
+  js_nanovg_tomatrix(ctx, src, argv[i]);
 
   int ret = nvgTransformInverse(dst, src);
 
@@ -1197,7 +1197,7 @@ FUNC(TransformPoint) {
   float m[6], dst[2], src[2];
 
   js_get_vector(ctx, argv[0], dst);
-  js_get_transform(ctx, argv[1], m);
+  js_nanovg_tomatrix(ctx, m, argv[1]);
   js_argument_vector(ctx, src, argc - 2, argv + 2);
   nvgTransformPoint(&dst[0], &dst[1], m, src[0], src[1]);
   js_set_vector(ctx, argv[0], dst);
