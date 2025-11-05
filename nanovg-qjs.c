@@ -22,6 +22,20 @@ static JSValue color_proto = JS_UNDEFINED;
 
 static int
 js_get_NVGcolor(JSContext* ctx, JSValueConst this_obj, NVGcolor* color) {
+  size_t offset = 0, length = 0, bytes_per_element = 0;
+  JSValue buf = JS_GetTypedArrayBuffer(ctx, this_obj, &offset, &length, &bytes_per_element);
+
+  if(!JS_IsException(buf) && bytes_per_element == sizeof(float) && length >= 4) {
+    size_t len;
+    uint8_t* ptr = JS_GetArrayBuffer(ctx, &len, buf);
+    JS_FreeValue(ctx, buf);
+
+    if(ptr) {
+      memcpy(color, ptr + offset, sizeof(*color));
+      return 0;
+    }
+  }
+
   JSValue iter = js_iterator_new(ctx, this_obj);
 
   if(JS_IsObject(iter)) {
