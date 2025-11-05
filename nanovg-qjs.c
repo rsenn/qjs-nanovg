@@ -54,7 +54,7 @@ js_nanovg_paint_finalizer(JSRuntime* rt, JSValue val) {
 }
 
 static JSValue
-js_nanovg_paint_ctor(JSContext* ctx, JSValueConst new_target, int argc, JSValueConst* argv) {
+js_nanovg_paint_constructor(JSContext* ctx, JSValueConst new_target, int argc, JSValueConst* argv) {
   NVGpaint* p;
   JSValue proto, obj = JS_UNDEFINED;
 
@@ -1179,7 +1179,7 @@ js_nanovg_init(JSContext* ctx, JSModuleDef* m) {
 
   paint_proto = JS_NewObject(ctx);
   JS_SetClassProto(ctx, js_nanovg_paint_class_id, paint_proto);
-  paint_class = JS_NewCFunction2(ctx, js_nanovg_paint_ctor, "Paint", 0, JS_CFUNC_constructor, 0);
+  paint_class = JS_NewCFunction2(ctx, js_nanovg_paint_constructor, "Paint", 0, JS_CFUNC_constructor, 0);
   JS_SetConstructor(ctx, paint_class, paint_proto);
 
   JS_SetModuleExport(ctx, m, "Paint", paint_class);
