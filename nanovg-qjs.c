@@ -190,8 +190,6 @@ nvgjs_vector_arguments(JSContext* ctx, float vec[2], int argc, JSValueConst argv
   return !nvgjs_tovector(ctx, vec, argv[0]);
 }
 
-#define NVGJS_DECL(fn) static JSValue nvgjs_##fn(JSContext* ctx, JSValueConst this_value, int argc, JSValueConst* argv)
-
 #ifdef NANOVG_GL2
 NVGJS_DECL(CreateGL2) {
   int32_t flags = 0;
@@ -1231,9 +1229,6 @@ NVGJS_DECL(IsNextFillClicked)
 }
 */
 
-#define NVGJS_FUNC(fn, length) JS_CFUNC_DEF(#fn, length, nvgjs_##fn)
-#define NVGJS_FLAG(name) JS_PROP_INT32_DEF(#name, NVG_##name, JS_PROP_CONFIGURABLE)
-
 static const JSCFunctionListEntry nvgjs_funcs[] = {
 #ifdef NANOVG_GL2
     NVGJS_FUNC(CreateGL2, 1),
@@ -1379,7 +1374,6 @@ nvgjs_init(JSContext* ctx, JSModuleDef* m) {
 
   color_proto = JS_NewObjectProto(ctx, js_float32array_proto);
   JS_SetPropertyFunctionList(ctx, color_proto, nvgjs_color_methods, countof(nvgjs_color_methods));
-  // JS_SetClassProto(ctx, nvgjs_color_class_id, color_proto);
   color_ctor = JS_NewObjectProto(ctx, JS_NULL);
   JS_SetConstructor(ctx, color_ctor, color_proto);
   JS_SetModuleExport(ctx, m, "Color", color_ctor);
@@ -1403,7 +1397,7 @@ nvgjs_init(JSContext* ctx, JSModuleDef* m) {
   return 0;
 }
 
-static JSModuleDef*
+VISIBLE JSModuleDef*
 js_init_module_nanovg(JSContext* ctx, const char* module_name) {
   JSModuleDef* m;
 
@@ -1416,13 +1410,6 @@ js_init_module_nanovg(JSContext* ctx, const char* module_name) {
   JS_AddModuleExportList(ctx, m, nvgjs_funcs, countof(nvgjs_funcs));
   return m;
 }
-
-#ifdef JS_SHARED_LIBRARY
-VISIBLE JSModuleDef*
-js_init_module(JSContext* ctx, const char* module_name) {
-  return js_init_module_nanovg(ctx, module_name);
-}
-#endif
 
 void
 nvgjs_init_with_context(struct NVGcontext* vg) {
