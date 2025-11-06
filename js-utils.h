@@ -12,9 +12,11 @@ int js_get_property_uint_float32(JSContext*, JSValueConst, uint32_t, float*);
 void* js_get_typedarray(JSContext*, JSValueConst, size_t*, size_t*);
 JSValue js_iterator_method(JSContext*, JSValueConst);
 JSValue js_iterator_next(JSContext*, JSValueConst, BOOL*);
-float* js_float32v_ptr(JSContext*, size_t, JSValueConst);
+float* js_float32v_ptr(JSContext*, size_t*, JSValueConst);
 int js_tofloat32v(JSContext*, float*, size_t, const char* const[], JSValueConst);
-int js_float32v_copy(JSContext*, const float*, size_t, const char* const[], JSValueConst);
+int js_float32v_load(JSContext*, float*, size_t, const char* const[], JSValueConst);
+int js_fromfloat32v(JSContext*, const float*, size_t, const char* const[], JSValueConst);
+int js_float32v_store(JSContext*, const float*, size_t, const char* const[], JSValueConst);
 
 static inline int
 js_tofloat32(JSContext* ctx, float* pres, JSValueConst val) {

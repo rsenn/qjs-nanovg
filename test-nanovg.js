@@ -116,10 +116,10 @@ function main(...args) {
     context.begin(color);
 
     let m = nvg.CurrentTransform();
-    let t = nvg.TransformTranslate([], 10, 20);
-    let s = nvg.TransformScale([], 3, 3);
+    let t = nvg.TransformTranslate(10, 20);
+    let s = nvg.TransformScale(3, 3);
 
-    let p = nvg.TransformMultiply(nvg.TransformMultiply(m, t), s);
+    let p = nvg.TransformMultiply(m, t, s);
 
     let center = new glfw.Position(size.width / 2, size.height / 2);
     let imgSz = new glfw.Position(img2Sz.width * -1, img2Sz.height * -1);

@@ -1,4 +1,5 @@
 #include "js-utils.h"
+#include <string.h>
 
 int
 js_get_property_str_float32(JSContext* ctx, JSValueConst this_obj, const char* prop, float* pres) {
@@ -61,15 +62,15 @@ js_iterator_next(JSContext* ctx, JSValueConst obj, BOOL* done_p) {
 }
 
 float*
-js_float32v_ptr(JSContext* ctx, size_t min_len, JSValueConst value) {
-  size_t length = 0, bytes_per_element = 0;
+js_float32v_ptr(JSContext* ctx, size_t* plength, JSValueConst value) {
+  size_t bytes_per_element = 0;
   float* ptr;
 
-  if((ptr = js_get_typedarray(ctx, value, &length, &bytes_per_element))) {
-    if(length < min_len) {
+  if((ptr = js_get_typedarray(ctx, value, plength, &bytes_per_element))) {
+    /*if(length < min_len) {
       JS_ThrowTypeError(ctx, "TypedArray value must have at least %zu elements (has %zu)", min_len, length);
       return 0;
-    }
+    }*/
 
     if(bytes_per_element == sizeof(float))
       return ptr;
@@ -81,12 +82,23 @@ js_float32v_ptr(JSContext* ctx, size_t min_len, JSValueConst value) {
 int
 js_tofloat32v(JSContext* ctx, float* vec, size_t min_len, const char* const prop_map[], JSValueConst value) {
   float* ptr;
+  size_t length;
 
-  if((ptr = js_float32v_ptr(ctx, min_len, value))) {
+  if((ptr = js_float32v_ptr(ctx, &length, value))) {
+    if(length < min_len) {
+      JS_ThrowTypeError(ctx, "TypedArray value must have at least %zu elements (has %zu)", min_len, length);
+      return -1;
+    }
+
     memcpy(vec, ptr, min_len * sizeof(float));
     return 0;
   }
 
+  return js_float32v_load(ctx, vec, min_len, prop_map, value);
+}
+
+int
+js_float32v_load(JSContext* ctx, float* vec, size_t min_len, const char* const prop_map[], JSValueConst value) {
   if(!JS_IsObject(value)) {
     JS_ThrowTypeError(ctx, "value must be an object");
     return -1;
@@ -139,9 +151,18 @@ js_tofloat32v(JSContext* ctx, float* vec, size_t min_len, const char* const prop
 }
 
 int
-js_float32v_copy(JSContext* ctx, const float* vec, size_t min_len, const char* const prop_map[], JSValueConst value) {
-  if(js_float32v_ptr(ctx, min_len, value))
+js_fromfloat32v(JSContext* ctx, const float* vec, size_t min_len, const char* const prop_map[], JSValueConst value) {
+  size_t length;
+
+  if(js_float32v_ptr(ctx, &length, value) && length >= min_len)
     return 0;
+
+  return js_float32v_store(ctx, vec, min_len, prop_map, value);
+}
+
+int
+js_float32v_store(JSContext* ctx, const float* vec, size_t min_len, const char* const prop_map[], JSValueConst value) {
+  size_t length;
 
   if(!JS_IsObject(value)) {
     JS_ThrowTypeError(ctx, "value must be an object");

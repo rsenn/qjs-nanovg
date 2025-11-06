@@ -14,9 +14,10 @@
 #define VISIBLE
 #endif
 
-#define NVGJS_DECL(fn) static JSValue nvgjs_##fn(JSContext* ctx, JSValueConst this_value, int argc, JSValueConst argv[])
-#define NVGJS_FUNC(fn, length) JS_CFUNC_DEF(#fn, length, nvgjs_##fn)
-#define NVGJS_FLAG(name) JS_PROP_INT32_DEF(#name, NVG_##name, JS_PROP_CONFIGURABLE)
+#define NVGJS_DECL(fn) static JSValue nvgjs_func_##fn(JSContext* ctx, JSValueConst this_value, int argc, JSValueConst argv[], int magic)
+#define NVGJS_FUNC(fn, length) JS_CFUNC_MAGIC_DEF(#fn, length, nvgjs_func_##fn, 0)
+#define NVGJS_METHOD(name, fn, length) JS_CFUNC_MAGIC_DEF(name, length, nvgjs_func_##fn, 1)
+#define NVGJS_FLAG(name) JS_PROP_INT32_DEF(#name, NVG_##name, JS_PROP_CONFIGURABLE | JS_PROP_ENUMERABLE)
 
 struct NVGcontext;
 void nvgqjs_init_with_context(struct NVGcontext* vg);
