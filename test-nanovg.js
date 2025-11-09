@@ -1,7 +1,7 @@
 import * as glfw from 'glfw';
-import * as nvg from 'nanovg';
+import { CreateGL3, STENCIL_STROKES, ANTIALIAS, DEBUG } from 'nanovg';
 
-let window;
+let window, nvg;
 
 export function DrawImage(image, pos) {
   const size = nvg.ImageSize(image);
@@ -94,7 +94,7 @@ function main(...args) {
     },
   });
 
-  nvg.CreateGL3(nvg.STENCIL_STROKES | nvg.ANTIALIAS | nvg.DEBUG);
+  nvg = CreateGL3(STENCIL_STROKES | ANTIALIAS | DEBUG);
 
   const { width, height } = size;
   const { x, y } = position;
@@ -116,10 +116,10 @@ function main(...args) {
     context.begin(color);
 
     let m = nvg.CurrentTransform();
-    let t = nvg.TransformTranslate(10, 20);
-    let s = nvg.TransformScale(3, 3);
+    let t = nvg.Transform.Translate(10, 20);
+    let s = nvg.Transform.Scale(3, 3);
 
-    let p = nvg.TransformMultiply(m, t, s);
+    let p = nvg.Transform.Multiply(m, t, s);
 
     let center = new glfw.Position(size.width / 2, size.height / 2);
     let imgSz = new glfw.Position(img2Sz.width * -1, img2Sz.height * -1);
