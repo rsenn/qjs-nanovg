@@ -21,6 +21,11 @@
   if(!(nvg = JS_GetOpaque2(ctx, this_obj, nvgjs_context_class_id))) \
     return JS_EXCEPTION;
 
+#define NVGJS_FRAMEBUFFER(this_obj) \
+  NVGLUframebuffer* fb; \
+  if(!(fb = JS_GetOpaque2(ctx, this_obj, nvgjs_framebuffer_class_id))) \
+    return JS_EXCEPTION;
+
 #define NVGJS_FUNC(fn, length) JS_CFUNC_MAGIC_DEF(#fn, length, nvgjs_func_##fn, 0)
 #define NVGJS_METHOD(class, fn, length) JS_CFUNC_MAGIC_DEF(#fn, length, nvgjs_##class##_##fn, 0)
 #define NVGJS_CFUNC_DEC(name, fn, length) JS_CFUNC_MAGIC_DEF(name, length, nvgjs_func_##fn, 1)

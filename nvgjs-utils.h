@@ -20,7 +20,7 @@ int nvgjs_copyobject(JSContext*, JSValueConst, const char* const[], const float*
 int nvgjs_copyarray(JSContext*, JSValueConst, const float*, size_t);
 
 static inline int
-js_tofloat32(JSContext* ctx, float* pres, JSValueConst val) {
+nvgjs_tofloat32(JSContext* ctx, float* pres, JSValueConst val) {
   double f;
   int ret;
 
@@ -31,7 +31,7 @@ js_tofloat32(JSContext* ctx, float* pres, JSValueConst val) {
 }
 
 static inline BOOL
-js_is_same_obj(JSValueConst a, JSValueConst b) {
+nvgjs_same_object(JSValueConst a, JSValueConst b) {
   return JS_IsObject(a) && JS_IsObject(b) && JS_VALUE_GET_PTR(a) == JS_VALUE_GET_PTR(b);
 }
 

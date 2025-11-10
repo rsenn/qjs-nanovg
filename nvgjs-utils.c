@@ -1,4 +1,4 @@
-#include "js-utils.h"
+#include "nvgjs-utils.h"
 #include <string.h>
 
 static JSAtom iterator_symbol;
@@ -75,7 +75,7 @@ int
 nvgjs_inputobject(JSContext* ctx, float* vec, size_t len, const char* const prop_map[], JSValueConst vector) {
   for(int i = 0; i < len; i++) {
     JSValue value = JS_GetPropertyStr(ctx, vector, prop_map[i]);
-    if(js_tofloat32(ctx, &vec[i], value))
+    if(nvgjs_tofloat32(ctx, &vec[i], value))
       return -1;
     JS_FreeValue(ctx, value);
   }
@@ -87,7 +87,7 @@ int
 nvgjs_inputarray(JSContext* ctx, float* vec, size_t len, JSValueConst vector) {
   for(int i = 0; i < len; i++) {
     JSValue value = JS_GetPropertyUint32(ctx, vector, i);
-    if(js_tofloat32(ctx, &vec[i], value))
+    if(nvgjs_tofloat32(ctx, &vec[i], value))
       return -1;
     JS_FreeValue(ctx, value);
   }
@@ -106,7 +106,7 @@ nvgjs_inputiterator(JSContext* ctx, float* vec, size_t len, JSValueConst vector)
       int ret = 0;
 
       if(!done)
-        ret = js_tofloat32(ctx, &vec[i], val);
+        ret = nvgjs_tofloat32(ctx, &vec[i], val);
 
       JS_FreeValue(ctx, val);
 

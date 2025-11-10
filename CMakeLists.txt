@@ -32,9 +32,10 @@ link_directories(${GLEW_LIBRARY_DIR} ${GLFW_LIBRARY_DIR} ${QUICKJS_LIBRARY_DIR})
 
 add_library(
   qjs-nanovg SHARED
-  js-utils.c js-utils.h nanovg-qjs.c nanovg-qjs.h ${CMAKE_CURRENT_SOURCE_DIR}/nanovg/src/nanovg.c
-  ${CMAKE_CURRENT_SOURCE_DIR}/nanovg/src/nanovg.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/nanovg/src/nanovg_gl.h)
+  nvgjs-utils.h nvgjs-utils.c nvgjs-module.h nvgjs-module.c
+  nanovg/src/nanovg.c
+  nanovg/src/nanovg.h
+  nanovg/src/nanovg_gl.h)
 
 set_target_properties(
   qjs-nanovg PROPERTIES OUTPUT_NAME nanovg PREFIX "" COMPILE_FLAGS

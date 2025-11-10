@@ -4,18 +4,22 @@
 
 #include "nanovg.h"
 #include "nanovg_gl.h"
+#include "nanovg_gl_utils.h"
 
-#include "nanovg-qjs.h"
-#include "js-utils.h"
+#include "nvgjs-module.h"
+#include "nvgjs-utils.h"
 
 #include <assert.h>
 
-static JSClassID nvgjs_context_class_id, nvgjs_paint_class_id;
+static JSClassID nvgjs_context_class_id, nvgjs_paint_class_id, nvgjs_framebuffer_class_id;
 
 static JSValue js_float32array_ctor = JS_UNDEFINED, js_float32array_proto = JS_UNDEFINED;
 static JSValue color_ctor = JS_UNDEFINED, color_proto = JS_UNDEFINED;
 static JSValue transform_ctor = JS_UNDEFINED, transform_proto = JS_UNDEFINED;
 static JSValue context_ctor = JS_UNDEFINED, context_proto = JS_UNDEFINED;
+static JSValue framebuffer_ctor = JS_UNDEFINED, framebuffer_proto = JS_UNDEFINED;
+
+static JSValue nvgjs_framebuffer_wrap(JSContext*, JSValueConst, NVGLUframebuffer*);
 
 static float*
 nvgjs_float32v(JSContext* ctx, size_t min_size, JSValueConst value) {
@@ -492,14 +496,14 @@ nvgjs_context_wrap(JSContext* ctx, JSValueConst proto, NVGcontext* nvg) {
 
 static void
 nvgjs_context_finalizer(JSRuntime* rt, JSValue val) {
-  NVGcontext* p;
+  NVGcontext* nvg;
 
-  if((p = JS_GetOpaque(val, nvgjs_context_class_id))) {
-    js_free_rt(rt, p);
+  if((nvg = JS_GetOpaque(val, nvgjs_context_class_id))) {
+    // XXX: bug
   }
 }
 
-static JSClassDef nvgjs_context = {
+static JSClassDef nvgjs_context_class = {
  .class_name = "NVGcontext",
  .finalizer = nvgjs_context_finalizer,
 };
@@ -628,6 +632,40 @@ NVGJS_DECL(func, ImageHandleGL3) {
   return JS_NewUint32(ctx, nvglImageHandleGL3(nvg, imageHandle));
 }
 #endif
+
+NVGJS_DECL(func, CreateFramebuffer) {
+  NVGJS_CONTEXT(argv[0]);
+
+  int32_t w, h, imageFlags;
+
+  if(JS_ToInt32(ctx, &w, argv[1]))
+    return JS_EXCEPTION;
+
+  if(JS_ToInt32(ctx, &h, argv[2]))
+    return JS_EXCEPTION;
+
+  if(JS_ToInt32(ctx, &imageFlags, argv[3]))
+    return JS_EXCEPTION;
+
+  return nvgjs_framebuffer_wrap(ctx, framebuffer_proto, nvgluCreateFramebuffer(nvg, w, h, imageFlags));
+}
+
+NVGJS_DECL(func, BindFramebuffer) {
+  NVGJS_FRAMEBUFFER(argv[0]);
+
+  nvgluBindFramebuffer(fb);
+
+  return JS_UNDEFINED;
+}
+
+NVGJS_DECL(func, DeleteFramebuffer) {
+  NVGJS_FRAMEBUFFER(argv[0]);
+
+  nvgluDeleteFramebuffer(fb);
+  JS_SetOpaque(argv[0], 0);
+
+  return JS_UNDEFINED;
+}
 
 NVGJS_DECL(func, DegToRad) {
   double arg;
@@ -1824,6 +1862,12 @@ static const JSCFunctionListEntry nvgjs_funcs[] = {
  NVGJS_FUNC(ImageHandleGL3, 2),
 #endif
 
+ NVGJS_FLAG(STENCIL_STROKES),
+ NVGJS_FLAG(ANTIALIAS),
+ NVGJS_FLAG(DEBUG),
+
+ NVGJS_FLAG(IMAGE_NODELETE),
+
  NVGJS_FUNC(RadToDeg, 1),
  NVGJS_FUNC(DegToRad, 1),
  NVGJS_FUNC(RGB, 3),
@@ -1835,7 +1879,7 @@ static const JSCFunctionListEntry nvgjs_funcs[] = {
  NVGJS_FUNC(TransRGBAf, 2),
  NVGJS_FUNC(HSL, 3),
  NVGJS_FUNC(HSLA, 4),
- 
+
  NVGJS_FUNC(TransformPoint, 2),
 
  NVGJS_FLAG(PI),
@@ -1885,9 +1929,6 @@ static const JSCFunctionListEntry nvgjs_funcs[] = {
  NVGJS_FLAG(IMAGE_NEAREST),
  NVGJS_FLAG(TEXTURE_ALPHA),
  NVGJS_FLAG(TEXTURE_RGBA),
- NVGJS_FLAG(STENCIL_STROKES),
- NVGJS_FLAG(ANTIALIAS),
- NVGJS_FLAG(DEBUG),
 };
 
 static const JSCFunctionListEntry nvgjs_context_methods[] = {
@@ -1966,6 +2007,34 @@ static const JSCFunctionListEntry nvgjs_context_methods[] = {
  JS_PROP_STRING_DEF("[Symbol.toStringTag]", "NVGcontext", JS_PROP_CONFIGURABLE),
 };
 
+static JSValue
+nvgjs_framebuffer_wrap(JSContext* ctx, JSValueConst proto, NVGLUframebuffer* fb) {
+  JSValue obj = JS_NewObjectProtoClass(ctx, proto, nvgjs_framebuffer_class_id);
+
+  if(!JS_IsException(obj))
+    JS_SetOpaque(obj, fb);
+
+  return obj;
+}
+
+static const JSCFunctionListEntry nvgjs_framebuffer_methods[] = {
+ JS_PROP_STRING_DEF("[Symbol.toStringTag]", "NVGLUframebuffer", JS_PROP_CONFIGURABLE),
+};
+
+static void
+nvgjs_framebuffer_finalizer(JSRuntime* rt, JSValue val) {
+  NVGLUframebuffer* fb;
+
+  if((fb = JS_GetOpaque(val, nvgjs_framebuffer_class_id))) {
+    nvgluDeleteFramebuffer(fb);
+  }
+}
+
+static JSClassDef nvgjs_framebuffer_class = {
+ .class_name = "NVGLUframebuffer",
+ .finalizer = nvgjs_framebuffer_finalizer,
+};
+
 static int
 nvgjs_init(JSContext* ctx, JSModuleDef* m) {
   JSValue paint_proto, paint_class;
@@ -1974,6 +2043,9 @@ nvgjs_init(JSContext* ctx, JSModuleDef* m) {
   js_float32array_ctor = JS_GetPropertyStr(ctx, global, "Float32Array");
   js_float32array_proto = JS_GetPropertyStr(ctx, js_float32array_ctor, "prototype");
   JS_FreeValue(ctx, global);
+
+  JS_NewClassID(&nvgjs_context_class_id);
+  JS_NewClass(JS_GetRuntime(ctx), nvgjs_context_class_id, &nvgjs_context_class);
 
   context_proto = JS_NewObjectProto(ctx, JS_NULL);
   JS_SetPropertyFunctionList(ctx, context_proto, nvgjs_context_methods, countof(nvgjs_context_methods));
@@ -2004,6 +2076,14 @@ nvgjs_init(JSContext* ctx, JSModuleDef* m) {
   // JS_SetConstructor(ctx, paint_class, paint_proto);
   JS_SetModuleExport(ctx, m, "Paint", paint_class);
 
+  JS_NewClassID(&nvgjs_framebuffer_class_id);
+  JS_NewClass(JS_GetRuntime(ctx), nvgjs_framebuffer_class_id, &nvgjs_framebuffer_class);
+
+  framebuffer_proto = JS_NewObjectProto(ctx, JS_NULL);
+  JS_SetPropertyFunctionList(ctx, framebuffer_proto, nvgjs_framebuffer_methods, countof(nvgjs_framebuffer_methods));
+
+  // JS_SetModuleExport(ctx, m, "Framebuffer", framebuffer_ctor);
+
   JS_SetModuleExportList(ctx, m, nvgjs_funcs, countof(nvgjs_funcs));
   return 0;
 }
@@ -2030,6 +2110,7 @@ nvgjs_init_module(JSContext* ctx, const char* module_name) {
   JS_AddModuleExport(ctx, m, "Color");
   JS_AddModuleExport(ctx, m, "Transform");
   JS_AddModuleExport(ctx, m, "Paint");
+  // JS_AddModuleExport(ctx, m, "Framebuffer");
   JS_AddModuleExportList(ctx, m, nvgjs_funcs, countof(nvgjs_funcs));
   return m;
 }
