@@ -1,5 +1,5 @@
 import * as glfw from 'glfw';
-import { CreateGL3, STENCIL_STROKES, ANTIALIAS, DEBUG, Transform, TransformPoint, RGB, RGBA } from 'nanovg';
+import { CreateGL3, STENCIL_STROKES, ANTIALIAS, DEBUG, CreateImageFromHandleGL3, ImageHandleGL3, IMAGE_NODELETE, CreateFramebuffer, BindFramebuffer, DeleteFramebuffer, Transform, TransformPoint, RGB, RGBA, } from 'nanovg';
 
 let window, nvg;
 

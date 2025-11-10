@@ -1868,6 +1868,10 @@ static const JSCFunctionListEntry nvgjs_funcs[] = {
 
  NVGJS_FLAG(IMAGE_NODELETE),
 
+ NVGJS_FUNC(CreateFramebuffer, 4),
+ NVGJS_FUNC(BindFramebuffer, 1),
+ NVGJS_FUNC(DeleteFramebuffer, 1),
+
  NVGJS_FUNC(RadToDeg, 1),
  NVGJS_FUNC(DegToRad, 1),
  NVGJS_FUNC(RGB, 3),
