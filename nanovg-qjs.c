@@ -22,7 +22,7 @@ nvgjs_float32v(JSContext* ctx, size_t min_size, JSValueConst value) {
   size_t length;
   float* ptr;
 
-  if(js_is_same_obj(value, transform_ctor))
+  if(nvgjs_same_object(value, transform_ctor))
     return 0;
 
   if((ptr = nvgjs_outputarray(ctx, &length, value)))
@@ -70,7 +70,7 @@ static JSValue
 nvgjs_transform_copy(JSContext* ctx, JSValueConst value, const float transform[6]) {
 
   assert(JS_IsObject(value));
-  assert(!js_is_same_obj(value, transform_ctor));
+  assert(!nvgjs_same_object(value, transform_ctor));
 
   nvgjs_copyarray(ctx, value, transform, 6);
   return JS_UNDEFINED;
@@ -82,7 +82,7 @@ nvgjs_transform_arguments(JSContext* ctx, float transform[6], int argc, JSValueC
 
   if(argc >= 6)
     for(i = 0; i < 6; i++)
-      if(js_tofloat32(ctx, &transform[i], argv[i]))
+      if(nvgjs_tofloat32(ctx, &transform[i], argv[i]))
         break;
 
   if(i == 6)
@@ -112,7 +112,7 @@ nvgjs_vector_arguments(JSContext* ctx, float vec[2], int argc, JSValueConst argv
 
   if(argc >= 2)
     for(i = 0; i < 2; i++)
-      if(js_tofloat32(ctx, &vec[i], argv[i]))
+      if(nvgjs_tofloat32(ctx, &vec[i], argv[i]))
         break;
 
   if(i == 2)
@@ -1823,7 +1823,6 @@ static const JSCFunctionListEntry nvgjs_funcs[] = {
  NVGJS_FUNC(CreateImageFromHandleGL3, 5),
  NVGJS_FUNC(ImageHandleGL3, 2),
 #endif
- NVGJS_FUNC(TransformPoint, 2),
 
  NVGJS_FUNC(RadToDeg, 1),
  NVGJS_FUNC(DegToRad, 1),
@@ -1836,6 +1835,8 @@ static const JSCFunctionListEntry nvgjs_funcs[] = {
  NVGJS_FUNC(TransRGBAf, 2),
  NVGJS_FUNC(HSL, 3),
  NVGJS_FUNC(HSLA, 4),
+ 
+ NVGJS_FUNC(TransformPoint, 2),
 
  NVGJS_FLAG(PI),
  NVGJS_FLAG(CCW),
@@ -2007,8 +2008,19 @@ nvgjs_init(JSContext* ctx, JSModuleDef* m) {
   return 0;
 }
 
+#ifdef JS_SHARED_LIBRARY
+#if defined(_WIN32) || defined(__MINGW32__)
+#define VISIBLE __declspec(dllexport)
+#else
+#define VISIBLE __attribute__((visibility("default")))
+#endif
+#define nvgjs_init_module js_init_module
+#else
+#define VISIBLE
+#endif
+
 VISIBLE JSModuleDef*
-js_init_module_nanovg(JSContext* ctx, const char* module_name) {
+nvgjs_init_module(JSContext* ctx, const char* module_name) {
   JSModuleDef* m;
 
   if(!(m = JS_NewCModule(ctx, module_name, nvgjs_init)))

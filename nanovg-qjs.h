@@ -9,7 +9,7 @@
 #else
 #define VISIBLE __attribute__((visibility("default")))
 #endif
-#define js_init_module_nanovg js_init_module
+#define nvgjs_init_module js_init_module
 #else
 #define VISIBLE
 #endif
@@ -25,9 +25,6 @@
 #define NVGJS_METHOD(class, fn, length) JS_CFUNC_MAGIC_DEF(#fn, length, nvgjs_##class##_##fn, 0)
 #define NVGJS_CFUNC_DEC(name, fn, length) JS_CFUNC_MAGIC_DEF(name, length, nvgjs_func_##fn, 1)
 #define NVGJS_FLAG(name) JS_PROP_INT32_DEF(#name, NVG_##name, JS_PROP_CONFIGURABLE | JS_PROP_ENUMERABLE)
-
-struct NVGcontext;
-void nvgqjs_init_with_context(struct NVGcontext* vg);
 
 VISIBLE JSModuleDef* js_init_module_nanovg(JSContext* ctx, const char* module_name);
 
