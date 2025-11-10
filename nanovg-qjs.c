@@ -72,7 +72,7 @@ nvgjs_transform_copy(JSContext* ctx, JSValueConst value, const float transform[6
   assert(JS_IsObject(value));
   assert(!js_is_same_obj(value, transform_ctor));
 
-  nvgjs_output_copy(ctx, transform, 6, nvgjs_transform_keys, value);
+  nvgjs_copyarray(ctx, value, transform, 6);
   return JS_UNDEFINED;
 }
 
@@ -100,7 +100,10 @@ nvgjs_tovector(JSContext* ctx, float vec[2], JSValueConst value) {
 
 static int
 nvgjs_vector_copy(JSContext* ctx, JSValueConst value, const float vec[2]) {
-  return nvgjs_output_copy(ctx, vec, 2, nvgjs_vector_keys, value);
+  if(JS_IsArray(ctx, value))
+    return nvgjs_copyarray(ctx, value, vec, 2);
+
+  return nvgjs_copyobject(ctx, value, nvgjs_vector_keys, vec, 2);
 }
 
 static int
@@ -1390,7 +1393,7 @@ NVGJS_DECL(Context, TextBounds) {
 
   JS_FreeCString(ctx, str);
 
-  nvgjs_output_copy(ctx, bounds, countof(bounds), (const char* const[]){"xmin", "ymin", "xmax", "ymax"}, argv[4]);
+  nvgjs_copyobject(ctx, argv[4], (const char* const[]){"xmin", "ymin", "xmax", "ymax"}, bounds, countof(bounds));
 
   return JS_NewFloat64(ctx, ret);
 }
@@ -1426,7 +1429,7 @@ NVGJS_DECL(Context, TextBoxBounds) {
 
   JS_FreeCString(ctx, str);
 
-  nvgjs_output_copy(ctx, bounds, countof(bounds), (const char* const[]){"xmin", "ymin", "xmax", "ymax"}, argv[5]);
+  nvgjs_copyobject(ctx, argv[5], (const char* const[]){"xmin", "ymin", "xmax", "ymax"}, bounds, countof(bounds));
 
   return JS_UNDEFINED;
 }

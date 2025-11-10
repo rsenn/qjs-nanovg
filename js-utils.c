@@ -160,37 +160,16 @@ nvgjs_outputarray(JSContext* ctx, size_t* plength, JSValueConst value) {
 }
 
 int
-nvgjs_output(JSContext* ctx, const float* vec, size_t len, const char* const prop_map[], JSValueConst value) {
-  size_t length;
-
-  if(nvgjs_outputarray(ctx, &length, value) && length >= len)
-    return 0;
-
-  return nvgjs_output_copy(ctx, vec, len, prop_map, value);
+nvgjs_copyobject(JSContext* ctx, JSValueConst value, const char* const prop_map[], const float* vec, size_t len) {
+  for(int i = 0; i < len; i++)
+    JS_SetPropertyStr(ctx, value, prop_map[i], JS_NewFloat64(ctx, vec[i]));
+  return 0;
 }
 
 int
-nvgjs_output_copy(JSContext* ctx, const float* vec, size_t len, const char* const prop_map[], JSValueConst value) {
-  size_t length;
-
-  if(!JS_IsObject(value)) {
-    JS_ThrowTypeError(ctx, "value must be an object");
-    return -1;
-  }
-
-  if(JS_IsArray(ctx, value)) {
-    for(int i = 0; i < len; i++)
-      JS_SetPropertyUint32(ctx, value, i, JS_NewFloat64(ctx, vec[i]));
-
-    return 1;
-  }
-
-  if(prop_map) {
-    for(int i = 0; i < len; i++)
-      JS_SetPropertyStr(ctx, value, prop_map[i], JS_NewFloat64(ctx, vec[i]));
-
-    return 1;
-  }
+nvgjs_copyarray(JSContext* ctx, JSValueConst value, const float* vec, size_t len) {
+  for(int i = 0; i < len; i++)
+    JS_SetPropertyUint32(ctx, value, i, JS_NewFloat64(ctx, vec[i]));
 
   return 0;
 }
