@@ -527,6 +527,38 @@ NVGJS_DECL(func, DeleteGL2) {
 
   return JS_UNDEFINED;
 }
+
+NVGJS_DECL(func, CreateImageFromHandleGL2) {
+  NVGJS_CONTEXT(argv[0]);
+
+  uint32_t textureId;
+  int32_t w, h, imageFlags;
+
+  if(JS_ToUint32(ctx, &textureId, argv[1]))
+    return JS_EXCEPTION;
+
+  if(JS_ToInt32(ctx, &w, argv[2]))
+    return JS_EXCEPTION;
+
+  if(JS_ToInt32(ctx, &h, argv[3]))
+    return JS_EXCEPTION;
+
+  if(JS_ToInt32(ctx, &imageFlags, argv[4]))
+    return JS_EXCEPTION;
+
+  return JS_NewInt32(ctx, nvglCreateImageFromHandleGL2(nvg, textureId, w, h, imageFlags));
+}
+
+NVGJS_DECL(func, ImageHandleGL2) {
+  NVGJS_CONTEXT(argv[0]);
+
+  int32_t imageHandle;
+
+  if(JS_ToInt32(ctx, &imageHandle, argv[1]))
+    return JS_EXCEPTION;
+
+  return JS_NewUint32(ctx, nvglImageHandleGL2(nvg, imageHandle));
+}
 #endif
 
 #ifdef NANOVG_GL3
@@ -562,6 +594,38 @@ NVGJS_DECL(func, DeleteGL3) {
   }
 
   return JS_UNDEFINED;
+}
+
+NVGJS_DECL(func, CreateImageFromHandleGL3) {
+  NVGJS_CONTEXT(argv[0]);
+
+  uint32_t textureId;
+  int32_t w, h, imageFlags;
+
+  if(JS_ToUint32(ctx, &textureId, argv[1]))
+    return JS_EXCEPTION;
+
+  if(JS_ToInt32(ctx, &w, argv[2]))
+    return JS_EXCEPTION;
+
+  if(JS_ToInt32(ctx, &h, argv[3]))
+    return JS_EXCEPTION;
+
+  if(JS_ToInt32(ctx, &imageFlags, argv[4]))
+    return JS_EXCEPTION;
+
+  return JS_NewInt32(ctx, nvglCreateImageFromHandleGL3(nvg, textureId, w, h, imageFlags));
+}
+
+NVGJS_DECL(func, ImageHandleGL3) {
+  NVGJS_CONTEXT(argv[0]);
+
+  int32_t imageHandle;
+
+  if(JS_ToInt32(ctx, &imageHandle, argv[1]))
+    return JS_EXCEPTION;
+
+  return JS_NewUint32(ctx, nvglImageHandleGL3(nvg, imageHandle));
 }
 #endif
 
@@ -1750,10 +1814,14 @@ static const JSCFunctionListEntry nvgjs_funcs[] = {
 #ifdef NANOVG_GL2
  NVGJS_FUNC(CreateGL2, 1),
  NVGJS_FUNC(DeleteGL2, 1),
+ NVGJS_FUNC(CreateImageFromHandleGL2, 5),
+ NVGJS_FUNC(ImageHandleGL2, 2),
 #endif
 #ifdef NANOVG_GL3
  NVGJS_FUNC(CreateGL3, 1),
  NVGJS_FUNC(DeleteGL3, 1),
+ NVGJS_FUNC(CreateImageFromHandleGL3, 5),
+ NVGJS_FUNC(ImageHandleGL3, 2),
 #endif
  NVGJS_FUNC(TransformPoint, 2),
 
