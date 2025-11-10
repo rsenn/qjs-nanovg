@@ -53,18 +53,6 @@ nvgjs_iterator_next(JSContext* ctx, JSValueConst obj, BOOL* done_p) {
   return value;
 }
 
-float*
-nvgjs_outputarray(JSContext* ctx, size_t* plength, JSValueConst value) {
-  size_t bytes_per_element = 0;
-  float* ptr;
-
-  if((ptr = nvgjs_typedarray(ctx, value, plength, &bytes_per_element)))
-    if(bytes_per_element == sizeof(float))
-      return ptr;
-
-  return 0;
-}
-
 int
 nvgjs_inputoutputarray(JSContext* ctx, float* vec, size_t len, JSValueConst value) {
   float* ptr;
@@ -160,17 +148,17 @@ nvgjs_input(JSContext* ctx, float* vec, size_t len, const char* const prop_map[]
 }
 
 int
-js_fromfloat32v(JSContext* ctx, const float* vec, size_t len, const char* const prop_map[], JSValueConst value) {
+nvgjs_output(JSContext* ctx, const float* vec, size_t len, const char* const prop_map[], JSValueConst value) {
   size_t length;
 
   if(nvgjs_outputarray(ctx, &length, value) && length >= len)
     return 0;
 
-  return js_float32v_store(ctx, vec, len, prop_map, value);
+  return nvgjs_output_copy(ctx, vec, len, prop_map, value);
 }
 
 int
-js_float32v_store(JSContext* ctx, const float* vec, size_t len, const char* const prop_map[], JSValueConst value) {
+nvgjs_output_copy(JSContext* ctx, const float* vec, size_t len, const char* const prop_map[], JSValueConst value) {
   size_t length;
 
   if(!JS_IsObject(value)) {

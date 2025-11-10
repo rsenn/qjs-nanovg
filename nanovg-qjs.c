@@ -1390,7 +1390,7 @@ NVGJS_DECL(Context, TextBounds) {
 
   JS_FreeCString(ctx, str);
 
-  js_float32v_store(ctx, bounds, countof(bounds), (const char* const[]){"xmin", "ymin", "xmax", "ymax"}, argv[4]);
+  nvgjs_output_copy(ctx, bounds, countof(bounds), (const char* const[]){"xmin", "ymin", "xmax", "ymax"}, argv[4]);
 
   return JS_NewFloat64(ctx, ret);
 }
@@ -1426,7 +1426,7 @@ NVGJS_DECL(Context, TextBoxBounds) {
 
   JS_FreeCString(ctx, str);
 
-  js_float32v_store(ctx, bounds, countof(bounds), (const char* const[]){"xmin", "ymin", "xmax", "ymax"}, argv[5]);
+  nvgjs_output_copy(ctx, bounds, countof(bounds), (const char* const[]){"xmin", "ymin", "xmax", "ymax"}, argv[5]);
 
   return JS_UNDEFINED;
 }

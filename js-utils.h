@@ -17,7 +17,7 @@ int nvgjs_inputarray(JSContext*, float*, size_t, JSValueConst);
 int nvgjs_inputiterator(JSContext*, float*, size_t, JSValueConst);
 int nvgjs_input(JSContext*, float*, size_t, const char* const[], JSValueConst);
 int js_fromfloat32v(JSContext*, const float*, size_t, const char* const[], JSValueConst);
-int js_float32v_store(JSContext*, const float*, size_t, const char* const[], JSValueConst);
+int nvgjs_output_copy(JSContext*, const float*, size_t, const char* const[], JSValueConst);
 
 static inline int
 js_tofloat32(JSContext* ctx, float* pres, JSValueConst val) {
