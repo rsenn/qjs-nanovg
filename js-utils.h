@@ -7,14 +7,15 @@
 #include <quickjs.h>
 #include <cutils.h>
 
-int js_get_property_str_float32(JSContext*, JSValueConst, const char*, float*);
-int js_get_property_uint_float32(JSContext*, JSValueConst, uint32_t, float*);
-void* js_get_typedarray(JSContext*, JSValueConst, size_t*, size_t*);
-JSValue js_iterator_method(JSContext*, JSValueConst);
-JSValue js_iterator_next(JSContext*, JSValueConst, BOOL*);
-float* js_float32v_ptr(JSContext*, size_t*, JSValueConst);
-int js_tofloat32v(JSContext*, float*, size_t, const char* const[], JSValueConst);
-int js_float32v_load(JSContext*, float*, size_t, const char* const[], JSValueConst);
+JSValue nvgjs_iterator_invoke(JSContext*, JSValueConst);
+void* nvgjs_typedarray(JSContext*, JSValueConst, size_t*, size_t*);
+JSValue nvgjs_iterator_next(JSContext*, JSValueConst, BOOL*);
+float* nvgjs_outputarray(JSContext*, size_t*, JSValueConst);
+int nvgjs_inputoutputarray(JSContext*, float*, size_t, JSValueConst);
+int nvgjs_inputobject(JSContext*, float*, size_t, const char* const[], JSValueConst);
+int nvgjs_inputarray(JSContext*, float*, size_t, JSValueConst);
+int nvgjs_inputiterator(JSContext*, float*, size_t, JSValueConst);
+int nvgjs_input(JSContext*, float*, size_t, const char* const[], JSValueConst);
 int js_fromfloat32v(JSContext*, const float*, size_t, const char* const[], JSValueConst);
 int js_float32v_store(JSContext*, const float*, size_t, const char* const[], JSValueConst);
 
@@ -29,15 +30,9 @@ js_tofloat32(JSContext* ctx, float* pres, JSValueConst val) {
   return ret;
 }
 
-static inline JSValue
-js_iterator_new(JSContext* ctx, JSValueConst obj) {
-  JSValue ret = JS_UNDEFINED, fn = js_iterator_method(ctx, obj);
-
-  if(JS_IsFunction(ctx, fn))
-    ret = JS_Call(ctx, fn, obj, 0, 0);
-
-  JS_FreeValue(ctx, fn);
-  return ret;
+static inline BOOL
+js_is_same_obj(JSValueConst a, JSValueConst b) {
+  return JS_IsObject(a) && JS_IsObject(b) && JS_VALUE_GET_PTR(a) == JS_VALUE_GET_PTR(b);
 }
 
 #endif /* defined JS_UTILS_H */
