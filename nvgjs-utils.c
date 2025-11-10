@@ -1,10 +1,21 @@
 #include "nvgjs-utils.h"
 #include <string.h>
 
-static JSAtom iterator_symbol;
+static void*
+nvgjs_typedarray(JSContext* ctx, JSValueConst obj, size_t* plength, size_t* pbytes_per_element) {
+  size_t offset = 0, len;
+  uint8_t* ptr;
+  JSValue buf = JS_GetTypedArrayBuffer(ctx, obj, &offset, plength, pbytes_per_element);
+
+  if((ptr = JS_GetArrayBuffer(ctx, &len, buf)))
+    ptr += offset;
+
+  JS_FreeValue(ctx, buf);
+  return ptr;
+}
 
 static JSAtom
-nvgjs_iterator_symbol(JSContext* ctx) {
+nvgjs_iterator(JSContext* ctx) {
   static JSAtom iterator;
 
   if(!iterator) {
@@ -21,27 +32,8 @@ nvgjs_iterator_symbol(JSContext* ctx) {
   return iterator;
 }
 
-JSValue
-nvgjs_iterator_invoke(JSContext* ctx, JSValueConst obj) {
-  JSAtom prop = nvgjs_iterator_symbol(ctx);
-  return JS_Invoke(ctx, obj, prop, 0, 0);
-}
-
-void*
-nvgjs_typedarray(JSContext* ctx, JSValueConst obj, size_t* plength, size_t* pbytes_per_element) {
-  size_t offset = 0, len;
-  uint8_t* ptr;
-  JSValue buf = JS_GetTypedArrayBuffer(ctx, obj, &offset, plength, pbytes_per_element);
-
-  if((ptr = JS_GetArrayBuffer(ctx, &len, buf)))
-    ptr += offset;
-
-  JS_FreeValue(ctx, buf);
-  return ptr;
-}
-
-JSValue
-nvgjs_iterator_next(JSContext* ctx, JSValueConst obj, BOOL* done_p) {
+static JSValue
+nvgjs_next(JSContext* ctx, JSValueConst obj, BOOL* done_p) {
   JSValue fn = JS_GetPropertyStr(ctx, obj, "next");
   JSValue result = JS_Call(ctx, fn, obj, 0, 0);
   JS_FreeValue(ctx, fn);
@@ -97,12 +89,12 @@ nvgjs_inputarray(JSContext* ctx, float* vec, size_t len, JSValueConst vector) {
 
 int
 nvgjs_inputiterator(JSContext* ctx, float* vec, size_t len, JSValueConst vector) {
-  JSValue iter = nvgjs_iterator_invoke(ctx, vector);
+  JSValue iter = JS_Invoke(ctx, vector, nvgjs_iterator(ctx), 0, 0);
 
   if(JS_IsObject(iter)) {
     for(int i = 0; i < len; i++) {
       BOOL done = FALSE;
-      JSValue val = nvgjs_iterator_next(ctx, iter, &done);
+      JSValue val = nvgjs_next(ctx, iter, &done);
       int ret = 0;
 
       if(!done)
@@ -137,7 +129,7 @@ nvgjs_input(JSContext* ctx, float* vec, size_t len, const char* const prop_map[]
   if(JS_IsArray(ctx, vector))
     return nvgjs_inputarray(ctx, vec, len, vector);
 
-  if(JS_HasProperty(ctx, vector, nvgjs_iterator_symbol(ctx)))
+  if(JS_HasProperty(ctx, vector, nvgjs_iterator(ctx)))
     return nvgjs_inputiterator(ctx, vec, len, vector);
 
   if(prop_map)

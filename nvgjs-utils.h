@@ -7,9 +7,6 @@
 #include <quickjs.h>
 #include <cutils.h>
 
-JSValue nvgjs_iterator_invoke(JSContext*, JSValueConst);
-void* nvgjs_typedarray(JSContext*, JSValueConst, size_t*, size_t*);
-JSValue nvgjs_iterator_next(JSContext*, JSValueConst, BOOL*);
 int nvgjs_inputoutputarray(JSContext*, float*, size_t, JSValueConst);
 int nvgjs_inputobject(JSContext*, float*, size_t, const char* const[], JSValueConst);
 int nvgjs_inputarray(JSContext*, float*, size_t, JSValueConst);

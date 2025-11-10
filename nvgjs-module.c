@@ -22,7 +22,7 @@ static JSValue framebuffer_ctor = JS_UNDEFINED, framebuffer_proto = JS_UNDEFINED
 static JSValue nvgjs_framebuffer_wrap(JSContext*, JSValueConst, NVGLUframebuffer*);
 
 static float*
-nvgjs_float32v(JSContext* ctx, size_t min_size, JSValueConst value) {
+nvgjs_output(JSContext* ctx, size_t min_size, JSValueConst value) {
   size_t length;
   float* ptr;
 
@@ -70,9 +70,16 @@ nvgjs_wrap(JSContext* ctx, void* s, JSClassID classID) {
 
 static const char* const nvgjs_transform_keys[] = {"a", "b", "c", "d", "e", "f"};
 
+static float*
+nvgjs_transform_output(JSContext* ctx, JSValueConst value) {
+  if(nvgjs_same_object(value, transform_ctor))
+    return 0;
+
+  return nvgjs_output(ctx, 6, value);
+}
+
 static JSValue
 nvgjs_transform_copy(JSContext* ctx, JSValueConst value, const float transform[6]) {
-
   assert(JS_IsObject(value));
   assert(!nvgjs_same_object(value, transform_ctor));
 
@@ -179,7 +186,7 @@ NVGJS_DECL(Transform, Identity) {
   float dst[6], *trf;
   int i = 0;
 
-  if(!(trf = nvgjs_float32v(ctx, 6, this_obj))) {
+  if(!(trf = nvgjs_transform_output(ctx, this_obj))) {
     if(argc >= 1)
       nvgjs_inputoutputarray(ctx, dst, 6, argv[i++]);
 
@@ -199,7 +206,7 @@ NVGJS_DECL(Transform, Translate) {
   float dst[6], vec[2], *trf;
   int i = 0;
 
-  if(!(trf = nvgjs_float32v(ctx, 6, this_obj))) {
+  if(!(trf = nvgjs_transform_output(ctx, this_obj))) {
     if(argc >= 1 && !JS_IsNumber(argv[0]) && !nvgjs_inputoutputarray(ctx, dst, 6, argv[0]))
       i++;
 
@@ -222,7 +229,7 @@ NVGJS_DECL(Transform, Scale) {
   float dst[6], vec[2], *trf;
   int i = 0;
 
-  if(!(trf = nvgjs_float32v(ctx, 6, this_obj))) {
+  if(!(trf = nvgjs_transform_output(ctx, this_obj))) {
     if(argc >= 1 && !JS_IsNumber(argv[0]) && !nvgjs_inputoutputarray(ctx, dst, 6, argv[0]))
       i++;
 
@@ -246,7 +253,7 @@ NVGJS_DECL(Transform, Rotate) {
   double angle;
   int i = 0;
 
-  if(!(trf = nvgjs_float32v(ctx, 6, this_obj))) {
+  if(!(trf = nvgjs_transform_output(ctx, this_obj))) {
     if(argc >= 1 && !JS_IsNumber(argv[0]) && !nvgjs_inputoutputarray(ctx, dst, 6, argv[0]))
       i++;
 
@@ -273,7 +280,7 @@ NVGJS_DECL(Transform, SkewX) {
   double angle;
   int i = 0;
 
-  if(!(trf = nvgjs_float32v(ctx, 6, this_obj))) {
+  if(!(trf = nvgjs_transform_output(ctx, this_obj))) {
     if(argc >= 1 && !JS_IsNumber(argv[0]) && !nvgjs_inputoutputarray(ctx, dst, 6, argv[0]))
       i++;
 
@@ -300,7 +307,7 @@ NVGJS_DECL(Transform, SkewY) {
   double angle;
   int i = 0;
 
-  if(!(trf = nvgjs_float32v(ctx, 6, this_obj))) {
+  if(!(trf = nvgjs_transform_output(ctx, this_obj))) {
     if(argc >= 1 && !JS_IsNumber(argv[0]) && !nvgjs_inputoutputarray(ctx, dst, 6, argv[0]))
       i++;
 
@@ -326,7 +333,7 @@ NVGJS_DECL(Transform, Multiply) {
   float dst[6], src[6], *trf;
   int i = 0;
 
-  if(!(trf = nvgjs_float32v(ctx, 6, this_obj))) {
+  if(!(trf = nvgjs_transform_output(ctx, this_obj))) {
     nvgjs_inputoutputarray(ctx, dst, 6, argv[0]);
     i++;
     trf = dst;
@@ -350,7 +357,7 @@ NVGJS_DECL(Transform, Premultiply) {
   float dst[6], src[6], *trf;
   int i = 0;
 
-  if(!(trf = nvgjs_float32v(ctx, 6, this_obj))) {
+  if(!(trf = nvgjs_transform_output(ctx, this_obj))) {
     nvgjs_inputoutputarray(ctx, dst, 6, argv[0]);
     i++;
     trf = dst;
@@ -374,7 +381,7 @@ NVGJS_DECL(Transform, Inverse) {
   float dst[6], src[6], *trf;
   int i = 0;
 
-  if(!(trf = nvgjs_float32v(ctx, 6, this_obj))) {
+  if(!(trf = nvgjs_transform_output(ctx, this_obj))) {
     if(argc > 1)
       i++;
     trf = dst;
