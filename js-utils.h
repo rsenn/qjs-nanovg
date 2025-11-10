@@ -10,13 +10,13 @@
 JSValue nvgjs_iterator_invoke(JSContext*, JSValueConst);
 void* nvgjs_typedarray(JSContext*, JSValueConst, size_t*, size_t*);
 JSValue nvgjs_iterator_next(JSContext*, JSValueConst, BOOL*);
-float* nvgjs_outputarray(JSContext*, size_t*, JSValueConst);
 int nvgjs_inputoutputarray(JSContext*, float*, size_t, JSValueConst);
 int nvgjs_inputobject(JSContext*, float*, size_t, const char* const[], JSValueConst);
 int nvgjs_inputarray(JSContext*, float*, size_t, JSValueConst);
 int nvgjs_inputiterator(JSContext*, float*, size_t, JSValueConst);
 int nvgjs_input(JSContext*, float*, size_t, const char* const[], JSValueConst);
-int js_fromfloat32v(JSContext*, const float*, size_t, const char* const[], JSValueConst);
+float* nvgjs_outputarray(JSContext*, size_t*, JSValueConst);
+int nvgjs_output(JSContext*, const float*, size_t, const char* const[], JSValueConst);
 int nvgjs_output_copy(JSContext*, const float*, size_t, const char* const[], JSValueConst);
 
 static inline int

@@ -72,7 +72,7 @@ nvgjs_transform_copy(JSContext* ctx, JSValueConst value, const float transform[6
   assert(JS_IsObject(value));
   assert(!js_is_same_obj(value, transform_ctor));
 
-  js_fromfloat32v(ctx, transform, 6, nvgjs_transform_keys, value);
+  nvgjs_output_copy(ctx, transform, 6, nvgjs_transform_keys, value);
   return JS_UNDEFINED;
 }
 
@@ -100,7 +100,7 @@ nvgjs_tovector(JSContext* ctx, float vec[2], JSValueConst value) {
 
 static int
 nvgjs_vector_copy(JSContext* ctx, JSValueConst value, const float vec[2]) {
-  return js_fromfloat32v(ctx, vec, 2, nvgjs_vector_keys, value);
+  return nvgjs_output_copy(ctx, vec, 2, nvgjs_vector_keys, value);
 }
 
 static int

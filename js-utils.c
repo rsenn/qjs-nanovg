@@ -147,6 +147,18 @@ nvgjs_input(JSContext* ctx, float* vec, size_t len, const char* const prop_map[]
   return -1;
 }
 
+float*
+nvgjs_outputarray(JSContext* ctx, size_t* plength, JSValueConst value) {
+  size_t bytes_per_element = 0;
+  float* ptr;
+
+  if((ptr = nvgjs_typedarray(ctx, value, plength, &bytes_per_element)))
+    if(bytes_per_element == sizeof(float))
+      return ptr;
+
+  return 0;
+}
+
 int
 nvgjs_output(JSContext* ctx, const float* vec, size_t len, const char* const prop_map[], JSValueConst value) {
   size_t length;
