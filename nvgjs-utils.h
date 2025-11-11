@@ -7,14 +7,14 @@
 #include <quickjs.h>
 #include <cutils.h>
 
-int nvgjs_inputoutputarray(JSContext*, float*, size_t, JSValueConst);
+float* nvgjs_inputoutputarray(JSContext*, float*, size_t, JSValueConst);
 int nvgjs_inputobject(JSContext*, float*, size_t, const char* const[], JSValueConst);
 int nvgjs_inputarray(JSContext*, float*, size_t, JSValueConst);
 int nvgjs_inputiterator(JSContext*, float*, size_t, JSValueConst);
 int nvgjs_input(JSContext*, float*, size_t, const char* const[], JSValueConst);
 float* nvgjs_outputarray(JSContext*, size_t*, JSValueConst);
-int nvgjs_copyobject(JSContext*, JSValueConst, const char* const[], const float*, size_t);
-int nvgjs_copyarray(JSContext*, JSValueConst, const float*, size_t);
+void nvgjs_copyobject(JSContext*, JSValueConst, const char* const[], const float*, size_t);
+void nvgjs_copyarray(JSContext*, JSValueConst, const float*, size_t);
 
 static inline int
 nvgjs_tofloat32(JSContext* ctx, float* pres, JSValueConst val) {

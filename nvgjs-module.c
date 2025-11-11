@@ -37,10 +37,10 @@ nvgjs_output(JSContext* ctx, size_t min_size, JSValueConst value) {
 }
 
 static size_t
-nvgjs_u8offset(const char* str, size_t len, size_t charpos) {
+nvgjs_u8offset(const char* str, size_t len, int charpos) {
   const uint8_t *p = (const uint8_t*)str, *e = (const uint8_t*)str + len;
 
-  for(size_t i = 0; i < charpos && p < e; i++) {
+  for(int i = 0; i < charpos && p < e; i++) {
     if(unicode_from_utf8(p, e - p, &p) == -1)
       break;
 
@@ -51,11 +51,6 @@ nvgjs_u8offset(const char* str, size_t len, size_t charpos) {
 }
 
 static const char* const nvgjs_color_keys[] = {"r", "g", "b", "a"};
-
-static int
-nvgjs_tocolor(JSContext* ctx, NVGcolor* color, JSValueConst value) {
-  return nvgjs_inputoutputarray(ctx, color->rgba, 4, value);
-}
 
 static JSValue
 nvgjs_wrap(JSContext* ctx, void* s, JSClassID classID) {
@@ -68,7 +63,29 @@ nvgjs_wrap(JSContext* ctx, void* s, JSClassID classID) {
   return obj;
 }
 
-static const char* const nvgjs_transform_keys[] = {"a", "b", "c", "d", "e", "f"};
+static int
+nvgjs_arguments(JSContext* ctx, float vec[2], int vlen, int argc, JSValueConst argv[]) {
+  if(argc >= 1 && !nvgjs_inputarray(ctx, vec, vlen, argv[0]))
+    return 1;
+
+  if(argc >= vlen) {
+    for(int i = 0; i < vlen; i++)
+      if(nvgjs_tofloat32(ctx, &vec[i], argv[i]))
+        return 0;
+
+    return vlen;
+  }
+
+  return 0;
+}
+
+static void
+nvgjs_copy(JSContext* ctx, JSValueConst value, const char* const prop_map[], const float vec[2], int vlen) {
+  if(JS_IsArray(ctx, value))
+    nvgjs_copyarray(ctx, value, vec, vlen);
+
+  nvgjs_copyobject(ctx, value, prop_map, vec, vlen);
+}
 
 static float*
 nvgjs_transform_output(JSContext* ctx, JSValueConst value) {
@@ -78,58 +95,26 @@ nvgjs_transform_output(JSContext* ctx, JSValueConst value) {
   return nvgjs_output(ctx, 6, value);
 }
 
+static const char* const nvgjs_transform_keys[] = {"a", "b", "c", "d", "e", "f"};
+
 static JSValue
 nvgjs_transform_copy(JSContext* ctx, JSValueConst value, const float transform[6]) {
   assert(JS_IsObject(value));
   assert(!nvgjs_same_object(value, transform_ctor));
 
-  nvgjs_copyarray(ctx, value, transform, 6);
+  nvgjs_copy(ctx, value, nvgjs_transform_keys, transform, 6);
   return JS_UNDEFINED;
-}
-
-static int
-nvgjs_transform_arguments(JSContext* ctx, float transform[6], int argc, JSValueConst argv[]) {
-  int i = 0;
-
-  if(argc >= 6)
-    for(i = 0; i < 6; i++)
-      if(nvgjs_tofloat32(ctx, &transform[i], argv[i]))
-        break;
-
-  if(i == 6)
-    return i;
-
-  return !nvgjs_inputoutputarray(ctx, transform, 6, argv[0]);
 }
 
 static const char* const nvgjs_vector_keys[] = {"x", "y"};
 
 static int
-nvgjs_tovector(JSContext* ctx, float vec[2], JSValueConst value) {
-  return nvgjs_inputoutputarray(ctx, vec, 2, value);
-}
+nvgjs_tocolor(JSContext* ctx, NVGcolor* color, JSValueConst value) {
+  if(nvgjs_inputarray(ctx, color->rgba, 4, value)) {
+    color->a = 1;
 
-static int
-nvgjs_vector_copy(JSContext* ctx, JSValueConst value, const float vec[2]) {
-  if(JS_IsArray(ctx, value))
-    return nvgjs_copyarray(ctx, value, vec, 2);
-
-  return nvgjs_copyobject(ctx, value, nvgjs_vector_keys, vec, 2);
-}
-
-static int
-nvgjs_vector_arguments(JSContext* ctx, float vec[2], int argc, JSValueConst argv[]) {
-  int i = 0;
-
-  if(argc >= 2)
-    for(i = 0; i < 2; i++)
-      if(nvgjs_tofloat32(ctx, &vec[i], argv[i]))
-        break;
-
-  if(i == 2)
-    return i;
-
-  return !nvgjs_tovector(ctx, vec, argv[0]);
+    return nvgjs_inputarray(ctx, color->rgba, 3, value);
+  }
 }
 
 static JSValue
@@ -183,81 +168,80 @@ nvgjs_transform_set(JSContext* ctx, JSValueConst this_val, JSValueConst value, i
 }
 
 NVGJS_DECL(Transform, Identity) {
-  float dst[6], *trf;
+  float tmp[6], *mat;
   int i = 0;
 
-  if(!(trf = nvgjs_transform_output(ctx, this_obj))) {
-    if(argc >= 1)
-      nvgjs_inputoutputarray(ctx, dst, 6, argv[i++]);
+  if(!(mat = nvgjs_transform_output(ctx, this_obj))) {
+    mat = tmp;
 
-    trf = dst;
+    if(argc > 0) {
+      if(!(mat = nvgjs_inputoutputarray(ctx, tmp, 6, argv[i++])))
+        return JS_EXCEPTION;
+    }
   }
 
-  nvgTransformIdentity(trf);
+  nvgTransformIdentity(mat);
 
-  if(i == 0)
-    return trf == dst ? nvgjs_transform_new(ctx, dst) : JS_DupValue(ctx, this_obj);
+  if(mat == tmp)
+    return i ? nvgjs_transform_copy(ctx, argv[0], tmp) : nvgjs_transform_new(ctx, tmp);
 
-  return nvgjs_transform_copy(ctx, argv[0], dst);
-  ;
+  return i ? JS_UNDEFINED : JS_DupValue(ctx, this_obj);
 }
 
 NVGJS_DECL(Transform, Translate) {
-  float dst[6], vec[2], *trf;
+  float tmp[6], vec[2], *mat;
   int i = 0;
 
-  if(!(trf = nvgjs_transform_output(ctx, this_obj))) {
-    if(argc >= 1 && !JS_IsNumber(argv[0]) && !nvgjs_inputoutputarray(ctx, dst, 6, argv[0]))
+  if(!(mat = nvgjs_transform_output(ctx, this_obj))) {
+    if(argc > 1 && (mat = nvgjs_inputoutputarray(ctx, tmp, 6, argv[0])))
       i++;
-
-    trf = dst;
+    else
+      mat = tmp;
   }
 
-  if(!nvgjs_vector_arguments(ctx, vec, argc - i, argv + i))
+  if(!nvgjs_arguments(ctx, vec, argc - i, 2, argv + i))
     return JS_ThrowInternalError(ctx, "need x, y arguments");
 
-  nvgTransformTranslate(trf, vec[0], vec[1]);
+  nvgTransformTranslate(mat, vec[0], vec[1]);
 
-  if(i == 0)
-    return trf == dst ? nvgjs_transform_new(ctx, dst) : JS_DupValue(ctx, this_obj);
+  if(mat == tmp)
+    return i ? nvgjs_transform_copy(ctx, argv[0], tmp) : nvgjs_transform_new(ctx, tmp);
 
-  return nvgjs_transform_copy(ctx, argv[0], dst);
-  ;
+  return i ? JS_UNDEFINED : JS_DupValue(ctx, this_obj);
 }
 
 NVGJS_DECL(Transform, Scale) {
-  float dst[6], vec[2], *trf;
+  float tmp[6], vec[2], *mat;
   int i = 0;
 
-  if(!(trf = nvgjs_transform_output(ctx, this_obj))) {
-    if(argc >= 1 && !JS_IsNumber(argv[0]) && !nvgjs_inputoutputarray(ctx, dst, 6, argv[0]))
+  if(!(mat = nvgjs_transform_output(ctx, this_obj))) {
+    if(argc > 1 && (mat = nvgjs_inputoutputarray(ctx, tmp, 6, argv[0])))
       i++;
-
-    trf = dst;
+    else
+      mat = tmp;
   }
 
-  if(!nvgjs_vector_arguments(ctx, vec, argc - i, argv + i))
+  if(!nvgjs_arguments(ctx, vec, argc - i, 2, argv + i))
     return JS_ThrowInternalError(ctx, "need x, y or vector arguments");
 
-  nvgTransformScale(trf, vec[0], vec[1]);
+  nvgTransformScale(mat, vec[0], vec[1]);
 
-  if(i == 0)
-    return trf == dst ? nvgjs_transform_new(ctx, dst) : JS_DupValue(ctx, this_obj);
+  if(mat == tmp)
+    return i ? nvgjs_transform_copy(ctx, argv[0], tmp) : nvgjs_transform_new(ctx, tmp);
 
-  return nvgjs_transform_copy(ctx, argv[0], dst);
-  ;
+  return i ? JS_UNDEFINED : JS_DupValue(ctx, this_obj);
 }
 
 NVGJS_DECL(Transform, Rotate) {
-  float dst[6], *trf;
+  float tmp[6], *mat;
   double angle;
   int i = 0;
 
-  if(!(trf = nvgjs_transform_output(ctx, this_obj))) {
-    if(argc >= 1 && !JS_IsNumber(argv[0]) && !nvgjs_inputoutputarray(ctx, dst, 6, argv[0]))
+  if(!(mat = nvgjs_transform_output(ctx, this_obj))) {
+    if(argc > 1 && (mat = nvgjs_inputoutputarray(ctx, tmp, 6, argv[0])))
       i++;
-
-    trf = dst;
+    else
+      mat = tmp;
   }
 
   if(argc < 1 + i)
@@ -266,25 +250,24 @@ NVGJS_DECL(Transform, Rotate) {
   if(JS_ToFloat64(ctx, &angle, argv[i]))
     return JS_EXCEPTION;
 
-  nvgTransformRotate(trf, angle);
+  nvgTransformRotate(mat, angle);
 
-  if(i == 0)
-    return trf == dst ? nvgjs_transform_new(ctx, dst) : JS_DupValue(ctx, this_obj);
+  if(mat == tmp)
+    return i ? nvgjs_transform_copy(ctx, argv[0], tmp) : nvgjs_transform_new(ctx, tmp);
 
-  return nvgjs_transform_copy(ctx, argv[0], dst);
-  ;
+  return i ? JS_UNDEFINED : JS_DupValue(ctx, this_obj);
 }
 
 NVGJS_DECL(Transform, SkewX) {
-  float dst[6], *trf;
+  float tmp[6], *mat;
   double angle;
   int i = 0;
 
-  if(!(trf = nvgjs_transform_output(ctx, this_obj))) {
-    if(argc >= 1 && !JS_IsNumber(argv[0]) && !nvgjs_inputoutputarray(ctx, dst, 6, argv[0]))
+  if(!(mat = nvgjs_transform_output(ctx, this_obj))) {
+    if(argc > 1 && (mat = nvgjs_inputoutputarray(ctx, tmp, 6, argv[0])))
       i++;
-
-    trf = dst;
+    else
+      mat = tmp;
   }
 
   if(argc < 1 + i)
@@ -293,25 +276,24 @@ NVGJS_DECL(Transform, SkewX) {
   if(JS_ToFloat64(ctx, &angle, argv[i]))
     return JS_EXCEPTION;
 
-  nvgTransformSkewX(trf, angle);
+  nvgTransformSkewX(mat, angle);
 
-  if(i == 0)
-    return trf == dst ? nvgjs_transform_new(ctx, dst) : JS_DupValue(ctx, this_obj);
+  if(mat == tmp)
+    return i ? nvgjs_transform_copy(ctx, argv[0], tmp) : nvgjs_transform_new(ctx, tmp);
 
-  return nvgjs_transform_copy(ctx, argv[0], dst);
-  ;
+  return i ? JS_UNDEFINED : JS_DupValue(ctx, this_obj);
 }
 
 NVGJS_DECL(Transform, SkewY) {
-  float dst[6], *trf;
+  float tmp[6], *mat;
   double angle;
   int i = 0;
 
-  if(!(trf = nvgjs_transform_output(ctx, this_obj))) {
-    if(argc >= 1 && !JS_IsNumber(argv[0]) && !nvgjs_inputoutputarray(ctx, dst, 6, argv[0]))
+  if(!(mat = nvgjs_transform_output(ctx, this_obj))) {
+    if(argc > 1 && (mat = nvgjs_inputoutputarray(ctx, tmp, 6, argv[0])))
       i++;
-
-    trf = dst;
+    else
+      mat = tmp;
   }
 
   if(argc < 1 + i)
@@ -320,90 +302,91 @@ NVGJS_DECL(Transform, SkewY) {
   if(JS_ToFloat64(ctx, &angle, argv[i]))
     return JS_EXCEPTION;
 
-  nvgTransformSkewY(trf, angle);
+  nvgTransformSkewY(mat, angle);
 
-  if(i == 0)
-    return trf == dst ? nvgjs_transform_new(ctx, dst) : JS_DupValue(ctx, this_obj);
+  if(mat == tmp)
+    return i ? nvgjs_transform_copy(ctx, argv[0], tmp) : nvgjs_transform_new(ctx, tmp);
 
-  return nvgjs_transform_copy(ctx, argv[0], dst);
-  ;
+  return i ? JS_UNDEFINED : JS_DupValue(ctx, this_obj);
 }
 
 NVGJS_DECL(Transform, Multiply) {
-  float dst[6], src[6], *trf;
-  int i = 0;
+  float tmp[6], src[6], *mat;
+  int n, i = 0;
 
-  if(!(trf = nvgjs_transform_output(ctx, this_obj))) {
-    nvgjs_inputoutputarray(ctx, dst, 6, argv[0]);
-    i++;
-    trf = dst;
+  if(!(mat = nvgjs_transform_output(ctx, this_obj))) {
+    if(argc > 1 && (mat = nvgjs_inputoutputarray(ctx, tmp, 6, argv[0])))
+      i++;
+    else
+      mat = tmp;
   }
 
   if(argc < 1 + i)
     return JS_ThrowInternalError(ctx, "need %d arguments", 1 + i);
 
-  for(int n; i < argc && (n = nvgjs_transform_arguments(ctx, src, argc - i, argv + i)); i += n) {
-    nvgTransformMultiply(trf, src);
+  for(; i < argc; i += n) {
+    if(!(n = nvgjs_arguments(ctx, src, argc - i, 6, argv + i)))
+      break;
+
+    nvgTransformMultiply(mat, src);
   }
 
-  if(trf != dst)
-    return JS_DupValue(ctx, this_obj);
+  if(mat == tmp)
+    return i ? nvgjs_transform_copy(ctx, argv[0], tmp) : nvgjs_transform_new(ctx, tmp);
 
-  return nvgjs_transform_copy(ctx, argv[0], dst);
-  ;
+  return i ? JS_UNDEFINED : JS_DupValue(ctx, this_obj);
 }
 
 NVGJS_DECL(Transform, Premultiply) {
-  float dst[6], src[6], *trf;
+  float tmp[6], src[6], *mat;
   int i = 0;
 
-  if(!(trf = nvgjs_transform_output(ctx, this_obj))) {
-    nvgjs_inputoutputarray(ctx, dst, 6, argv[0]);
-    i++;
-    trf = dst;
+  if(!(mat = nvgjs_transform_output(ctx, this_obj))) {
+    if(argc > 1 && (mat = nvgjs_inputoutputarray(ctx, tmp, 6, argv[0])))
+      i++;
+    else
+      mat = tmp;
   }
 
   if(argc < 1 + i)
     return JS_ThrowInternalError(ctx, "need %d arguments", 1 + i);
 
-  for(int n; i < argc && (n = nvgjs_transform_arguments(ctx, src, argc - i, argv + i)); i += n) {
-    nvgTransformPremultiply(trf, src);
+  for(int n; i < argc; i += n) {
+    if(!(n = nvgjs_arguments(ctx, src, argc - i, 6, argv + i)))
+      break;
+
+    nvgTransformPremultiply(mat, src);
   }
 
-  if(trf != dst)
-    return JS_DupValue(ctx, this_obj);
+  if(mat == tmp)
+    return i ? nvgjs_transform_copy(ctx, argv[0], tmp) : nvgjs_transform_new(ctx, tmp);
 
-  return nvgjs_transform_copy(ctx, argv[0], dst);
-  ;
+  return i ? JS_UNDEFINED : JS_DupValue(ctx, this_obj);
 }
 
 NVGJS_DECL(Transform, Inverse) {
-  float dst[6], src[6], *trf;
-  int i = 0;
+  float tmp[6], src[6], *mat;
+  int ret, i = 0;
 
-  if(!(trf = nvgjs_transform_output(ctx, this_obj))) {
-    if(argc > 1)
+  if(!(mat = nvgjs_transform_output(ctx, this_obj))) {
+    if(argc > 0 && (mat = nvgjs_inputoutputarray(ctx, tmp, 6, argv[0])))
       i++;
-    trf = dst;
+    else
+      mat = tmp;
   }
 
   if(argc < 1 + i)
     return JS_ThrowInternalError(ctx, "need %d arguments", 1 + i);
 
-  nvgjs_inputoutputarray(ctx, src, 6, argv[i]);
+  nvgjs_inputarray(ctx, src, 6, argv[i]);
 
-  int ret = nvgTransformInverse(trf, src);
-
-  if(!ret)
+  if(!(ret = nvgTransformInverse(mat, src)))
     return JS_ThrowInternalError(ctx, "nvgTransformInverse failed");
 
-  if(trf != dst)
-    return JS_DupValue(ctx, this_obj);
+  if(mat == tmp)
+    return i ? nvgjs_transform_copy(ctx, argv[0], tmp) : nvgjs_transform_new(ctx, tmp);
 
-  if(i == 0)
-    return nvgjs_transform_new(ctx, dst);
-
-  return nvgjs_transform_copy(ctx, argv[0], dst);
+  return i ? JS_UNDEFINED : JS_DupValue(ctx, this_obj);
 }
 
 static const JSCFunctionListEntry nvgjs_transform_methods[] = {
@@ -413,6 +396,14 @@ static const JSCFunctionListEntry nvgjs_transform_methods[] = {
  JS_CGETSET_MAGIC_DEF("d", nvgjs_transform_get, nvgjs_transform_set, 3),
  JS_CGETSET_MAGIC_DEF("e", nvgjs_transform_get, nvgjs_transform_set, 4),
  JS_CGETSET_MAGIC_DEF("f", nvgjs_transform_get, nvgjs_transform_set, 5),
+
+ JS_CGETSET_MAGIC_DEF("xx", nvgjs_transform_get, nvgjs_transform_set, 0),
+ JS_CGETSET_MAGIC_DEF("yx", nvgjs_transform_get, nvgjs_transform_set, 1),
+ JS_CGETSET_MAGIC_DEF("xy", nvgjs_transform_get, nvgjs_transform_set, 2),
+ JS_CGETSET_MAGIC_DEF("yy", nvgjs_transform_get, nvgjs_transform_set, 3),
+ JS_CGETSET_MAGIC_DEF("x0", nvgjs_transform_get, nvgjs_transform_set, 4),
+ JS_CGETSET_MAGIC_DEF("y0", nvgjs_transform_get, nvgjs_transform_set, 5),
+
  JS_PROP_STRING_DEF("[Symbol.toStringTag]", "nvgTransform", JS_PROP_CONFIGURABLE),
 };
 
@@ -811,20 +802,37 @@ NVGJS_DECL(func, HSLA) {
 }
 
 NVGJS_DECL(func, TransformPoint) {
-  float trf[6], dst[2], src[2];
+  float trf[6], *dst, src[2];
+  size_t size;
+  int i = 0;
 
-  if(argc < 3)
-    return JS_ThrowInternalError(ctx, "need 3 arguments");
+  if(argc < 2)
+    return JS_ThrowInternalError(ctx, "need 2 arguments");
 
-  nvgjs_tovector(ctx, dst, argv[0]);
-  nvgjs_inputoutputarray(ctx, trf, 6, argv[1]);
-  nvgjs_vector_arguments(ctx, src, argc - 2, argv + 2);
+  if(!(dst = nvgjs_outputarray(ctx, &size, argv[0])))
+    return JS_EXCEPTION;
 
-  nvgTransformPoint(&dst[0], &dst[1], trf, src[0], src[1]);
+  nvgjs_inputarray(ctx, trf, 6, argv[1]);
 
-  nvgjs_vector_copy(ctx, argv[0], dst);
+  if(argc > 2) {
+    for(; size >= 2; size -= 2, dst += 2, i++) {
+      int r;
 
-  return JS_UNDEFINED;
+      if(!(r = nvgjs_arguments(ctx, src, argc - 2, 2, argv + 2)))
+        break;
+
+      argc -= r;
+      argv += r;
+
+      nvgTransformPoint(&dst[0], &dst[1], trf, src[0], src[1]);
+    }
+
+  } else {
+    for(; size >= 2; size -= 2, dst += 2, i++)
+      nvgTransformPoint(&dst[0], &dst[1], trf, dst[0], dst[1]);
+  }
+
+  return JS_NewInt32(ctx, i);
 }
 
 NVGJS_DECL(Context, CreateFont) {
@@ -1430,9 +1438,10 @@ NVGJS_DECL(Context, Text) {
     return JS_EXCEPTION;
 
   if(argc > 3) {
-    uint64_t u;
-    if(!JS_ToIndex(ctx, &u, argv[3]))
-      end = str + nvgjs_u8offset(str, len, u);
+    int32_t pos;
+
+    if(!JS_ToInt32(ctx, &pos, argv[3]))
+      end = str + nvgjs_u8offset(str, len, pos);
   }
 
   float ret = nvgText(nvg, x, y, str, end);
@@ -1463,9 +1472,10 @@ NVGJS_DECL(Context, TextBox) {
     return JS_EXCEPTION;
 
   if(argc > 4) {
-    uint64_t u;
-    if(!JS_ToIndex(ctx, &u, argv[4]))
-      end = str + nvgjs_u8offset(str, len, u);
+    int32_t pos;
+
+    if(!JS_ToInt32(ctx, &pos, argv[4]))
+      end = str + nvgjs_u8offset(str, len, pos);
   }
 
   nvgTextBox(nvg, x, y, breakRowWidth, str, end);
@@ -1493,9 +1503,10 @@ NVGJS_DECL(Context, TextBounds) {
     return JS_EXCEPTION;
 
   if(!(JS_IsNull(argv[3]) || JS_IsUndefined(argv[3]))) {
-    uint64_t u;
-    if(!JS_ToIndex(ctx, &u, argv[3]))
-      end = str + nvgjs_u8offset(str, len, u);
+    int32_t pos;
+
+    if(!JS_ToInt32(ctx, &pos, argv[3]))
+      end = str + nvgjs_u8offset(str, len, pos);
   }
 
   float ret = nvgTextBounds(nvg, x, y, str, end, bounds);
@@ -1529,9 +1540,10 @@ NVGJS_DECL(Context, TextBoxBounds) {
     return JS_EXCEPTION;
 
   if(argc > 4) {
-    uint64_t u;
-    if(!JS_ToIndex(ctx, &u, argv[4]))
-      end = str + nvgjs_u8offset(str, len, u);
+    int32_t pos;
+
+    if(!JS_ToInt32(ctx, &pos, argv[4]))
+      end = str + nvgjs_u8offset(str, len, pos);
   }
 
   nvgTextBoxBounds(nvg, x, y, breakRowWidth, str, end, bounds);
@@ -1715,7 +1727,7 @@ NVGJS_DECL(Context, Transform) {
   if(argc < 1)
     return JS_ThrowInternalError(ctx, "need 1/6 arguments");
 
-  while((n = nvgjs_transform_arguments(ctx, t, argc, argv))) {
+  while((n = nvgjs_arguments(ctx, t, argc, 6, argv))) {
     nvgTransform(nvg, t[0], t[1], t[2], t[3], t[4], t[5]);
 
     argc -= n;
