@@ -12,7 +12,7 @@ nvgjs_arraylen(JSContext* ctx, JSValueConst vector) {
 }
 
 static void*
-nvgjs_typedarray(JSContext* ctx, JSValueConst obj, size_t* plength, size_t* pbytes_per_element) {
+nvgjs_typedarray(JSContext* ctx, JSValueConst obj, int* plength, int* pbytes_per_element) {
   size_t offset, byte_length, bytes_per_element;
   uint8_t* ptr = 0;
   JSValue buf = JS_GetTypedArrayBuffer(ctx, obj, &offset, &byte_length, &bytes_per_element);
@@ -66,13 +66,38 @@ nvgjs_next(JSContext* ctx, JSValueConst obj, BOOL* done_p) {
 }
 
 float*
-nvgjs_inputoutputarray(JSContext* ctx, float* vec, size_t min_length, JSValueConst vector) {
+nvgjs_outputarray(JSContext* ctx, int* plength, JSValueConst value) {
+  int bytes_per_element = 0;
   float* ptr;
-  size_t length;
 
-  if((ptr = nvgjs_outputarray(ctx, &length, vector))) {
-    if(length < min_length) {
-      JS_ThrowRangeError(ctx, "TypedArray vector must have at least %zu elements (has %zu)", min_length, length);
+  if((ptr = nvgjs_typedarray(ctx, value, plength, &bytes_per_element)))
+    if(bytes_per_element == sizeof(float))
+      return ptr;
+
+  JS_ThrowTypeError(ctx, "expecting a Float32Array");
+  return 0;
+}
+
+float*
+nvgjs_output(JSContext* ctx, int min_length, JSValueConst value) {
+  int len;
+  float* ptr;
+
+  if((ptr = nvgjs_outputarray(ctx, &len, value)))
+    if(len >= min_length)
+      return ptr;
+
+  return 0;
+}
+
+float*
+nvgjs_inputoutputarray(JSContext* ctx, float vec[], int min_length, JSValueConst vector) {
+  float* ptr;
+  int len;
+
+  if((ptr = nvgjs_outputarray(ctx, &len, vector))) {
+    if(len < min_length) {
+      JS_ThrowRangeError(ctx, "TypedArray vector must have at least %i elements (has %i)", min_length, len);
       return 0;
     }
 
@@ -91,8 +116,8 @@ nvgjs_inputoutputarray(JSContext* ctx, float* vec, size_t min_length, JSValueCon
 }
 
 int
-nvgjs_inputobject(JSContext* ctx, float* vec, size_t len, const char* const prop_map[], JSValueConst vector) {
-  for(size_t i = 0; i < len; i++) {
+nvgjs_inputobject(JSContext* ctx, float vec[], int len, const char* const prop_map[], JSValueConst vector) {
+  for(int i = 0; i < len; i++) {
     JSValue value = JS_GetPropertyStr(ctx, vector, prop_map[i]);
 
     if(nvgjs_tofloat32(ctx, &vec[i], value))
@@ -105,18 +130,13 @@ nvgjs_inputobject(JSContext* ctx, float* vec, size_t len, const char* const prop
 }
 
 int
-nvgjs_inputarray(JSContext* ctx, float* vec, size_t min_length, JSValueConst vector) {
-  if(nvgjs_arraylen(ctx, vector) < min_length) {
-    JS_ThrowRangeError(ctx, "input Array must have at least %zu elements", min_length);
-    return -1;
-  }
-
+nvgjs_inputarray(JSContext* ctx, float vec[], int min_length, JSValueConst vector) {
   float* ptr;
-  size_t length;
+  int length;
 
   if((ptr = nvgjs_outputarray(ctx, &length, vector))) {
     if(length < min_length) {
-      JS_ThrowRangeError(ctx, "TypedArray vector must have at least %zu elements (has %zu)", min_length, length);
+      JS_ThrowRangeError(ctx, "TypedArray vector must have at least %i elements (has %i)", min_length, length);
       return -1;
     }
 
@@ -124,7 +144,12 @@ nvgjs_inputarray(JSContext* ctx, float* vec, size_t min_length, JSValueConst vec
     return 0;
   }
 
-  for(size_t i = 0; i < min_length; i++) {
+  if(nvgjs_arraylen(ctx, vector) < min_length) {
+    JS_ThrowRangeError(ctx, "input Array must have at least %i elements", min_length);
+    return -1;
+  }
+
+  for(int i = 0; i < min_length; i++) {
     JSValue value = JS_GetPropertyUint32(ctx, vector, i);
 
     if(nvgjs_tofloat32(ctx, &vec[i], value))
@@ -137,7 +162,7 @@ nvgjs_inputarray(JSContext* ctx, float* vec, size_t min_length, JSValueConst vec
 }
 
 int
-nvgjs_inputiterator(JSContext* ctx, float* vec, size_t min_length, JSValueConst vector) {
+nvgjs_inputiterator(JSContext* ctx, float vec[], int min_length, JSValueConst vector) {
   JSValue iter = JS_Invoke(ctx, vector, nvgjs_iterator(ctx), 0, 0);
 
   if(JS_IsException(iter)) {
@@ -145,7 +170,7 @@ nvgjs_inputiterator(JSContext* ctx, float* vec, size_t min_length, JSValueConst 
     return -1;
   }
 
-  for(size_t i = 0; i < min_length; i++) {
+  for(int i = 0; i < min_length; i++) {
     BOOL done = FALSE;
     JSValue val = nvgjs_next(ctx, iter, &done);
     int ret = 0;
@@ -159,7 +184,7 @@ nvgjs_inputiterator(JSContext* ctx, float* vec, size_t min_length, JSValueConst 
       return -1;
 
     if(done) {
-      JS_ThrowRangeError(ctx, "iterable must have at least %zu elements (has %zu)", min_length, i);
+      JS_ThrowRangeError(ctx, "iterable must have at least %i elements (has %i)", min_length, i);
       return -1;
     }
   }
@@ -169,7 +194,7 @@ nvgjs_inputiterator(JSContext* ctx, float* vec, size_t min_length, JSValueConst 
 }
 
 int
-nvgjs_input(JSContext* ctx, float* vec, size_t len, const char* const prop_map[], JSValueConst vector) {
+nvgjs_input(JSContext* ctx, float vec[], int len, const char* const prop_map[], JSValueConst vector) {
   if(!JS_IsObject(vector)) {
     JS_ThrowTypeError(ctx, "vector must be an object");
     return -1;
@@ -190,29 +215,15 @@ nvgjs_input(JSContext* ctx, float* vec, size_t len, const char* const prop_map[]
   return -1;
 }
 
-float*
-nvgjs_outputarray(JSContext* ctx, size_t* plength, JSValueConst value) {
-  size_t bytes_per_element = 0;
-  float* ptr;
-
-  if((ptr = nvgjs_typedarray(ctx, value, plength, &bytes_per_element))) {
-    if(bytes_per_element == sizeof(float))
-      return ptr;
-  }
-
-  JS_ThrowTypeError(ctx, "expecting a Float32Array");
-  return 0;
-}
-
 void
-nvgjs_copyobject(JSContext* ctx, JSValueConst value, const char* const prop_map[], const float* vec, size_t len) {
+nvgjs_copyobject(JSContext* ctx, JSValueConst value, const char* const prop_map[], const float vec[], int len) {
 
-  for(size_t i = 0; i < len; i++)
+  for(int i = 0; i < len; i++)
     JS_SetPropertyStr(ctx, value, prop_map[i], JS_NewFloat64(ctx, vec[i]));
 }
 
 void
-nvgjs_copyarray(JSContext* ctx, JSValueConst value, const float* vec, size_t len) {
-  for(size_t i = 0; i < len; i++)
+nvgjs_copyarray(JSContext* ctx, JSValueConst value, const float vec[], int len) {
+  for(int i = 0; i < len; i++)
     JS_SetPropertyUint32(ctx, value, i, JS_NewFloat64(ctx, vec[i]));
 }

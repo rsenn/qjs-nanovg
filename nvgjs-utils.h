@@ -7,14 +7,15 @@
 #include <quickjs.h>
 #include <cutils.h>
 
-float* nvgjs_inputoutputarray(JSContext*, float*, size_t, JSValueConst);
-int nvgjs_inputobject(JSContext*, float*, size_t, const char* const[], JSValueConst);
-int nvgjs_inputarray(JSContext*, float*, size_t, JSValueConst);
-int nvgjs_inputiterator(JSContext*, float*, size_t, JSValueConst);
-int nvgjs_input(JSContext*, float*, size_t, const char* const[], JSValueConst);
-float* nvgjs_outputarray(JSContext*, size_t*, JSValueConst);
-void nvgjs_copyobject(JSContext*, JSValueConst, const char* const[], const float*, size_t);
-void nvgjs_copyarray(JSContext*, JSValueConst, const float*, size_t);
+float* nvgjs_outputarray(JSContext*, int* plength, JSValueConst value);
+float* nvgjs_output(JSContext*, int min_length, JSValueConst value);
+float* nvgjs_inputoutputarray(JSContext*, float vec[], int min_length, JSValueConst);
+int nvgjs_inputobject(JSContext*, float vec[], int len, const char* const prop_map[], JSValueConst);
+int nvgjs_inputarray(JSContext*, float vec[], int min_length, JSValueConst);
+int nvgjs_inputiterator(JSContext*, float vec[], int min_length, JSValueConst);
+int nvgjs_input(JSContext*, float vec[], int len, const char* const prop_map[], JSValueConst);
+void nvgjs_copyobject(JSContext*, JSValueConst value, const char* const prop_map[], const float vec[], int len);
+void nvgjs_copyarray(JSContext*, JSValueConst value, const float vec[], int len);
 
 static inline int
 nvgjs_tofloat32(JSContext* ctx, float* pres, JSValueConst val) {
@@ -25,6 +26,17 @@ nvgjs_tofloat32(JSContext* ctx, float* pres, JSValueConst val) {
     *pres = (float)f;
 
   return ret;
+}
+
+static size_t
+nvgjs_utf8offset(const void* str, size_t len, int charpos) {
+  const uint8_t *p = (const uint8_t*)str, *e = p + len;
+
+  for(int i = 0; i < charpos && p < e; i++)
+    if(unicode_from_utf8(p, e - p, &p) == -1)
+      break;
+
+  return p - (const uint8_t*)str;
 }
 
 static inline BOOL

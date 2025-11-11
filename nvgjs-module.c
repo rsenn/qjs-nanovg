@@ -11,44 +11,15 @@
 
 #include <assert.h>
 
-static JSClassID nvgjs_context_class_id, nvgjs_paint_class_id, nvgjs_framebuffer_class_id;
+JSClassID nvgjs_context_class_id, nvgjs_paint_class_id, nvgjs_framebuffer_class_id;
 
-static JSValue js_float32array_ctor = JS_UNDEFINED, js_float32array_proto = JS_UNDEFINED;
-static JSValue color_ctor = JS_UNDEFINED, color_proto = JS_UNDEFINED;
-static JSValue transform_ctor = JS_UNDEFINED, transform_proto = JS_UNDEFINED;
-static JSValue context_ctor = JS_UNDEFINED, context_proto = JS_UNDEFINED;
-static JSValue framebuffer_ctor = JS_UNDEFINED, framebuffer_proto = JS_UNDEFINED;
+static JSValue js_float32array_ctor, js_float32array_proto;
+static JSValue color_ctor, color_proto;
+static JSValue transform_ctor, transform_proto;
+static JSValue context_ctor, context_proto;
+static JSValue framebuffer_ctor, framebuffer_proto;
 
 static JSValue nvgjs_framebuffer_wrap(JSContext*, JSValueConst, NVGLUframebuffer*);
-
-static float*
-nvgjs_output(JSContext* ctx, size_t min_size, JSValueConst value) {
-  size_t length;
-  float* ptr;
-
-  if(nvgjs_same_object(value, transform_ctor))
-    return 0;
-
-  if((ptr = nvgjs_outputarray(ctx, &length, value)))
-    if(length >= min_size)
-      return ptr;
-
-  return 0;
-}
-
-static size_t
-nvgjs_u8offset(const char* str, size_t len, int charpos) {
-  const uint8_t *p = (const uint8_t*)str, *e = (const uint8_t*)str + len;
-
-  for(int i = 0; i < charpos && p < e; i++) {
-    if(unicode_from_utf8(p, e - p, &p) == -1)
-      break;
-
-    i++;
-  }
-
-  return (const char*)p - str;
-}
 
 static const char* const nvgjs_color_keys[] = {"r", "g", "b", "a"};
 
@@ -65,7 +36,7 @@ nvgjs_wrap(JSContext* ctx, void* s, JSClassID classID) {
 
 static int
 nvgjs_arguments(JSContext* ctx, float vec[2], int vlen, int argc, JSValueConst argv[]) {
-  if(argc >= 1 && !nvgjs_inputarray(ctx, vec, vlen, argv[0]))
+  if(argc >= 1 && JS_IsObject(argv[0]) && !nvgjs_inputarray(ctx, vec, vlen, argv[0]))
     return 1;
 
   if(argc >= vlen) {
@@ -581,7 +552,8 @@ NVGJS_DECL(func, CreateGL3) {
   }
 #endif
 
-  // GLEW generates GL error because it calls glGetString(GL_EXTENSIONS), we'll consume it here.
+  // GLEW generates GL error because it calls glGetString(GL_EXTENSIONS), we'll
+  // consume it here.
   glGetError();
 
   return nvgjs_context_wrap(ctx, context_proto, nvgCreateGL3(flags));
@@ -645,11 +617,20 @@ NVGJS_DECL(func, CreateFramebuffer) {
   if(JS_ToInt32(ctx, &imageFlags, argv[3]))
     return JS_EXCEPTION;
 
-  return nvgjs_framebuffer_wrap(ctx, framebuffer_proto, nvgluCreateFramebuffer(nvg, w, h, imageFlags));
+  NVGLUframebuffer* fb;
+
+  if(!(fb = nvgluCreateFramebuffer(nvg, w, h, imageFlags)))
+    return JS_ThrowInternalError(ctx, "Failed creating NVGLUframebuffer [%ix%i] (%i)", w, h, imageFlags);
+
+  return nvgjs_framebuffer_wrap(ctx, framebuffer_proto, fb);
 }
 
 NVGJS_DECL(func, BindFramebuffer) {
-  NVGJS_FRAMEBUFFER(argv[0]);
+  NVGLUframebuffer* fb = 0;
+
+  if(!JS_IsNull(argv[0]))
+    if(!(fb = JS_GetOpaque2(ctx, argv[0], nvgjs_framebuffer_class_id)))
+      return JS_EXCEPTION;
 
   nvgluBindFramebuffer(fb);
 
@@ -663,6 +644,22 @@ NVGJS_DECL(func, DeleteFramebuffer) {
   JS_SetOpaque(argv[0], 0);
 
   return JS_UNDEFINED;
+}
+
+NVGJS_DECL(func, ReadPixels) {
+  uint32_t w, h;
+
+  JS_ToUint32(ctx, &w, argv[0]);
+  JS_ToUint32(ctx, &h, argv[1]);
+
+  void* image;
+
+  if(!(image = js_malloc(ctx, w * h * 4)))
+    return JS_EXCEPTION;
+
+  glReadPixels(0, 0, w, h, GL_RGBA, GL_UNSIGNED_BYTE, image);
+
+  return JS_NewArrayBuffer(ctx, image, w * h * 4, (JSFreeArrayBufferDataFunc*)&js_free_rt, image, FALSE);
 }
 
 NVGJS_DECL(func, DegToRad) {
@@ -719,7 +716,8 @@ NVGJS_DECL(func, RGBA) {
   if(argc < 4)
     return JS_ThrowInternalError(ctx, "need 4 arguments");
 
-  if(JS_ToInt32(ctx, &r, argv[0]) || JS_ToInt32(ctx, &g, argv[1]) || JS_ToInt32(ctx, &b, argv[2]) || JS_ToInt32(ctx, &a, argv[3]))
+  if(JS_ToInt32(ctx, &r, argv[0]) || JS_ToInt32(ctx, &g, argv[1]) || JS_ToInt32(ctx, &b, argv[2]) ||
+     JS_ToInt32(ctx, &a, argv[3]))
     return JS_EXCEPTION;
 
   return nvgjs_color_new(ctx, nvgRGBA(r, g, b, a));
@@ -731,7 +729,8 @@ NVGJS_DECL(func, RGBAf) {
   if(argc < 4)
     return JS_ThrowInternalError(ctx, "need 4 arguments");
 
-  if(JS_ToFloat64(ctx, &r, argv[0]) || JS_ToFloat64(ctx, &g, argv[1]) || JS_ToFloat64(ctx, &b, argv[2]) || JS_ToFloat64(ctx, &a, argv[3]))
+  if(JS_ToFloat64(ctx, &r, argv[0]) || JS_ToFloat64(ctx, &g, argv[1]) || JS_ToFloat64(ctx, &b, argv[2]) ||
+     JS_ToFloat64(ctx, &a, argv[3]))
     return JS_EXCEPTION;
 
   return nvgjs_color_new(ctx, nvgRGBAf(r, g, b, a));
@@ -795,7 +794,8 @@ NVGJS_DECL(func, HSLA) {
   if(argc < 4)
     return JS_ThrowInternalError(ctx, "need 4 arguments");
 
-  if(JS_ToFloat64(ctx, &h, argv[0]) || JS_ToFloat64(ctx, &s, argv[1]) || JS_ToFloat64(ctx, &l, argv[2]) || JS_ToInt32(ctx, &a, argv[3]))
+  if(JS_ToFloat64(ctx, &h, argv[0]) || JS_ToFloat64(ctx, &s, argv[1]) || JS_ToFloat64(ctx, &l, argv[2]) ||
+     JS_ToInt32(ctx, &a, argv[3]))
     return JS_EXCEPTION;
 
   return nvgjs_color_new(ctx, nvgHSLA(h, s, l, a));
@@ -803,8 +803,7 @@ NVGJS_DECL(func, HSLA) {
 
 NVGJS_DECL(func, TransformPoint) {
   float trf[6], *dst, src[2];
-  size_t size;
-  int i = 0;
+  int size, i = 0;
 
   if(argc < 2)
     return JS_ThrowInternalError(ctx, "need 2 arguments");
@@ -939,7 +938,8 @@ NVGJS_DECL(Context, Rect) {
   if(argc < 4)
     return JS_ThrowInternalError(ctx, "need 4 arguments");
 
-  if(JS_ToFloat64(ctx, &x, argv[0]) || JS_ToFloat64(ctx, &y, argv[1]) || JS_ToFloat64(ctx, &w, argv[2]) || JS_ToFloat64(ctx, &h, argv[3]))
+  if(JS_ToFloat64(ctx, &x, argv[0]) || JS_ToFloat64(ctx, &y, argv[1]) || JS_ToFloat64(ctx, &w, argv[2]) ||
+     JS_ToFloat64(ctx, &h, argv[3]))
     return JS_EXCEPTION;
 
   nvgRect(nvg, x, y, w, h);
@@ -969,7 +969,8 @@ NVGJS_DECL(Context, Ellipse) {
   if(argc < 4)
     return JS_ThrowInternalError(ctx, "need 4 arguments");
 
-  if(JS_ToFloat64(ctx, &cx, argv[0]) || JS_ToFloat64(ctx, &cy, argv[1]) || JS_ToFloat64(ctx, &rx, argv[2]) || JS_ToFloat64(ctx, &ry, argv[3]))
+  if(JS_ToFloat64(ctx, &cx, argv[0]) || JS_ToFloat64(ctx, &cy, argv[1]) || JS_ToFloat64(ctx, &rx, argv[2]) ||
+     JS_ToFloat64(ctx, &ry, argv[3]))
     return JS_EXCEPTION;
 
   nvgEllipse(nvg, cx, cy, rx, ry);
@@ -1029,7 +1030,8 @@ NVGJS_DECL(Context, BezierTo) {
   if(argc < 6)
     return JS_ThrowInternalError(ctx, "need 6 arguments");
 
-  if(JS_ToFloat64(ctx, &c1x, argv[0]) || JS_ToFloat64(ctx, &c1y, argv[1]) || JS_ToFloat64(ctx, &c2x, argv[2]) || JS_ToFloat64(ctx, &c2y, argv[3]) || JS_ToFloat64(ctx, &x, argv[4]) || JS_ToFloat64(ctx, &y, argv[5]))
+  if(JS_ToFloat64(ctx, &c1x, argv[0]) || JS_ToFloat64(ctx, &c1y, argv[1]) || JS_ToFloat64(ctx, &c2x, argv[2]) ||
+     JS_ToFloat64(ctx, &c2y, argv[3]) || JS_ToFloat64(ctx, &x, argv[4]) || JS_ToFloat64(ctx, &y, argv[5]))
     return JS_EXCEPTION;
 
   nvgBezierTo(nvg, c1x, c1y, c2x, c2y, x, y);
@@ -1044,7 +1046,8 @@ NVGJS_DECL(Context, QuadTo) {
   if(argc < 4)
     return JS_ThrowInternalError(ctx, "need 4 arguments");
 
-  if(JS_ToFloat64(ctx, &cx, argv[0]) || JS_ToFloat64(ctx, &cy, argv[1]) || JS_ToFloat64(ctx, &x, argv[2]) || JS_ToFloat64(ctx, &y, argv[3]))
+  if(JS_ToFloat64(ctx, &cx, argv[0]) || JS_ToFloat64(ctx, &cy, argv[1]) || JS_ToFloat64(ctx, &x, argv[2]) ||
+     JS_ToFloat64(ctx, &y, argv[3]))
     return JS_EXCEPTION;
 
   nvgQuadTo(nvg, cx, cy, x, y);
@@ -1059,7 +1062,8 @@ NVGJS_DECL(Context, ArcTo) {
   if(argc < 5)
     return JS_ThrowInternalError(ctx, "need 5 arguments");
 
-  if(JS_ToFloat64(ctx, &x1, argv[0]) || JS_ToFloat64(ctx, &y1, argv[1]) || JS_ToFloat64(ctx, &x2, argv[2]) || JS_ToFloat64(ctx, &y2, argv[3]) || JS_ToFloat64(ctx, &radius, argv[4]))
+  if(JS_ToFloat64(ctx, &x1, argv[0]) || JS_ToFloat64(ctx, &y1, argv[1]) || JS_ToFloat64(ctx, &x2, argv[2]) ||
+     JS_ToFloat64(ctx, &y2, argv[3]) || JS_ToFloat64(ctx, &radius, argv[4]))
     return JS_EXCEPTION;
 
   nvgArcTo(nvg, x1, y1, x2, y2, radius);
@@ -1075,7 +1079,8 @@ NVGJS_DECL(Context, Arc) {
   if(argc < 6)
     return JS_ThrowInternalError(ctx, "need 6 arguments");
 
-  if(JS_ToFloat64(ctx, &cx, argv[0]) || JS_ToFloat64(ctx, &cy, argv[1]) || JS_ToFloat64(ctx, &r, argv[2]) || JS_ToFloat64(ctx, &a0, argv[3]) || JS_ToFloat64(ctx, &a1, argv[4]) || JS_ToInt32(ctx, &dir, argv[5]))
+  if(JS_ToFloat64(ctx, &cx, argv[0]) || JS_ToFloat64(ctx, &cy, argv[1]) || JS_ToFloat64(ctx, &r, argv[2]) ||
+     JS_ToFloat64(ctx, &a0, argv[3]) || JS_ToFloat64(ctx, &a1, argv[4]) || JS_ToInt32(ctx, &dir, argv[5]))
     return JS_EXCEPTION;
 
   nvgArc(nvg, cx, cy, r, a0, a1, dir);
@@ -1164,7 +1169,8 @@ NVGJS_DECL(Context, RoundedRect) {
   if(argc < 5)
     return JS_ThrowInternalError(ctx, "need 5 arguments");
 
-  if(JS_ToFloat64(ctx, &x, argv[0]) || JS_ToFloat64(ctx, &y, argv[1]) || JS_ToFloat64(ctx, &w, argv[2]) || JS_ToFloat64(ctx, &h, argv[3]) || JS_ToFloat64(ctx, &r, argv[4]))
+  if(JS_ToFloat64(ctx, &x, argv[0]) || JS_ToFloat64(ctx, &y, argv[1]) || JS_ToFloat64(ctx, &w, argv[2]) ||
+     JS_ToFloat64(ctx, &h, argv[3]) || JS_ToFloat64(ctx, &r, argv[4]))
     return JS_EXCEPTION;
 
   nvgRoundedRect(nvg, x, y, w, h, r);
@@ -1179,7 +1185,9 @@ NVGJS_DECL(Context, RoundedRectVarying) {
   if(argc < 8)
     return JS_ThrowInternalError(ctx, "need 8 arguments");
 
-  if(JS_ToFloat64(ctx, &x, argv[0]) || JS_ToFloat64(ctx, &y, argv[1]) || JS_ToFloat64(ctx, &w, argv[2]) || JS_ToFloat64(ctx, &h, argv[3]) || JS_ToFloat64(ctx, &rtl, argv[4]) || JS_ToFloat64(ctx, &rtr, argv[5]) || JS_ToFloat64(ctx, &rbr, argv[6]) || JS_ToFloat64(ctx, &rbl, argv[7]))
+  if(JS_ToFloat64(ctx, &x, argv[0]) || JS_ToFloat64(ctx, &y, argv[1]) || JS_ToFloat64(ctx, &w, argv[2]) ||
+     JS_ToFloat64(ctx, &h, argv[3]) || JS_ToFloat64(ctx, &rtl, argv[4]) || JS_ToFloat64(ctx, &rtr, argv[5]) ||
+     JS_ToFloat64(ctx, &rbr, argv[6]) || JS_ToFloat64(ctx, &rbl, argv[7]))
     return JS_EXCEPTION;
 
   nvgRoundedRectVarying(nvg, x, y, w, h, rtl, rtr, rbr, rbl);
@@ -1194,7 +1202,8 @@ NVGJS_DECL(Context, Scissor) {
   if(argc < 4)
     return JS_ThrowInternalError(ctx, "need 4 arguments");
 
-  if(JS_ToFloat64(ctx, &x, argv[0]) || JS_ToFloat64(ctx, &y, argv[1]) || JS_ToFloat64(ctx, &w, argv[2]) || JS_ToFloat64(ctx, &h, argv[3]))
+  if(JS_ToFloat64(ctx, &x, argv[0]) || JS_ToFloat64(ctx, &y, argv[1]) || JS_ToFloat64(ctx, &w, argv[2]) ||
+     JS_ToFloat64(ctx, &h, argv[3]))
     return JS_EXCEPTION;
 
   nvgScissor(nvg, x, y, w, h);
@@ -1209,7 +1218,8 @@ NVGJS_DECL(Context, IntersectScissor) {
   if(argc < 4)
     return JS_ThrowInternalError(ctx, "need 4 arguments");
 
-  if(JS_ToFloat64(ctx, &x, argv[0]) || JS_ToFloat64(ctx, &y, argv[1]) || JS_ToFloat64(ctx, &w, argv[2]) || JS_ToFloat64(ctx, &h, argv[3]))
+  if(JS_ToFloat64(ctx, &x, argv[0]) || JS_ToFloat64(ctx, &y, argv[1]) || JS_ToFloat64(ctx, &w, argv[2]) ||
+     JS_ToFloat64(ctx, &h, argv[3]))
     return JS_EXCEPTION;
 
   nvgIntersectScissor(nvg, x, y, w, h);
@@ -1354,7 +1364,8 @@ NVGJS_DECL(Context, LinearGradient) {
   if(argc < 6)
     return JS_ThrowInternalError(ctx, "need 6 arguments");
 
-  if(JS_ToFloat64(ctx, &sx, argv[0]) || JS_ToFloat64(ctx, &sy, argv[1]) || JS_ToFloat64(ctx, &ex, argv[2]) || JS_ToFloat64(ctx, &ey, argv[3]) || nvgjs_tocolor(ctx, &icol, argv[4]) || nvgjs_tocolor(ctx, &ocol, argv[5]))
+  if(JS_ToFloat64(ctx, &sx, argv[0]) || JS_ToFloat64(ctx, &sy, argv[1]) || JS_ToFloat64(ctx, &ex, argv[2]) ||
+     JS_ToFloat64(ctx, &ey, argv[3]) || nvgjs_tocolor(ctx, &icol, argv[4]) || nvgjs_tocolor(ctx, &ocol, argv[5]))
     return JS_EXCEPTION;
 
   return nvgjs_paint_new(ctx, nvgLinearGradient(nvg, sx, sy, ex, ey, icol, ocol));
@@ -1369,7 +1380,9 @@ NVGJS_DECL(Context, BoxGradient) {
   if(argc < 8)
     return JS_ThrowInternalError(ctx, "need 8 arguments");
 
-  if(JS_ToFloat64(ctx, &x, argv[0]) || JS_ToFloat64(ctx, &y, argv[1]) || JS_ToFloat64(ctx, &w, argv[2]) || JS_ToFloat64(ctx, &h, argv[3]) || JS_ToFloat64(ctx, &r, argv[4]) || JS_ToFloat64(ctx, &f, argv[5]) || nvgjs_tocolor(ctx, &icol, argv[6]) || nvgjs_tocolor(ctx, &ocol, argv[7]))
+  if(JS_ToFloat64(ctx, &x, argv[0]) || JS_ToFloat64(ctx, &y, argv[1]) || JS_ToFloat64(ctx, &w, argv[2]) ||
+     JS_ToFloat64(ctx, &h, argv[3]) || JS_ToFloat64(ctx, &r, argv[4]) || JS_ToFloat64(ctx, &f, argv[5]) ||
+     nvgjs_tocolor(ctx, &icol, argv[6]) || nvgjs_tocolor(ctx, &ocol, argv[7]))
     return JS_EXCEPTION;
 
   return nvgjs_paint_new(ctx, nvgBoxGradient(nvg, x, y, w, h, r, f, icol, ocol));
@@ -1384,7 +1397,8 @@ NVGJS_DECL(Context, RadialGradient) {
   if(argc < 6)
     return JS_ThrowInternalError(ctx, "need 6 arguments");
 
-  if(JS_ToFloat64(ctx, &cx, argv[0]) || JS_ToFloat64(ctx, &cy, argv[1]) || JS_ToFloat64(ctx, &inr, argv[2]) || JS_ToFloat64(ctx, &outr, argv[3]) || nvgjs_tocolor(ctx, &icol, argv[4]) || nvgjs_tocolor(ctx, &ocol, argv[5]))
+  if(JS_ToFloat64(ctx, &cx, argv[0]) || JS_ToFloat64(ctx, &cy, argv[1]) || JS_ToFloat64(ctx, &inr, argv[2]) ||
+     JS_ToFloat64(ctx, &outr, argv[3]) || nvgjs_tocolor(ctx, &icol, argv[4]) || nvgjs_tocolor(ctx, &ocol, argv[5]))
     return JS_EXCEPTION;
 
   return nvgjs_paint_new(ctx, nvgRadialGradient(nvg, cx, cy, inr, outr, icol, ocol));
@@ -1441,7 +1455,7 @@ NVGJS_DECL(Context, Text) {
     int32_t pos;
 
     if(!JS_ToInt32(ctx, &pos, argv[3]))
-      end = str + nvgjs_u8offset(str, len, pos);
+      end = str + nvgjs_utf8offset(str, len, pos);
   }
 
   float ret = nvgText(nvg, x, y, str, end);
@@ -1475,7 +1489,7 @@ NVGJS_DECL(Context, TextBox) {
     int32_t pos;
 
     if(!JS_ToInt32(ctx, &pos, argv[4]))
-      end = str + nvgjs_u8offset(str, len, pos);
+      end = str + nvgjs_utf8offset(str, len, pos);
   }
 
   nvgTextBox(nvg, x, y, breakRowWidth, str, end);
@@ -1506,7 +1520,7 @@ NVGJS_DECL(Context, TextBounds) {
     int32_t pos;
 
     if(!JS_ToInt32(ctx, &pos, argv[3]))
-      end = str + nvgjs_u8offset(str, len, pos);
+      end = str + nvgjs_utf8offset(str, len, pos);
   }
 
   float ret = nvgTextBounds(nvg, x, y, str, end, bounds);
@@ -1543,7 +1557,7 @@ NVGJS_DECL(Context, TextBoxBounds) {
     int32_t pos;
 
     if(!JS_ToInt32(ctx, &pos, argv[4]))
-      end = str + nvgjs_u8offset(str, len, pos);
+      end = str + nvgjs_utf8offset(str, len, pos);
   }
 
   nvgTextBoxBounds(nvg, x, y, breakRowWidth, str, end, bounds);
@@ -1678,7 +1692,6 @@ NVGJS_DECL(Context, ImageSize) {
 
   int32_t id = 0;
   int width, height;
-  JSValue ret;
 
   if(argc < 1)
     return JS_ThrowInternalError(ctx, "need 1 arguments");
@@ -1688,7 +1701,7 @@ NVGJS_DECL(Context, ImageSize) {
 
   nvgImageSize(nvg, id, &width, &height);
 
-  ret = JS_NewArray(ctx);
+  JSValue ret = JS_NewArray(ctx);
   JS_SetPropertyUint32(ctx, ret, 0, JS_NewInt32(ctx, width));
   JS_SetPropertyUint32(ctx, ret, 1, JS_NewInt32(ctx, height));
   return ret;
@@ -1722,17 +1735,12 @@ NVGJS_DECL(Context, Transform) {
   NVGJS_CONTEXT(this_obj);
 
   float t[6];
-  int n;
 
   if(argc < 1)
     return JS_ThrowInternalError(ctx, "need 1/6 arguments");
 
-  while((n = nvgjs_arguments(ctx, t, argc, 6, argv))) {
+  if(nvgjs_arguments(ctx, t, argc, 6, argv))
     nvgTransform(nvg, t[0], t[1], t[2], t[3], t[4], t[5]);
-
-    argc -= n;
-    argv += n;
-  }
 
   return JS_UNDEFINED;
 }
@@ -1842,7 +1850,9 @@ NVGJS_DECL(Context, ImagePattern) {
   if(argc < 7)
     return JS_ThrowInternalError(ctx, "need 7 arguments");
 
-  if(JS_ToFloat64(ctx, &ox, argv[0]) || JS_ToFloat64(ctx, &oy, argv[1]) || JS_ToFloat64(ctx, &ex, argv[2]) || JS_ToFloat64(ctx, &ey, argv[3]) || JS_ToFloat64(ctx, &angle, argv[4]) || JS_ToInt32(ctx, &image, argv[5]) || JS_ToFloat64(ctx, &alpha, argv[6]))
+  if(JS_ToFloat64(ctx, &ox, argv[0]) || JS_ToFloat64(ctx, &oy, argv[1]) || JS_ToFloat64(ctx, &ex, argv[2]) ||
+     JS_ToFloat64(ctx, &ey, argv[3]) || JS_ToFloat64(ctx, &angle, argv[4]) || JS_ToInt32(ctx, &image, argv[5]) ||
+     JS_ToFloat64(ctx, &alpha, argv[6]))
     return JS_EXCEPTION;
 
   return nvgjs_paint_new(ctx, nvgImagePattern(nvg, ox, oy, ex, ey, angle, image, alpha));
@@ -1890,6 +1900,8 @@ static const JSCFunctionListEntry nvgjs_funcs[] = {
  NVGJS_FUNC(CreateFramebuffer, 4),
  NVGJS_FUNC(BindFramebuffer, 1),
  NVGJS_FUNC(DeleteFramebuffer, 1),
+
+ NVGJS_FUNC(ReadPixels, 2),
 
  NVGJS_FUNC(RadToDeg, 1),
  NVGJS_FUNC(DegToRad, 1),
@@ -2030,6 +2042,47 @@ static const JSCFunctionListEntry nvgjs_context_methods[] = {
  JS_PROP_STRING_DEF("[Symbol.toStringTag]", "NVGcontext", JS_PROP_CONFIGURABLE),
 };
 
+enum {
+  FRAMEBUFFER_FBO,
+  FRAMEBUFFER_RBO,
+  FRAMEBUFFER_TEXTURE,
+  FRAMEBUFFER_IMAGE,
+};
+
+static JSValue
+nvgjs_framebuffer_get(JSContext* ctx, JSValueConst this_val, int magic) {
+  NVGJS_FRAMEBUFFER(this_val);
+
+  int64_t id;
+
+  switch(magic) {
+    case FRAMEBUFFER_FBO: id = fb->fbo; break;
+    case FRAMEBUFFER_RBO: id = fb->rbo; break;
+    case FRAMEBUFFER_TEXTURE: id = fb->texture; break;
+    case FRAMEBUFFER_IMAGE: id = fb->image; break;
+  }
+
+  return JS_NewInt64(ctx, id);
+}
+
+static JSValue
+nvgjs_framebuffer_set(JSContext* ctx, JSValueConst this_val, JSValueConst value, int magic) {
+  NVGJS_FRAMEBUFFER(this_val);
+
+  int64_t id;
+
+  JS_ToInt64(ctx, &id, value);
+
+  switch(magic) {
+    case FRAMEBUFFER_FBO: fb->fbo = id; break;
+    case FRAMEBUFFER_RBO: fb->rbo = id; break;
+    case FRAMEBUFFER_TEXTURE: fb->texture = id; break;
+    case FRAMEBUFFER_IMAGE: fb->image = id; break;
+  }
+
+  return JS_UNDEFINED;
+}
+
 static JSValue
 nvgjs_framebuffer_wrap(JSContext* ctx, JSValueConst proto, NVGLUframebuffer* fb) {
   JSValue obj = JS_NewObjectProtoClass(ctx, proto, nvgjs_framebuffer_class_id);
@@ -2041,6 +2094,10 @@ nvgjs_framebuffer_wrap(JSContext* ctx, JSValueConst proto, NVGLUframebuffer* fb)
 }
 
 static const JSCFunctionListEntry nvgjs_framebuffer_methods[] = {
+ JS_CGETSET_MAGIC_DEF("fbo", nvgjs_framebuffer_get, nvgjs_framebuffer_set, FRAMEBUFFER_FBO),
+ JS_CGETSET_MAGIC_DEF("rbo", nvgjs_framebuffer_get, nvgjs_framebuffer_set, FRAMEBUFFER_RBO),
+ JS_CGETSET_MAGIC_DEF("texture", nvgjs_framebuffer_get, nvgjs_framebuffer_set, FRAMEBUFFER_TEXTURE),
+ JS_CGETSET_MAGIC_DEF("image", nvgjs_framebuffer_get, nvgjs_framebuffer_set, FRAMEBUFFER_IMAGE),
  JS_PROP_STRING_DEF("[Symbol.toStringTag]", "NVGLUframebuffer", JS_PROP_CONFIGURABLE),
 };
 

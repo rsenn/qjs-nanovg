@@ -1,22 +1,11 @@
 import * as glfw from 'glfw';
-import { CreateGL3, STENCIL_STROKES, ANTIALIAS, DEBUG, CreateImageFromHandleGL3, ImageHandleGL3, IMAGE_NODELETE, CreateFramebuffer, BindFramebuffer, DeleteFramebuffer, Transform, TransformPoint, RGB, RGBA, } from 'nanovg';
-
-let window, nvg;
+import { CreateGL3, STENCIL_STROKES, ANTIALIAS, DEBUG, ReadPixels, CreateImageFromHandleGL3, ImageHandleGL3, IMAGE_NODELETE, CreateFramebuffer, BindFramebuffer, DeleteFramebuffer, Transform, TransformPoint, RGB, RGBA, } from 'nanovg';
 
 const C = console.config({ compact: true });
 
 const log = (...args) => console.log(C, ...args);
 
-export function DrawImage(image, pos) {
-  const size = nvg.ImageSize(image);
-  nvg.Save();
-  if(pos) nvg.Translate(...pos);
-  nvg.BeginPath();
-  nvg.Rect(0, 0, ...size);
-  nvg.FillPaint(nvg.ImagePattern(0, 0, ...size, 0, image, 1));
-  nvg.Fill();
-  nvg.Restore();
-}
+let window;
 
 export function DrawCircle(radius, stroke = RGB(255, 255, 255), fill = RGBA(255, 0, 0, 96)) {
   nvg.BeginPath();
@@ -28,15 +17,9 @@ export function DrawCircle(radius, stroke = RGB(255, 255, 255), fill = RGBA(255,
   nvg.Stroke();
 }
 
-function RotatePoint(x, y, angle) {
-  let c = Math.cos(angle),
-    s = Math.sin(angle);
-  return [x * c - y * s, x * s + y * c];
-}
-
 export function Clear(color = RGB(0, 0, 0)) {
   const { size } = window;
-  //log('size', ...size);
+
   nvg.Save();
   nvg.BeginPath();
   nvg.Rect(0, 0, ...size);
@@ -56,17 +39,18 @@ function main(...args) {
   glfw.Window.hint(glfw.RESIZABLE, false);
   glfw.Window.hint(glfw.SAMPLES, 4);
 
-  window = glfw.context.current = new glfw.Window(1024, 768, scriptArgs[0]);
+   window = glfw.context.current = new glfw.Window(1024, 768, scriptArgs[0]);
 
-  let context = glfw.context;
+  const context = glfw.context;
   log('context', context);
 
-  const { position, size } = window;
+  const { size } = window;
+  const { width, height } = size;
 
   Object.assign(context, {
     begin(color = RGB(255, 255, 255)) {
       Clear(color);
-      nvg.BeginFrame(...size, 1);
+      nvg.BeginFrame(width, height, 1);
     },
     end() {
       nvg.EndFrame();
@@ -99,26 +83,47 @@ function main(...args) {
     handleMouseButton(button, action, mods) {
       log(`handleMouseButton`, { button, action, mods });
     },
-    handleCursorPos(x, y) {
-      //log(`handleCursorPos`, { x, y });
-    },
+    /*handleCursorPos(x, y) {
+      log(`handleCursorPos`, { x, y });
+    },*/
   });
 
-  nvg = CreateGL3(STENCIL_STROKES | ANTIALIAS | DEBUG);
+  const nvg = CreateGL3(STENCIL_STROKES | ANTIALIAS | DEBUG);
 
   Object.assign(globalThis, { nvg, glfw, Transform, TransformPoint, RGB, RGBA });
 
-  const { width, height } = size;
-  const { x, y } = position;
+  const images = [new Image('Architektur.png', 0), new Image('Muehleberg.png', 0)];
 
-  let pixels;
-  let imgId = nvg.CreateImage('Architektur.png', 0);
-  let img2Id = nvg.CreateImage('Muehleberg.png', 0);
+  function Image(path) {
+    const id = nvg.CreateImage(path, 0);
+    const [width, height] = nvg.ImageSize(id);
+    const pattern = nvg.ImagePattern(0, 0, width, height, 0, id, 1);
 
-  log(`main`, { imgId, img2Id });
+    return {
+      id,
+      width,
+      height,
+      draw() {
+        nvg.Save();
+        nvg.Translate(-width / 2, -height / 2);
+        nvg.BeginPath();
+        nvg.Rect(0, 0, width, height);
+        nvg.FillPaint(pattern);
+        nvg.Fill();
+        nvg.Restore();
+      },
+    };
+  }
 
-  let img2Sz = nvg.ImageSize(img2Id);
-  let imgSz = nvg.ImageSize(imgId);
+  /* let img3Id = nvg.CreateImageRGBA(width, height, 0, (imgBuf = new ArrayBuffer(width * height)));*/
+
+  log(`main`, { images });
+
+  /*const fb = CreateFramebuffer(nvg, width, height, 0);
+  const { fbo, rbo, texture, image } = fb;
+  console.log('fb', fb, { fbo, rbo, texture, image });
+  BindFramebuffer(fb);
+  console.log('fb', fb, { fbo, rbo, texture, image });*/
 
   while((running &&= !window.shouldClose)) {
     let time = +new Date() / 1000;
@@ -130,16 +135,13 @@ function main(...args) {
     let m = nvg.CurrentTransform();
     let t = Transform.Translate(10, 20);
     let s = Transform.Scale(3, 3);
-
     let p = Transform.Multiply(m, t, s);
 
-    let center = new glfw.Position(size.width / 2, size.height / 2);
-    let imgSz = new glfw.Position(img2Sz.width * -1, img2Sz.height * -1);
-    let imgSz_2 = new glfw.Position(img2Sz.width * -0.5, img2Sz.height * -0.5);
+    let center = [width / 2, height / 2];
     let phi = a => ((a % 360) / 180) * Math.PI;
-    let vec = (w, h, angle = phi(i)) => [Math.cos(angle) * w, Math.sin(angle) * h]; /*.map(n => n * radius)*/
+    let vec = (w, h, angle = phi(i)) => [Math.cos(angle) * w, Math.sin(angle) * h];
 
-    function Planet(radius, stroke, fill, getAngle, getPrecession, getPosition) {
+    function Planet(radius, stroke, fill, getAngle, getPrecession, [x, y]) {
       return Object.assign(this, {
         radius,
         stroke,
@@ -151,13 +153,24 @@ function main(...args) {
           return getPrecession();
         },
         get position() {
-          return RotatePoint(...getPosition(this.angle), this.precession);
+          return vec(x,y, this.angle);
         },
         draw() {
           nvg.Save();
-          nvg.Translate(...center);
+          nvg.Rotate(this.precession);
           nvg.Translate(...this.position);
           DrawCircle(this.radius, this.stroke, this.fill);
+          nvg.Restore();
+        },
+        drawOrbit() {
+          nvg.Save();
+          nvg.Rotate(this.precession);
+          nvg.BeginPath();
+          nvg.StrokeColor(stroke);
+          nvg.FillColor(fill);
+          nvg.StrokeWidth(1);
+          nvg.Ellipse(0, 0, x, y);
+          nvg.Stroke();
           nvg.Restore();
         },
         get zpos() {
@@ -175,7 +188,7 @@ function main(...args) {
         RGBA(255, 192, 0, 255),
         () => phi(i + 240),
         () => phi(i * 0.01),
-        a => vec(20, 10, a),
+        [20, 10],
       ),
       new Planet(
         20,
@@ -183,7 +196,7 @@ function main(...args) {
         RGBA(255, 0, 0, 0.8 * 255),
         () => phi(i),
         () => phi(i * -0.01),
-        a => vec(300, 100, a),
+        [300, 100],
       ),
       new Planet(
         30,
@@ -191,7 +204,7 @@ function main(...args) {
         RGBA(0, 120, 255, 0.8 * 255),
         () => phi(i * 0.8 + 120),
         () => phi(i * 0.02),
-        a => vec(180, 40, a),
+        [180, 40],
       ),
       new Planet(
         10,
@@ -199,18 +212,45 @@ function main(...args) {
         RGBA(120, 0, 255, 0.8 * 255),
         () => phi(i * 0.4 - 120),
         () => phi(i * 0.001),
-        a => vec(320, 200, a),
+        [320, 200],
       ),
     ];
 
     planets.sort((a, b) => a.zpos - b.zpos);
 
+    nvg.Save();
+    nvg.Translate(...center);
+
+    /*nvg.Save();
+    nvg.Translate(...vec(width/2 - images[0].height*0.1, height/2 - images[0].height*0.1, i * 0.01 + -Math.PI/2));
+    nvg.Scale(0.2, 0.2);
+    nvg.Rotate(i * 0.01);
+
+    images[0].draw();
+    nvg.Restore();*/
+
+    for(let planet of planets) planet.drawOrbit();
+
     for(let planet of planets) {
       planet.draw();
     }
+
+    nvg.Restore();
+
     context.end();
     i++;
   }
+
+  /*console.log('imgBuf', imgBuf);
+
+  let fbimg = CreateImageFromHandleGL3(nvg, fb.texture, width, height, 0);
+  console.log('fbimg', fbimg);*/
+
+  const pixels = ReadPixels(width, height);
+
+  console.log('pixels', pixels);
+
+  window.destroy();
 }
 
 main(...scriptArgs.slice(1));
