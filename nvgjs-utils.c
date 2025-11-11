@@ -111,7 +111,7 @@ nvgjs_inputoutputarray(JSContext* ctx, float vec[], int min_length, JSValueConst
     if(!nvgjs_inputiterator(ctx, vec, min_length, vector))
       return vec;
 
-  JS_ThrowTypeError(ctx, "Expecting an Float32Array, Array or Iterable");
+  JS_ThrowTypeError(ctx, "expecting a Float32Array, Array or Iterable");
   return 0;
 }
 

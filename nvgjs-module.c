@@ -654,6 +654,7 @@ NVGJS_DECL(func, ReadPixels) {
 
   void* image;
 
+  /* XXX: better write to a provided ArrayBuffer */
   if(!(image = js_malloc(ctx, w * h * 4)))
     return JS_EXCEPTION;
 
@@ -1917,7 +1918,7 @@ static const JSCFunctionListEntry nvgjs_funcs[] = {
 
  NVGJS_FUNC(TransformPoint, 2),
 
- NVGJS_FLAG(PI),
+ NVGJS_CONST(PI),
  NVGJS_FLAG(CCW),
  NVGJS_FLAG(CW),
  NVGJS_FLAG(SOLID),
@@ -2066,24 +2067,6 @@ nvgjs_framebuffer_get(JSContext* ctx, JSValueConst this_val, int magic) {
 }
 
 static JSValue
-nvgjs_framebuffer_set(JSContext* ctx, JSValueConst this_val, JSValueConst value, int magic) {
-  NVGJS_FRAMEBUFFER(this_val);
-
-  int64_t id;
-
-  JS_ToInt64(ctx, &id, value);
-
-  switch(magic) {
-    case FRAMEBUFFER_FBO: fb->fbo = id; break;
-    case FRAMEBUFFER_RBO: fb->rbo = id; break;
-    case FRAMEBUFFER_TEXTURE: fb->texture = id; break;
-    case FRAMEBUFFER_IMAGE: fb->image = id; break;
-  }
-
-  return JS_UNDEFINED;
-}
-
-static JSValue
 nvgjs_framebuffer_wrap(JSContext* ctx, JSValueConst proto, NVGLUframebuffer* fb) {
   JSValue obj = JS_NewObjectProtoClass(ctx, proto, nvgjs_framebuffer_class_id);
 
@@ -2094,10 +2077,10 @@ nvgjs_framebuffer_wrap(JSContext* ctx, JSValueConst proto, NVGLUframebuffer* fb)
 }
 
 static const JSCFunctionListEntry nvgjs_framebuffer_methods[] = {
- JS_CGETSET_MAGIC_DEF("fbo", nvgjs_framebuffer_get, nvgjs_framebuffer_set, FRAMEBUFFER_FBO),
- JS_CGETSET_MAGIC_DEF("rbo", nvgjs_framebuffer_get, nvgjs_framebuffer_set, FRAMEBUFFER_RBO),
- JS_CGETSET_MAGIC_DEF("texture", nvgjs_framebuffer_get, nvgjs_framebuffer_set, FRAMEBUFFER_TEXTURE),
- JS_CGETSET_MAGIC_DEF("image", nvgjs_framebuffer_get, nvgjs_framebuffer_set, FRAMEBUFFER_IMAGE),
+ JS_CGETSET_MAGIC_DEF("fbo", nvgjs_framebuffer_get, 0, FRAMEBUFFER_FBO),
+ JS_CGETSET_MAGIC_DEF("rbo", nvgjs_framebuffer_get, 0, FRAMEBUFFER_RBO),
+ JS_CGETSET_MAGIC_DEF("texture", nvgjs_framebuffer_get, 0, FRAMEBUFFER_TEXTURE),
+ JS_CGETSET_MAGIC_DEF("image", nvgjs_framebuffer_get, 0, FRAMEBUFFER_IMAGE),
  JS_PROP_STRING_DEF("[Symbol.toStringTag]", "NVGLUframebuffer", JS_PROP_CONFIGURABLE),
 };
 

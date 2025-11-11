@@ -7,15 +7,15 @@
 #include <quickjs.h>
 #include <cutils.h>
 
-float* nvgjs_outputarray(JSContext*, int* plength, JSValueConst value);
-float* nvgjs_output(JSContext*, int min_length, JSValueConst value);
-float* nvgjs_inputoutputarray(JSContext*, float vec[], int min_length, JSValueConst);
-int nvgjs_inputobject(JSContext*, float vec[], int len, const char* const prop_map[], JSValueConst);
-int nvgjs_inputarray(JSContext*, float vec[], int min_length, JSValueConst);
-int nvgjs_inputiterator(JSContext*, float vec[], int min_length, JSValueConst);
-int nvgjs_input(JSContext*, float vec[], int len, const char* const prop_map[], JSValueConst);
-void nvgjs_copyobject(JSContext*, JSValueConst value, const char* const prop_map[], const float vec[], int len);
-void nvgjs_copyarray(JSContext*, JSValueConst value, const float vec[], int len);
+float* nvgjs_outputarray(JSContext*, int* plength, JSValueConst);
+float* nvgjs_output(JSContext*, int min_length, JSValueConst);
+float* nvgjs_inputoutputarray(JSContext*, float[], int min_length, JSValueConst);
+int nvgjs_inputobject(JSContext*, float[], int len, const char* const prop_map[], JSValueConst);
+int nvgjs_inputarray(JSContext*, float[], int min_length, JSValueConst);
+int nvgjs_inputiterator(JSContext*, float[], int min_length, JSValueConst);
+int nvgjs_input(JSContext*, float[], int len, const char* const prop_map[], JSValueConst);
+void nvgjs_copyobject(JSContext*, JSValueConst, const char* const prop_map[], const float[], int len);
+void nvgjs_copyarray(JSContext*, JSValueConst, const float[], int len);
 
 static inline int
 nvgjs_tofloat32(JSContext* ctx, float* pres, JSValueConst val) {

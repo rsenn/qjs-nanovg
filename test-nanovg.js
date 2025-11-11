@@ -1,5 +1,5 @@
 import * as glfw from 'glfw';
-import { CreateGL3, STENCIL_STROKES, ANTIALIAS, DEBUG, ReadPixels, CreateImageFromHandleGL3, ImageHandleGL3, IMAGE_NODELETE, CreateFramebuffer, BindFramebuffer, DeleteFramebuffer, Transform, TransformPoint, RGB, RGBA, } from 'nanovg';
+import { CreateGL3, STENCIL_STROKES, ANTIALIAS, DEBUG, DegToRad, ReadPixels, CreateImageFromHandleGL3, ImageHandleGL3, IMAGE_NODELETE, CreateFramebuffer, BindFramebuffer, DeleteFramebuffer, Transform, TransformPoint, RGB, RGBA, } from 'nanovg';
 
 const C = console.config({ compact: true });
 
@@ -39,7 +39,7 @@ function main(...args) {
   glfw.Window.hint(glfw.RESIZABLE, false);
   glfw.Window.hint(glfw.SAMPLES, 4);
 
-   window = glfw.context.current = new glfw.Window(1024, 768, scriptArgs[0]);
+  window = glfw.context.current = new glfw.Window(1024, 768, scriptArgs[0]);
 
   const context = glfw.context;
   log('context', context);
@@ -88,7 +88,7 @@ function main(...args) {
     },*/
   });
 
-  const nvg = CreateGL3(STENCIL_STROKES | ANTIALIAS | DEBUG);
+  const nvg = CreateGL3(STENCIL_STROKES | ANTIALIAS);
 
   Object.assign(globalThis, { nvg, glfw, Transform, TransformPoint, RGB, RGBA });
 
@@ -138,7 +138,7 @@ function main(...args) {
     let p = Transform.Multiply(m, t, s);
 
     let center = [width / 2, height / 2];
-    let phi = a => ((a % 360) / 180) * Math.PI;
+    let phi = a => DegToRad(a % 360);
     let vec = (w, h, angle = phi(i)) => [Math.cos(angle) * w, Math.sin(angle) * h];
 
     function Planet(radius, stroke, fill, getAngle, getPrecession, [x, y]) {
@@ -153,7 +153,7 @@ function main(...args) {
           return getPrecession();
         },
         get position() {
-          return vec(x,y, this.angle);
+          return vec(x, y, this.angle);
         },
         draw() {
           nvg.Save();
