@@ -22,18 +22,7 @@ static JSValue framebuffer_ctor, framebuffer_proto;
 static JSValue nvgjs_framebuffer_wrap(JSContext*, JSValueConst, NVGLUframebuffer*);
 
 static const char* const nvgjs_color_keys[] = {"r", "g", "b", "a"};
-
-static JSValue
-nvgjs_wrap(JSContext* ctx, void* s, JSClassID classID) {
-  JSValue obj = JS_NewObjectClass(ctx, classID);
-
-  if(JS_IsException(obj))
-    return obj;
-
-  JS_SetOpaque(obj, s);
-  return obj;
-}
-
+ 
 static int
 nvgjs_arguments(JSContext* ctx, float vec[2], int vlen, int argc, JSValueConst argv[]) {
   if(argc >= 1 && JS_IsObject(argv[0]) && !nvgjs_inputarray(ctx, vec, vlen, argv[0]))
@@ -52,7 +41,7 @@ nvgjs_arguments(JSContext* ctx, float vec[2], int vlen, int argc, JSValueConst a
 
 static void
 nvgjs_copy(JSContext* ctx, JSValueConst value, const char* const prop_map[], const float vec[2], int vlen) {
-  if(JS_IsArray(ctx, value))
+  if(JS_IsArray(ctx, value) == TRUE)
     nvgjs_copyarray(ctx, value, vec, vlen);
 
   nvgjs_copyobject(ctx, value, prop_map, vec, vlen);
