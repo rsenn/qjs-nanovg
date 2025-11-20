@@ -47,6 +47,9 @@ function main(...args) {
   const { size } = window;
   const { width, height } = size;
 
+  let paused = true;
+  let rate = 1.0;
+
   Object.assign(context, {
     begin(color = RGB(255, 255, 255)) {
       Clear(color);
@@ -63,7 +66,7 @@ function main(...args) {
     handleSize(width, height) {
       log('resized', { width, height });
     },
-    handleKey(keyCode) {
+    handleKey(keyCode, scancode, action, mods) {
       let charCode = keyCode & 0xff;
       let char = String.fromCodePoint(charCode);
 
@@ -71,14 +74,32 @@ function main(...args) {
         keyCode: '0x' + keyCode.toString(16),
         charCode,
         char,
+        scancode,
+        action,
+        mods,
       });
 
-      let handler = { '\x00': () => (running = false), Q: () => (running = false) }[char];
+      if(action) {
+        let handler = {
+          '\x00': () => (running = false),
+          Q: () => (running = false),
+        }[char];
+
+        if(handler) handler();
+      }
+    },
+    handleCharMods(charCode, mods) {
+      let char = String.fromCodePoint(charCode);
+
+      log(`handleCharMods`, { char, mods });
+
+      let handler = {
+        ' ': () => (paused = !paused),
+        '+': () => (rate += 0.2),
+        '-': () => (rate -= 0.2),
+      }[char];
 
       if(handler) handler();
-    },
-    handleCharMods(char, mods) {
-      log(`handleCharMods`, { char, mods });
     },
     handleMouseButton(button, action, mods) {
       log(`handleMouseButton`, { button, action, mods });
@@ -238,7 +259,8 @@ function main(...args) {
     nvg.Restore();
 
     context.end();
-    i++;
+
+    if(!paused) i += rate;
   }
 
   /*console.log('imgBuf', imgBuf);
