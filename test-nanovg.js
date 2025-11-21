@@ -161,7 +161,9 @@ function main(...args) {
 
     let center = [width / 2, height / 2];
     let phi = a => DegToRad(a % 360);
-    let vec = (w, h, angle = phi(i)) => [Math.cos(angle) * w, Math.sin(angle) * h];
+    //let vec = (w, h, angle = phi(i)) => [Math.cos(angle) * w, Math.sin(angle) * h];
+
+    let vec =(x,y,angle = phi(i)) => Transform.Rotate(angle).TransformPoint(x,y);
 
     function Planet(radius, stroke, fill, getAngle, getPrecession, [x, y]) {
       return Object.assign(this, {
