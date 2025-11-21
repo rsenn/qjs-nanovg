@@ -47,7 +47,7 @@ function main(...args) {
   const { size } = window;
   const { width, height } = size;
 
-  let paused = true;
+  let paused = false;
   let rate = 1.0;
 
   Object.assign(context, {
