@@ -161,9 +161,8 @@ function main(...args) {
 
     let center = [width / 2, height / 2];
     let phi = a => DegToRad(a % 360);
-    //let vec = (w, h, angle = phi(i)) => [Math.cos(angle) * w, Math.sin(angle) * h];
-
-    let vec =(x,y,angle = phi(i)) => Transform.Rotate(angle).TransformPoint(x,y);
+    
+    let vec =(x,y,angle /*= DegToRad(i%360)*/) => Transform.Rotate(angle).TransformPoint(x,y);
 
     function Planet(radius, stroke, fill, getAngle, getPrecession, [x, y]) {
       return Object.assign(this, {
@@ -181,8 +180,15 @@ function main(...args) {
         },
         draw() {
           nvg.Save();
-          nvg.Rotate(this.precession);
-          nvg.Translate(...this.position);
+              nvg.Rotate(this.precession);
+          
+         nvg.Rotate(this.angle);
+         nvg.Translate(x,y);
+       
+          
+           //nvg.Translate(...this.position);
+         
+          /* nvg.Rotate(this.angle);*/
           DrawCircle(this.radius, this.stroke, this.fill);
           nvg.Restore();
         },
