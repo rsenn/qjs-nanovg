@@ -67,12 +67,10 @@ function main(...args) {
       log('resized', { width, height });
     },
     handleKey(keyCode, scancode, action, mods) {
-      let charCode = keyCode & 0xff;
-      let char = String.fromCodePoint(charCode);
+      let char = String.fromCodePoint(keyCode);
 
-      log(`handleKey`, {
-        keyCode: '0x' + keyCode.toString(16),
-        charCode,
+      log(`handleKey`, console.config({ numberBase: 16 }), {
+        keyCode,
         char,
         scancode,
         action,
@@ -81,17 +79,20 @@ function main(...args) {
 
       if(action) {
         let handler = {
-          '\x00': () => (running = false),
-          Q: () => (running = false),
-        }[char];
+          [glfw.KEY_ESCAPE]: () => (running = false),
+          [glfw.KEY_Q]: () => (running = false),
+          [glfw.KEY_LEFT]: () => ((paused = true), (i -= rate)),
+          [glfw.KEY_RIGHT]: () => ((paused = true), (i += rate)),
+          [glfw.KEY_UP]: () => (i = 0),
+          [glfw.KEY_DOWN]: () => (i = 0),
+        }[keyCode];
 
-        if(handler) handler();
+        if(handler) return handler();
       }
     },
     handleCharMods(charCode, mods) {
       let char = String.fromCodePoint(charCode);
-
-      log(`handleCharMods`, { char, mods });
+      log(`handleCharMods`, { charCode, char, mods });
 
       let handler = {
         ' ': () => (paused = !paused),

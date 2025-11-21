@@ -97,7 +97,10 @@ nvgjs_inputoutputarray(JSContext* ctx, float vec[], int min_length, JSValueConst
 
   if((ptr = nvgjs_outputarray(ctx, &len, vector))) {
     if(len < min_length) {
-      JS_ThrowRangeError(ctx, "TypedArray vector must have at least %i elements (has %i)", min_length, len);
+      JS_ThrowRangeError(ctx,
+                         "TypedArray vector must have at least %i elements (has %i)",
+                         min_length,
+                         len);
       return 0;
     }
 
@@ -111,12 +114,15 @@ nvgjs_inputoutputarray(JSContext* ctx, float vec[], int min_length, JSValueConst
     if(!nvgjs_inputiterator(ctx, vec, min_length, vector))
       return vec;
 
-  JS_ThrowTypeError(ctx, "expecting a Float32Array, Array or Iterable");
+  JS_ThrowTypeError(ctx,
+                    "expecting a Float32Array, Array or Iterable (%s)",
+                    JS_ToCString(ctx, vector));
   return 0;
 }
 
 int
-nvgjs_inputobject(JSContext* ctx, float vec[], int len, const char* const prop_map[], JSValueConst vector) {
+nvgjs_inputobject(
+    JSContext* ctx, float vec[], int len, const char* const prop_map[], JSValueConst vector) {
   for(int i = 0; i < len; i++) {
     JSValue value = JS_GetPropertyStr(ctx, vector, prop_map[i]);
 
@@ -136,7 +142,10 @@ nvgjs_inputarray(JSContext* ctx, float vec[], int min_length, JSValueConst vecto
 
   if((ptr = nvgjs_outputarray(ctx, &length, vector))) {
     if(length < min_length) {
-      JS_ThrowRangeError(ctx, "TypedArray vector must have at least %i elements (has %i)", min_length, length);
+      JS_ThrowRangeError(ctx,
+                         "TypedArray vector must have at least %i elements (has %i)",
+                         min_length,
+                         length);
       return -1;
     }
 
@@ -184,7 +193,10 @@ nvgjs_inputiterator(JSContext* ctx, float vec[], int min_length, JSValueConst ve
       return -1;
 
     if(done) {
-      JS_ThrowRangeError(ctx, "iterable must have at least %i elements (has %i)", min_length, i);
+      JS_ThrowRangeError(ctx,
+                         "iterable must have at least %i elements (has %i)",
+                         min_length,
+                         i);
       return -1;
     }
   }
@@ -194,7 +206,8 @@ nvgjs_inputiterator(JSContext* ctx, float vec[], int min_length, JSValueConst ve
 }
 
 int
-nvgjs_input(JSContext* ctx, float vec[], int len, const char* const prop_map[], JSValueConst vector) {
+nvgjs_input(
+    JSContext* ctx, float vec[], int len, const char* const prop_map[], JSValueConst vector) {
   if(!JS_IsObject(vector)) {
     JS_ThrowTypeError(ctx, "vector must be an object");
     return -1;
@@ -216,7 +229,11 @@ nvgjs_input(JSContext* ctx, float vec[], int len, const char* const prop_map[], 
 }
 
 void
-nvgjs_copyobject(JSContext* ctx, JSValueConst value, const char* const prop_map[], const float vec[], int len) {
+nvgjs_copyobject(JSContext* ctx,
+                 JSValueConst value,
+                 const char* const prop_map[],
+                 const float vec[],
+                 int len) {
 
   for(int i = 0; i < len; i++)
     JS_SetPropertyStr(ctx, value, prop_map[i], JS_NewFloat64(ctx, vec[i]));

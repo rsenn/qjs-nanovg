@@ -14,7 +14,8 @@ int nvgjs_inputobject(JSContext*, float[], int len, const char* const prop_map[]
 int nvgjs_inputarray(JSContext*, float[], int min_length, JSValueConst);
 int nvgjs_inputiterator(JSContext*, float[], int min_length, JSValueConst);
 int nvgjs_input(JSContext*, float[], int len, const char* const prop_map[], JSValueConst);
-void nvgjs_copyobject(JSContext*, JSValueConst, const char* const prop_map[], const float[], int len);
+void nvgjs_copyobject(
+    JSContext*, JSValueConst, const char* const prop_map[], const float[], int len);
 void nvgjs_copyarray(JSContext*, JSValueConst, const float[], int len);
 
 static inline int
