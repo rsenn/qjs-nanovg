@@ -370,14 +370,14 @@ nvgjs_transform_function(JSContext* ctx, JSValueConst this_obj, int argc, JSValu
     }
     case TRANSFORM_SCALE: {
       float x, y;
-           if(argc > 0)
- nvgjs_tofloat32(ctx, &x, argv[0]);
-else
-  x=1;
+      if(argc > 0)
+        nvgjs_tofloat32(ctx, &x, argv[0]);
+      else
+        x = 1;
       if(argc > 1)
-      nvgjs_tofloat32(ctx, &y, argv[1]);
-    else 
-      y=x;
+        nvgjs_tofloat32(ctx, &y, argv[1]);
+      else
+        y = x;
 
       nvgTransformScale(tmp, x, y);
       break;
