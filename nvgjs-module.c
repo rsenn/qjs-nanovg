@@ -72,6 +72,14 @@ nvgjs_color_new(JSContext* ctx, NVGcolor color) {
 }
 
 static JSValue
+nvgjs_point_new(JSContext* ctx, float point[2]) {
+  JSValue ret = JS_NewArray(ctx);
+  JS_SetPropertyUint32(ctx, ret, 0, JS_NewFloat64(ctx, point[0]));
+  JS_SetPropertyUint32(ctx, ret, 1, JS_NewFloat64(ctx, point[1]));
+  return ret;
+}
+
+static JSValue
 nvgjs_color_get(JSContext* ctx, JSValueConst this_val, int magic) {
   return JS_GetPropertyUint32(ctx, this_val, magic);
 }
@@ -143,7 +151,7 @@ NVGJS_DECL(Transform, Translate) {
       mat = tmp;
   }
 
-  if(!nvgjs_arguments(ctx, vec, argc - i, 2, argv + i))
+  if(!nvgjs_arguments(ctx, vec, 2, argc - i, argv + i))
     return JS_ThrowInternalError(ctx, "need x, y arguments");
 
   nvgTransformTranslate(mat, vec[0], vec[1]);
@@ -165,7 +173,7 @@ NVGJS_DECL(Transform, Scale) {
       mat = tmp;
   }
 
-  if(!nvgjs_arguments(ctx, vec, argc - i, 2, argv + i))
+  if(!nvgjs_arguments(ctx, vec, 2, argc - i, argv + i))
     return JS_ThrowInternalError(ctx, "need x, y or vector arguments");
 
   nvgTransformScale(mat, vec[0], vec[1]);
@@ -268,17 +276,19 @@ NVGJS_DECL(Transform, Multiply) {
   if(argc < 1 + i)
     return JS_ThrowInternalError(ctx, "need %d arguments", 1 + i);
 
-  for(; i < argc; i += n) {
-    if(!(n = nvgjs_arguments(ctx, src, argc - i, 6, argv + i)))
+  while(i < argc) {
+    if(!(n = nvgjs_arguments(ctx, src, 6, argc - i, argv + i)))
       break;
 
     nvgTransformMultiply(mat, src);
+
+    i += n;
   }
 
   if(mat == tmp)
     return i ? nvgjs_transform_copy(ctx, argv[0], tmp) : nvgjs_transform_new(ctx, tmp);
 
-  return i ? JS_UNDEFINED : JS_DupValue(ctx, this_obj);
+  return mat == NULL ? JS_UNDEFINED : JS_DupValue(ctx, this_obj);
 }
 
 NVGJS_DECL(Transform, Premultiply) {
@@ -296,7 +306,7 @@ NVGJS_DECL(Transform, Premultiply) {
     return JS_ThrowInternalError(ctx, "need %d arguments", 1 + i);
 
   for(int n; i < argc; i += n) {
-    if(!(n = nvgjs_arguments(ctx, src, argc - i, 6, argv + i)))
+    if(!(n = nvgjs_arguments(ctx, src, 6, argc - i, argv + i)))
       break;
 
     nvgTransformPremultiply(mat, src);
@@ -305,7 +315,7 @@ NVGJS_DECL(Transform, Premultiply) {
   if(mat == tmp)
     return i ? nvgjs_transform_copy(ctx, argv[0], tmp) : nvgjs_transform_new(ctx, tmp);
 
-  return i ? JS_UNDEFINED : JS_DupValue(ctx, this_obj);
+  return mat == NULL ? JS_UNDEFINED : JS_DupValue(ctx, this_obj);
 }
 
 NVGJS_DECL(Transform, Inverse) {
@@ -330,7 +340,97 @@ NVGJS_DECL(Transform, Inverse) {
   if(mat == tmp)
     return i ? nvgjs_transform_copy(ctx, argv[0], tmp) : nvgjs_transform_new(ctx, tmp);
 
-  return i ? JS_UNDEFINED : JS_DupValue(ctx, this_obj);
+  return mat == NULL ? JS_UNDEFINED : JS_DupValue(ctx, this_obj);
+}
+
+enum {
+  TRANSFORM_TRANSLATE,
+  TRANSFORM_ROTATE,
+  TRANSFORM_SCALE,
+  TRANSFORM_SKEWX,
+  TRANSFORM_SKEWY,
+  TRANSFORM_INVERSE,
+  TRANSFORM_MULTIPLY,
+  TRANSFORM_PREMULTIPLY,
+  TRANSFORM_POINT,
+};
+
+static JSValue
+nvgjs_transform_function(JSContext* ctx, JSValueConst this_obj, int argc, JSValueConst argv[], int magic) {
+
+  float *mat = nvgjs_transform_output(ctx, this_obj), tmp[6];
+
+  switch(magic) {
+    case TRANSFORM_TRANSLATE: {
+      float x, y;
+      nvgjs_tofloat32(ctx, &x, argv[0]);
+      nvgjs_tofloat32(ctx, &y, argv[1]);
+      nvgTransformTranslate(tmp, x, y);
+      break;
+    }
+    case TRANSFORM_SCALE: {
+      float x, y;
+      nvgjs_tofloat32(ctx, &x, argv[0]);
+      nvgjs_tofloat32(ctx, &y, argv[1]);
+      nvgTransformScale(tmp, x, y);
+      break;
+    }
+    case TRANSFORM_ROTATE: {
+      float a;
+      nvgjs_tofloat32(ctx, &a, argv[0]);
+      nvgTransformRotate(tmp, a);
+      break;
+    }
+    case TRANSFORM_SKEWX: {
+      float a;
+      nvgjs_tofloat32(ctx, &a, argv[0]);
+      nvgTransformSkewX(tmp, a);
+      break;
+    }
+    case TRANSFORM_SKEWY: {
+      float a;
+      nvgjs_tofloat32(ctx, &a, argv[0]);
+      nvgTransformSkewY(tmp, a);
+      break;
+    }
+
+    case TRANSFORM_MULTIPLY: {
+      if(!nvgjs_arguments(ctx, tmp, 6, argc, argv))
+        nvgTransformIdentity(tmp);
+      break;
+
+      nvgTransformMultiply(mat, tmp);
+      nvgTransformIdentity(tmp);
+    }
+
+    case TRANSFORM_PREMULTIPLY: {
+      if(!nvgjs_arguments(ctx, tmp, 6, argc, argv))
+        nvgTransformIdentity(tmp);
+
+      nvgTransformPremultiply(mat, tmp);
+      nvgTransformIdentity(tmp);
+      break;
+    }
+
+    case TRANSFORM_INVERSE: {
+      memcpy(tmp, mat, sizeof(float) * 6);
+      nvgTransformInverse(mat, tmp);
+      nvgTransformIdentity(tmp);
+      break;
+    }
+
+    case TRANSFORM_POINT: {
+      float in[2], out[2];
+      nvgjs_arguments(ctx, in, 2, argc, argv);
+
+      nvgTransformPoint(&out[0], &out[1], mat, in[0], in[1]);
+
+      return nvgjs_point_new(ctx, out);
+    }
+  }
+
+  nvgTransformPremultiply(mat, tmp);
+  return JS_DupValue(ctx, this_obj);
 }
 
 static const JSCFunctionListEntry nvgjs_transform_methods[] = {
@@ -347,6 +447,17 @@ static const JSCFunctionListEntry nvgjs_transform_methods[] = {
     JS_CGETSET_MAGIC_DEF("yy", nvgjs_transform_get, nvgjs_transform_set, 3),
     JS_CGETSET_MAGIC_DEF("x0", nvgjs_transform_get, nvgjs_transform_set, 4),
     JS_CGETSET_MAGIC_DEF("y0", nvgjs_transform_get, nvgjs_transform_set, 5),
+
+    JS_CFUNC_MAGIC_DEF("Translate", 2, nvgjs_transform_function, TRANSFORM_TRANSLATE),
+    JS_CFUNC_MAGIC_DEF("Scale", 2, nvgjs_transform_function, TRANSFORM_SCALE),
+    JS_CFUNC_MAGIC_DEF("Rotate", 1, nvgjs_transform_function, TRANSFORM_ROTATE),
+    JS_CFUNC_MAGIC_DEF("SkewX", 1, nvgjs_transform_function, TRANSFORM_SKEWX),
+    JS_CFUNC_MAGIC_DEF("SkewY", 1, nvgjs_transform_function, TRANSFORM_SKEWY),
+    JS_CFUNC_MAGIC_DEF("Multiply", 1, nvgjs_transform_function, TRANSFORM_MULTIPLY),
+    JS_CFUNC_MAGIC_DEF("Premultiply", 1, nvgjs_transform_function, TRANSFORM_PREMULTIPLY),
+    JS_CFUNC_MAGIC_DEF("Inverse", 0, nvgjs_transform_function, TRANSFORM_INVERSE),
+
+    JS_CFUNC_MAGIC_DEF("TransformPoint", 1, nvgjs_transform_function, TRANSFORM_POINT),
 
     JS_PROP_STRING_DEF("[Symbol.toStringTag]", "nvgTransform", JS_PROP_CONFIGURABLE),
 };
@@ -791,7 +902,7 @@ NVGJS_DECL(func, TransformPoint) {
     for(; size >= 2; size -= 2, dst += 2, i++) {
       int r;
 
-      if(!(r = nvgjs_arguments(ctx, src, argc - 2, 2, argv + 2)))
+      if(!(r = nvgjs_arguments(ctx, src, 2, argc - 2, argv + 2)))
         break;
 
       argc -= r;
@@ -1717,7 +1828,7 @@ NVGJS_DECL(Context, Transform) {
   if(argc < 1)
     return JS_ThrowInternalError(ctx, "need 1/6 arguments");
 
-  if(nvgjs_arguments(ctx, t, argc, 6, argv))
+  if(nvgjs_arguments(ctx, t, 6, argc, argv))
     nvgTransform(nvg, t[0], t[1], t[2], t[3], t[4], t[5]);
 
   return JS_UNDEFINED;
