@@ -96,8 +96,8 @@ function main(...args) {
 
       let handler = {
         ' ': () => (paused = !paused),
-        '+': () => (rate += 0.2),
-        '-': () => (rate -= 0.2),
+        '+': () => ((paused = false), (rate += 0.2)),
+        '-': () => ((paused = false), (rate -= 0.2)),
       }[char];
 
       if(handler) handler();
@@ -161,8 +161,8 @@ function main(...args) {
 
     let center = [width / 2, height / 2];
     let phi = a => DegToRad(a % 360);
-    
-    let vec =(x,y,angle /*= DegToRad(i%360)*/) => Transform.Rotate(angle).TransformPoint(x,y);
+
+    let vec = (x, y, angle) => Transform.Scale(x, y).Rotate(angle).Translate(1, 1);
 
     function Planet(radius, stroke, fill, getAngle, getPrecession, [x, y]) {
       return Object.assign(this, {
@@ -180,15 +180,9 @@ function main(...args) {
         },
         draw() {
           nvg.Save();
-              nvg.Rotate(this.precession);
-          
-         nvg.Rotate(this.angle);
-         nvg.Translate(x,y);
-       
-          
-           //nvg.Translate(...this.position);
-         
-          /* nvg.Rotate(this.angle);*/
+          nvg.Rotate(this.precession);
+          nvg.Translate(...this.position);
+
           DrawCircle(this.radius, this.stroke, this.fill);
           nvg.Restore();
         },
@@ -223,7 +217,7 @@ function main(...args) {
       new Planet(
         20,
         RGB(255, 180, 180),
-        RGBA(255, 0, 0, 0.8 * 255),
+        RGBA(255, 10, 0, 0.8 * 255),
         () => phi(i),
         () => phi(i * -0.01),
         [300, 100],
