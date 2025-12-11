@@ -164,6 +164,7 @@ function main(...args) {
 
     let vec = (x, y, angle) => Transform.Scale(x, y).Rotate(angle).Translate(1, 1);
 
+
     function Planet(radius, stroke, fill, getAngle, getPrecession, [x, y]) {
       return Object.assign(this, {
         radius,
@@ -243,15 +244,9 @@ function main(...args) {
     planets.sort((a, b) => a.zpos - b.zpos);
 
     nvg.Save();
-    nvg.Translate(...center);
-
-    /*nvg.Save();
-    nvg.Translate(...vec(width/2 - images[0].height*0.1, height/2 - images[0].height*0.1, i * 0.01 + -Math.PI/2));
-    nvg.Scale(0.2, 0.2);
-    nvg.Rotate(i * 0.01);
-
-    images[0].draw();
-    nvg.Restore();*/
+         
+ nvg.Translate(...center);
+nvg.Scale(0.85, 0.85);
 
     for(let planet of planets) planet.drawOrbit();
 
