@@ -1,5 +1,16 @@
 import * as glfw from 'glfw';
-import { CreateGL3, STENCIL_STROKES, ANTIALIAS, DEBUG, DegToRad, ReadPixels, CreateImageFromHandleGL3, ImageHandleGL3, IMAGE_NODELETE, CreateFramebuffer, BindFramebuffer, DeleteFramebuffer, Transform, TransformPoint, RGB, RGBA, } from 'nanovg';
+import { ANTIALIAS } from 'nanovg';
+import { BindFramebuffer } from 'nanovg';
+import { CreateFramebuffer } from 'nanovg';
+import { CreateGL3 } from 'nanovg';
+import { CreateImageFromHandleGL3 } from 'nanovg';
+import { DegToRad } from 'nanovg';
+import { ReadPixels } from 'nanovg';
+import { RGB } from 'nanovg';
+import { RGBA } from 'nanovg';
+import { STENCIL_STROKES } from 'nanovg';
+import { Transform } from 'nanovg';
+import { TransformPoint } from 'nanovg';
 
 const C = console.config({ compact: true });
 
@@ -164,7 +175,6 @@ function main(...args) {
 
     let vec = (x, y, angle) => Transform.Scale(x, y).Rotate(angle).Translate(1, 1);
 
-
     function Planet(radius, stroke, fill, getAngle, getPrecession, [x, y]) {
       return Object.assign(this, {
         radius,
@@ -244,9 +254,9 @@ function main(...args) {
     planets.sort((a, b) => a.zpos - b.zpos);
 
     nvg.Save();
-         
- nvg.Translate(...center);
-nvg.Scale(0.85, 0.85);
+
+    nvg.Translate(...center);
+    nvg.Scale(0.85, 0.85);
 
     for(let planet of planets) planet.drawOrbit();
 
