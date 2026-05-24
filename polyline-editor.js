@@ -49,11 +49,7 @@ function main() {
   const nvg = CreateGL3(STENCIL_STROKES | ANTIALIAS);
 
   let font = -1;
-  for(let path of [
-    '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
-    '/usr/share/fonts/TTF/DejaVuSans.ttf',
-    '/usr/share/fonts/dejavu/DejaVuSans.ttf',
-  ]) {
+  for(let path of ['/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf', '/usr/share/fonts/TTF/DejaVuSans.ttf', '/usr/share/fonts/dejavu/DejaVuSans.ttf']) {
     if((font = nvg.CreateFont('sans', path)) >= 0) break;
   }
   const hasText = font >= 0;
@@ -112,7 +108,12 @@ function main() {
     f.puts(JSON.stringify(polylines, null, 2));
     f.close();
     savedAt = Date.now();
-    console.log('saved', polylines.reduce((n, p) => n + p.length, 0), 'points to', SAVE_PATH);
+    console.log(
+      'saved',
+      polylines.reduce((n, p) => n + p.length, 0),
+      'points to',
+      SAVE_PATH,
+    );
   }
 
   Object.assign(window, {
@@ -204,8 +205,7 @@ function main() {
       align: ALIGN_CENTER | ALIGN_MIDDLE,
     });
 
-    if(Date.now() - savedAt < 1200)
-      text(saveBtn.x - 12, saveBtn.y + saveBtn.h / 2, 'saved ✓', { color: COL.ok, align: ALIGN_RIGHT | ALIGN_MIDDLE });
+    if(Date.now() - savedAt < 1200) text(saveBtn.x - 12, saveBtn.y + saveBtn.h / 2, 'saved ✓', { color: COL.ok, align: ALIGN_RIGHT | ALIGN_MIDDLE });
 
     text(16, height - 18, 'drag handle: move    left-click: add point    right-click: delete    s: save    q/esc: quit', { size: 12 });
   }
