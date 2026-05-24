@@ -8,7 +8,7 @@
 
 import * as glfw from 'glfw';
 import * as std from 'std';
-import { ALIGN_BOTTOM, ALIGN_LEFT, ALIGN_MIDDLE, ALIGN_RIGHT, ALIGN_TOP, ALIGN_BASELINE, ANTIALIAS, CreateGL3, DeleteGL3, ReadPixels, RGB, RGBA, STENCIL_STROKES } from 'nanovg';
+import { ALIGN_BOTTOM, ALIGN_LEFT, ALIGN_MIDDLE, ALIGN_RIGHT, ALIGN_TOP, ANTIALIAS, CreateGL3, DeleteGL3, ReadPixels, RGB, RGBA, STENCIL_STROKES } from 'nanovg';
 
 const SYMBOL = 'EUR/USD';
 const CANDLE_MS = 1000; // duration of one candle
