@@ -10,11 +10,14 @@ include(FindOpenGL)
 if(NOT PKG_CONFIG_FOUND)
   include(FindPkgConfig)
 endif(NOT PKG_CONFIG_FOUND)
+
 include(CheckCCompilerFlag)
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindQuickJS.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindGLEW.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindGLFW.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/UseMultiArch.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindMarkdown.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/markdown.cmake)
 
 check_c_compiler_flag("-fvisibility=hidden" VISIBILITY_HIDDEN)
 if(VISIBILITY_HIDDEN)
@@ -72,3 +75,6 @@ if(BUILD_EXAMPLE)
   add_custom_target(run_example COMMAND ${CMAKE_CURRENT_BINARY_DIR}/nanovg_example
                     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/nanovg/example)
 endif(BUILD_EXAMPLE)
+
+file(GLOB MARKDOWN_DOCS doc/*.md)
+md2html(${MARKDOWN_DOCS})
