@@ -8,20 +8,7 @@
 
 import * as glfw from 'glfw';
 import * as std from 'std';
-import {
-  ALIGN_BOTTOM,
-  ALIGN_LEFT,
-  ALIGN_MIDDLE,
-  ALIGN_RIGHT,
-  ALIGN_TOP,
-  ANTIALIAS,
-  CreateGL3,
-  DeleteGL3,
-  ReadPixels,
-  RGB,
-  RGBA,
-  STENCIL_STROKES,
-} from 'nanovg';
+import { ALIGN_BOTTOM, ALIGN_LEFT, ALIGN_MIDDLE, ALIGN_RIGHT, ALIGN_TOP, ALIGN_BASELINE, ANTIALIAS, CreateGL3, DeleteGL3, ReadPixels, RGB, RGBA, STENCIL_STROKES } from 'nanovg';
 
 const SYMBOL = 'EUR/USD';
 const CANDLE_MS = 1000; // duration of one candle
@@ -68,17 +55,13 @@ function main() {
 
   // Load a font for the axis/HUD labels; degrade gracefully if unavailable.
   let font = -1;
-  for(let path of [
-    '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
-    '/usr/share/fonts/TTF/DejaVuSans.ttf',
-    '/usr/share/fonts/dejavu/DejaVuSans.ttf',
-  ]) {
+  for(let path of ['/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf', '/usr/share/fonts/TTF/DejaVuSans.ttf', '/usr/share/fonts/dejavu/DejaVuSans.ttf']) {
     if((font = nvg.CreateFont('sans', path)) >= 0) break;
   }
   const hasText = font >= 0;
 
   // ---- Simulated price feed -------------------------------------------------
-  let price = 1.10000;
+  let price = 1.1;
   const candles = [];
 
   // Seed some history so the chart starts populated.
