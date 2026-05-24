@@ -9,7 +9,7 @@
 
 import * as glfw from 'glfw';
 import * as std from 'std';
-import { ALIGN_CENTER, ALIGN_LEFT, ALIGN_MIDDLE, ANTIALIAS, CreateGL3, DeleteGL3, RGB, RGBA, STENCIL_STROKES } from 'nanovg';
+import { ALIGN_CENTER, ALIGN_LEFT, ALIGN_MIDDLE, ALIGN_RIGHT, ANTIALIAS, CreateGL3, DeleteGL3, RGB, STENCIL_STROKES } from 'nanovg';
 
 // glfw.so does not export the mouse-button / action enums, so spell them out.
 // (GLFW_MOUSE_BUTTON_LEFT = 0, GLFW_MOUSE_BUTTON_RIGHT = 1; GLFW_PRESS = 1.)
