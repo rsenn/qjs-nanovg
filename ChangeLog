@@ -1,0 +1,131 @@
+2026-07-03  Roman Senn  <roman.l.senn@gmail.com>
+
+	Bug-fix pass on the QuickJS ↔ NanoVG binding.
+
+	The fixes below were derived from a static read of nvgjs-module.[ch]
+	and nvgjs-utils.[ch]. Every fix is covered by an entry in the new
+	test-fixes.js harness — before the fixes 2/26 assertions failed
+	(both symptoms of the misplaced-break bug); after the fixes all 26
+	pass. Run with `qjsm test-fixes.js` against an installed nanovg.so.
+
+	* nvgjs-module.c (nvgjs_tocolor):
+	Clear the pending TypeError/RangeError left over by the failed
+	4-element probe before attempting the 3-element (RGB-only, alpha=1)
+	fallback. Previously a valid 3-element colour was accepted but the
+	stale exception leaked into the next JS API call, sporadically
+	throwing "expecting a Float32Array" from an unrelated site.
+
+	* nvgjs-module.c (nvgjs_transform_function, TRANSFORM_MULTIPLY case):
+	Move the misplaced `break` to the end of the case and reset `tmp` to
+	identity, so nvgTransformMultiply actually runs. Previously the case
+	skipped the multiply entirely and the unconditional post-switch
+	nvgTransformPremultiply(mat, tmp) fired with `tmp` still holding the
+	user's argument — making the instance method `.Multiply(m)` silently
+	behave like `.Premultiply(m)`. Test coverage:
+	  - Scale(2,3).Multiply(Translate(5,7)) now returns
+	    [2,0,0,3, 5, 7] (previously [2,0,0,3, 10, 21]).
+	  - .Multiply and .Premultiply now disagree on non-commutative pairs.
+
+	* nvgjs-module.c (nvgjs_context_finalizer):
+	Removed the "XXX: bug" marker and replaced with a comment documenting
+	the ordering constraint: the finalizer intentionally does NOT call
+	nvgDeleteGL[23] because it may run after the owning GL context
+	(managed by the glfw module) has already been destroyed. Callers that
+	want deterministic teardown must still call DeleteGL3(nvg) before
+	closing the window — this is now an explicit contract rather than a
+	silent leak.
+
+	* nvgjs-module.c (CreateGL2): Fix `ctxc` typo → `ctx`. The
+	NANOVG_GL2 code path is behind an #ifdef that is not currently set
+	in CMakeLists.txt, so this was a latent build error; flipping the
+	flag would previously have failed to compile.
+
+	* nvgjs-module.c (BeginFrame): Change bitwise `|` to logical `||` in
+	the JS_ToFloat64 chain for w/h/ratio so conversion errors
+	short-circuit instead of stacking additional exceptions onto an
+	already-pending one.
+
+	* nvgjs-module.c (Context.ResetScissor): Add the missing
+	`return JS_UNDEFINED;`. The non-void JS callback previously fell off
+	the end of the function; the returned JSValue was whatever was in
+	the return register — potentially a corrupted object handle.
+
+	* nvgjs-module.c (Context.Text, Context.TextBox, Context.TextBounds,
+	Context.TextBoxBounds):
+	  - x, y (and w for TextBox/TextBoxBounds) converted with
+	    JS_ToFloat64 into double, instead of JS_ToInt32 into int.
+	    NanoVG's text APIs take floats; the old code silently truncated
+	    fractional positions.
+	  - If the optional `pos` argument is present but its int conversion
+	    fails, propagate the exception (return JS_EXCEPTION and free the
+	    duplicated CString) instead of ignoring the pending exception
+	    and continuing.
+	  - TextBoxBounds now null/undefined-guards `argv[4]` before trying
+	    to convert it, matching the pattern in TextBounds.
+
+	* nvgjs-module.c (nvgjs_paint_new):
+	Free the malloc'd NVGpaint* on the JS_NewObjectClass failure path.
+	Previously an out-of-memory or class-creation error leaked
+	sizeof(NVGpaint) bytes on every call.
+
+	* nvgjs-module.c (nvgjs_arraybuffer_free) [new], (ReadPixels):
+	Introduced a small wrapper matching QuickJS's
+	`JSFreeArrayBufferDataFunc` signature (rt, opaque, ptr) that
+	delegates to js_free_rt(rt, ptr). ReadPixels now passes this wrapper
+	instead of casting `js_free_rt` (which has arity 2) to a
+	3-argument callback — undefined behaviour per ISO C, and portable
+	only by accident of the SysV ABI on the currently-supported
+	x86_64 target.
+
+	* nvgjs-utils.c (nvgjs_iterator):
+	Remove the shadowing `JSAtom iterator = ...` declaration inside the
+	init block that had been hiding the outer static. Consequence of the
+	shadow: the static was never assigned, every call to
+	nvgjs_iterator() returned JS_ATOM_NULL (0) and leaked the newly
+	created atom, and every iterable-input path
+	(nvgjs_inputoutputarray, nvgjs_input) silently failed to recognise
+	iterables — falling through to a TypeError. The unused
+	`JSValue ret = JS_UNDEFINED;` local was also removed.
+
+	* nvgjs-utils.c (nvgjs_inputarray, nvgjs_inputoutputarray,
+	nvgjs_input):
+	Explicitly clear the TypeError thrown by the initial
+	nvgjs_outputarray probe before falling back to Array / iterator /
+	property-map paths. Successful fallbacks previously returned 0 with
+	a stale exception still on the context, which QuickJS then treated
+	as if the entire wrapper function had thrown.
+
+	* nvgjs-utils.c (nvgjs_inputobject, nvgjs_inputarray,
+	nvgjs_inputiterator):
+	Free per-element JSValues (and, for nvgjs_inputiterator, the outer
+	iterator object) on the error-return paths.
+
+	* nvgjs-utils.c (nvgjs_inputoutputarray):
+	The final TypeError path previously leaked the JSCString returned by
+	JS_ToCString and dereferenced NULL if the conversion itself failed.
+	Now it stashes the pointer, uses "" as the fallback, and always
+	frees the string.
+
+	* nvgjs-module.h:
+	Rename the exported prototype from `js_init_module_nanovg` (which
+	matched no C definition) to `nvgjs_init_module`, and note the
+	shared-library rename to `js_init_module` in a comment.
+
+	* test-fixes.js [new]:
+	Headless (no-GL) unit tests exercising the code paths above:
+	  Group A — colour helpers (RGB / RGBA / RGBf / RGBAf / HSL / HSLA /
+	    LerpRGBA / TransRGBA / TransRGBAf) — targets nvgjs_tocolor and
+	    the util exception-clearing fixes.
+	  Group B — DegToRad / RadToDeg.
+	  Group C — Transform statics (Identity, Translate, Scale, Rotate).
+	  Group D — Transform instance methods, specifically:
+	    .Multiply must give mat := arg * mat
+	    .Premultiply must give mat := mat * arg
+	    They must disagree for non-commutative pairs.
+	  Group E — TransformPoint.
+	  Group F — Transform.TransformPoint instance.
+	Assertions log a one-line message on failure and the runner exits
+	non-zero if any test fails.
+
+	* ChangeLog [new]:
+	This file.

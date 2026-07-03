@@ -24,6 +24,8 @@
 #define NVGJS_CONST(name) \
   JS_PROP_DOUBLE_DEF(#name, NVG_##name, JS_PROP_CONFIGURABLE | JS_PROP_ENUMERABLE)
 
-JSModuleDef* js_init_module_nanovg(JSContext* ctx, const char* module_name);
+/* Exported entry point. When built as a shared library the symbol is renamed
+ * to js_init_module via the #define in nvgjs-module.c. */
+JSModuleDef* nvgjs_init_module(JSContext* ctx, const char* module_name);
 
 #endif /* NANOVG_QJS_H */

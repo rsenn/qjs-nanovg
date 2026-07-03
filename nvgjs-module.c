@@ -21,6 +21,12 @@ static JSValue framebuffer_ctor, framebuffer_proto;
 
 static JSValue nvgjs_framebuffer_wrap(JSContext*, JSValueConst, NVGLUframebuffer*);
 
+static void
+nvgjs_arraybuffer_free(JSRuntime* rt, void* opaque, void* ptr) {
+  (void)opaque;
+  js_free_rt(rt, ptr);
+}
+
 static const char* const nvgjs_color_keys[] = {"r", "g", "b", "a"};
 
 static void
@@ -54,12 +60,14 @@ static const char* const nvgjs_vector_keys[] = {"x", "y"};
 
 static int
 nvgjs_tocolor(JSContext* ctx, NVGcolor* color, JSValueConst value) {
-  if(nvgjs_inputarray(ctx, color->rgba, 4, value)) {
-    color->a = 1;
+  if(!nvgjs_inputarray(ctx, color->rgba, 4, value))
+    return 0;
 
-    return nvgjs_inputarray(ctx, color->rgba, 3, value);
-  }
-  return 0;
+  /* 4-element read failed and left an exception on ctx; discard it so the
+     3-element fallback (with default alpha=1) can throw its own on failure. */
+  JS_FreeValue(ctx, JS_GetException(ctx));
+  color->a = 1;
+  return nvgjs_inputarray(ctx, color->rgba, 3, value);
 }
 
 static JSValue
@@ -405,10 +413,10 @@ nvgjs_transform_function(JSContext* ctx, JSValueConst this_obj, int argc, JSValu
     case TRANSFORM_MULTIPLY: {
       if(!nvgjs_arguments(ctx, tmp, 6, argc, argv))
         nvgTransformIdentity(tmp);
-      break;
 
       nvgTransformMultiply(mat, tmp);
-      nvgTransformIdentity(tmp);
+      nvgTransformIdentity(tmp); /* neutralise the tail Premultiply below */
+      break;
     }
 
     case TRANSFORM_PREMULTIPLY: {
@@ -493,8 +501,10 @@ nvgjs_paint_new(JSContext* ctx, NVGpaint p) {
   *ptr = p;
 
   obj = JS_NewObjectClass(ctx, nvgjs_paint_class_id);
-  if(JS_IsException(obj))
+  if(JS_IsException(obj)) {
+    js_free(ctx, ptr);
     return obj;
+  }
 
   JS_SetOpaque(obj, ptr);
   return obj;
@@ -557,11 +567,13 @@ nvgjs_context_wrap(JSContext* ctx, JSValueConst proto, NVGcontext* nvg) {
 
 static void
 nvgjs_context_finalizer(JSRuntime* rt, JSValue val) {
-  NVGcontext* nvg;
-
-  if((nvg = JS_GetOpaque(val, nvgjs_context_class_id))) {
-    // XXX: bug
-  }
+  /* Intentionally do NOT call nvgDeleteGL[23] here: the finalizer may run
+   * after the owning GL context (owned by the glfw module) has been destroyed,
+   * in which case tearing down NanoVG's GL resources would crash. Callers
+   * that care about deterministic cleanup must call DeleteGL3(nvg) (or GL2)
+   * *before* their window is destroyed. */
+  (void)rt;
+  (void)val;
 }
 
 static JSClassDef nvgjs_context_class = {
@@ -579,7 +591,7 @@ NVGJS_DECL(func, CreateGL2) {
   if(JS_ToInt32(ctx, &flags, argv[0]))
     return JS_EXCEPTION;
 
-  return nvgjs_context_wrap(ctxc, context_proto, nvgCreateGL2(flags));
+  return nvgjs_context_wrap(ctx, context_proto, nvgCreateGL2(flags));
 }
 
 NVGJS_DECL(func, DeleteGL2) {
@@ -752,7 +764,7 @@ NVGJS_DECL(func, ReadPixels) {
 
   glReadPixels(0, 0, w, h, GL_RGBA, GL_UNSIGNED_BYTE, image);
 
-  return JS_NewArrayBuffer(ctx, image, w * h * 4, (JSFreeArrayBufferDataFunc*)&js_free_rt, image, FALSE);
+  return JS_NewArrayBuffer(ctx, image, w * h * 4, nvgjs_arraybuffer_free, NULL, FALSE);
 }
 
 NVGJS_DECL(func, DegToRad) {
@@ -974,7 +986,7 @@ NVGJS_DECL(Context, BeginFrame) {
   if(argc < 3)
     return JS_ThrowInternalError(ctx, "need 3 arguments");
 
-  if(JS_ToFloat64(ctx, &w, argv[0]) || JS_ToFloat64(ctx, &h, argv[1]) | JS_ToFloat64(ctx, &ratio, argv[2]))
+  if(JS_ToFloat64(ctx, &w, argv[0]) || JS_ToFloat64(ctx, &h, argv[1]) || JS_ToFloat64(ctx, &ratio, argv[2]))
     return JS_EXCEPTION;
 
   nvgBeginFrame(nvg, w, h, ratio);
@@ -1324,6 +1336,7 @@ NVGJS_DECL(Context, ResetScissor) {
   NVGJS_CONTEXT(this_obj);
 
   nvgResetScissor(nvg);
+  return JS_UNDEFINED;
 }
 
 NVGJS_DECL(Context, FillPaint) {
@@ -1533,24 +1546,27 @@ NVGJS_DECL(Context, FontFace) {
 NVGJS_DECL(Context, Text) {
   NVGJS_CONTEXT(this_obj);
 
-  int x, y;
+  double x, y;
   const char *str, *end = 0;
   size_t len;
 
   if(argc < 3)
     return JS_ThrowInternalError(ctx, "need 3 arguments");
 
-  if(JS_ToInt32(ctx, &x, argv[0]) || JS_ToInt32(ctx, &y, argv[1]))
+  if(JS_ToFloat64(ctx, &x, argv[0]) || JS_ToFloat64(ctx, &y, argv[1]))
     return JS_EXCEPTION;
 
   if(!(str = JS_ToCStringLen(ctx, &len, argv[2])))
     return JS_EXCEPTION;
 
-  if(argc > 3) {
+  if(argc > 3 && !JS_IsUndefined(argv[3]) && !JS_IsNull(argv[3])) {
     int32_t pos;
 
-    if(!JS_ToInt32(ctx, &pos, argv[3]))
-      end = str + nvgjs_utf8offset(str, len, pos);
+    if(JS_ToInt32(ctx, &pos, argv[3])) {
+      JS_FreeCString(ctx, str);
+      return JS_EXCEPTION;
+    }
+    end = str + nvgjs_utf8offset(str, len, pos);
   }
 
   float ret = nvgText(nvg, x, y, str, end);
@@ -1563,7 +1579,7 @@ NVGJS_DECL(Context, Text) {
 NVGJS_DECL(Context, TextBox) {
   NVGJS_CONTEXT(this_obj);
 
-  int x, y;
+  double x, y;
   double breakRowWidth;
   const char *str, *end = 0;
   size_t len;
@@ -1571,7 +1587,7 @@ NVGJS_DECL(Context, TextBox) {
   if(argc < 4)
     return JS_ThrowInternalError(ctx, "need 4 arguments");
 
-  if(JS_ToInt32(ctx, &x, argv[0]) || JS_ToInt32(ctx, &y, argv[1]))
+  if(JS_ToFloat64(ctx, &x, argv[0]) || JS_ToFloat64(ctx, &y, argv[1]))
     return JS_EXCEPTION;
 
   if(JS_ToFloat64(ctx, &breakRowWidth, argv[2]))
@@ -1580,11 +1596,14 @@ NVGJS_DECL(Context, TextBox) {
   if(!(str = JS_ToCStringLen(ctx, &len, argv[3])))
     return JS_EXCEPTION;
 
-  if(argc > 4) {
+  if(argc > 4 && !JS_IsUndefined(argv[4]) && !JS_IsNull(argv[4])) {
     int32_t pos;
 
-    if(!JS_ToInt32(ctx, &pos, argv[4]))
-      end = str + nvgjs_utf8offset(str, len, pos);
+    if(JS_ToInt32(ctx, &pos, argv[4])) {
+      JS_FreeCString(ctx, str);
+      return JS_EXCEPTION;
+    }
+    end = str + nvgjs_utf8offset(str, len, pos);
   }
 
   nvgTextBox(nvg, x, y, breakRowWidth, str, end);
@@ -1614,8 +1633,11 @@ NVGJS_DECL(Context, TextBounds) {
   if(!(JS_IsNull(argv[3]) || JS_IsUndefined(argv[3]))) {
     int32_t pos;
 
-    if(!JS_ToInt32(ctx, &pos, argv[3]))
-      end = str + nvgjs_utf8offset(str, len, pos);
+    if(JS_ToInt32(ctx, &pos, argv[3])) {
+      JS_FreeCString(ctx, str);
+      return JS_EXCEPTION;
+    }
+    end = str + nvgjs_utf8offset(str, len, pos);
   }
 
   float ret = nvgTextBounds(nvg, x, y, str, end, bounds);
@@ -1631,7 +1653,7 @@ NVGJS_DECL(Context, TextBounds) {
 NVGJS_DECL(Context, TextBoxBounds) {
   NVGJS_CONTEXT(this_obj);
 
-  int x, y;
+  double x, y;
   double breakRowWidth;
   const char *str, *end = 0;
   size_t len;
@@ -1640,7 +1662,7 @@ NVGJS_DECL(Context, TextBoxBounds) {
   if(argc < 6)
     return JS_ThrowInternalError(ctx, "need 6 arguments");
 
-  if(JS_ToInt32(ctx, &x, argv[0]) || JS_ToInt32(ctx, &y, argv[1]))
+  if(JS_ToFloat64(ctx, &x, argv[0]) || JS_ToFloat64(ctx, &y, argv[1]))
     return JS_EXCEPTION;
 
   if(JS_ToFloat64(ctx, &breakRowWidth, argv[2]))
@@ -1649,11 +1671,14 @@ NVGJS_DECL(Context, TextBoxBounds) {
   if(!(str = JS_ToCStringLen(ctx, &len, argv[3])))
     return JS_EXCEPTION;
 
-  if(argc > 4) {
+  if(!(JS_IsNull(argv[4]) || JS_IsUndefined(argv[4]))) {
     int32_t pos;
 
-    if(!JS_ToInt32(ctx, &pos, argv[4]))
-      end = str + nvgjs_utf8offset(str, len, pos);
+    if(JS_ToInt32(ctx, &pos, argv[4])) {
+      JS_FreeCString(ctx, str);
+      return JS_EXCEPTION;
+    }
+    end = str + nvgjs_utf8offset(str, len, pos);
   }
 
   nvgTextBoxBounds(nvg, x, y, breakRowWidth, str, end, bounds);

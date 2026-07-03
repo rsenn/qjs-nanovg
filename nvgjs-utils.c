@@ -39,13 +39,12 @@ nvgjs_iterator(JSContext* ctx) {
   static JSAtom iterator;
 
   if(!iterator) {
-    JSValue ret = JS_UNDEFINED;
     JSValue global = JS_GetGlobalObject(ctx);
     JSValue ctor = JS_GetPropertyStr(ctx, global, "Symbol");
     JS_FreeValue(ctx, global);
     JSValue sym = JS_GetPropertyStr(ctx, ctor, "iterator");
     JS_FreeValue(ctx, ctor);
-    JSAtom iterator = JS_ValueToAtom(ctx, sym);
+    iterator = JS_ValueToAtom(ctx, sym);
     JS_FreeValue(ctx, sym);
   }
 
@@ -104,14 +103,24 @@ nvgjs_inputoutputarray(JSContext* ctx, float vec[], int min_length, JSValueConst
     return ptr;
   }
 
+  /* Not a Float32Array — clear the probe TypeError before trying fallbacks. */
+  JS_FreeValue(ctx, JS_GetException(ctx));
+
   if(!nvgjs_inputarray(ctx, vec, min_length, vector))
     return vec;
+
+  JS_FreeValue(ctx, JS_GetException(ctx));
 
   if(JS_HasProperty(ctx, vector, nvgjs_iterator(ctx)))
     if(!nvgjs_inputiterator(ctx, vec, min_length, vector))
       return vec;
 
-  JS_ThrowTypeError(ctx, "expecting a Float32Array, Array or Iterable (%s)", JS_ToCString(ctx, vector));
+  JS_FreeValue(ctx, JS_GetException(ctx));
+
+  const char* s = JS_ToCString(ctx, vector);
+  JS_ThrowTypeError(ctx, "expecting a Float32Array, Array or Iterable (%s)", s ? s : "");
+  if(s)
+    JS_FreeCString(ctx, s);
   return 0;
 }
 
@@ -119,11 +128,11 @@ int
 nvgjs_inputobject(JSContext* ctx, float vec[], int len, const char* const prop_map[], JSValueConst vector) {
   for(int i = 0; i < len; i++) {
     JSValue value = JS_GetPropertyStr(ctx, vector, prop_map[i]);
-
-    if(nvgjs_tofloat32(ctx, &vec[i], value))
-      return -1;
-
+    int ret = nvgjs_tofloat32(ctx, &vec[i], value);
     JS_FreeValue(ctx, value);
+
+    if(ret)
+      return -1;
   }
 
   return 0;
@@ -144,6 +153,11 @@ nvgjs_inputarray(JSContext* ctx, float vec[], int min_length, JSValueConst vecto
     return 0;
   }
 
+  /* nvgjs_outputarray threw a TypeError (its probe failed). Clear it before
+     the Array fallback so a *successful* fallback doesn't leave a spurious
+     pending exception for the caller. */
+  JS_FreeValue(ctx, JS_GetException(ctx));
+
   if(nvgjs_arraylen(ctx, vector) < min_length) {
     JS_ThrowRangeError(ctx, "input Array must have at least %i elements", min_length);
     return -1;
@@ -151,11 +165,11 @@ nvgjs_inputarray(JSContext* ctx, float vec[], int min_length, JSValueConst vecto
 
   for(int i = 0; i < min_length; i++) {
     JSValue value = JS_GetPropertyUint32(ctx, vector, i);
-
-    if(nvgjs_tofloat32(ctx, &vec[i], value))
-      return -1;
-
+    int ret = nvgjs_tofloat32(ctx, &vec[i], value);
     JS_FreeValue(ctx, value);
+
+    if(ret)
+      return -1;
   }
 
   return 0;
@@ -180,10 +194,13 @@ nvgjs_inputiterator(JSContext* ctx, float vec[], int min_length, JSValueConst ve
 
     JS_FreeValue(ctx, val);
 
-    if(ret)
+    if(ret) {
+      JS_FreeValue(ctx, iter);
       return -1;
+    }
 
     if(done) {
+      JS_FreeValue(ctx, iter);
       JS_ThrowRangeError(ctx, "iterable must have at least %i elements (has %i)", min_length, i);
       return -1;
     }
@@ -203,13 +220,19 @@ nvgjs_input(JSContext* ctx, float vec[], int len, const char* const prop_map[], 
   if(!nvgjs_inputarray(ctx, vec, len, vector))
     return 0;
 
+  JS_FreeValue(ctx, JS_GetException(ctx));
+
   if(JS_HasProperty(ctx, vector, nvgjs_iterator(ctx)))
     if(!nvgjs_inputiterator(ctx, vec, len, vector))
       return 0;
 
+  JS_FreeValue(ctx, JS_GetException(ctx));
+
   if(prop_map)
     if(!nvgjs_inputobject(ctx, vec, len, prop_map, vector))
       return 0;
+
+  JS_FreeValue(ctx, JS_GetException(ctx));
 
   JS_ThrowTypeError(ctx, "object must be iterable or a property Map must be supplied");
   return -1;
