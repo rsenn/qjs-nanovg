@@ -33,8 +33,8 @@ static void
 nvgjs_copy(JSContext* ctx, JSValueConst value, const char* const prop_map[], const float vec[], int vlen) {
   if(JS_IsArray(ctx, value) == TRUE)
     nvgjs_copyarray(ctx, value, vec, vlen);
-
-  nvgjs_copyobject(ctx, value, prop_map, vec, vlen);
+  else
+    nvgjs_copyobject(ctx, value, prop_map, vec, vlen);
 }
 
 static float*
@@ -100,11 +100,11 @@ nvgjs_color_set(JSContext* ctx, JSValueConst this_val, JSValueConst value, int m
 }
 
 static const JSCFunctionListEntry nvgjs_color_methods[] = {
-    JS_CGETSET_MAGIC_DEF("r", nvgjs_color_get, nvgjs_color_set, 0),
-    JS_CGETSET_MAGIC_DEF("g", nvgjs_color_get, nvgjs_color_set, 1),
-    JS_CGETSET_MAGIC_DEF("b", nvgjs_color_get, nvgjs_color_set, 2),
-    JS_CGETSET_MAGIC_DEF("a", nvgjs_color_get, nvgjs_color_set, 3),
-    JS_PROP_STRING_DEF("[Symbol.toStringTag]", "nvgColor", JS_PROP_CONFIGURABLE),
+ JS_CGETSET_MAGIC_DEF("r", nvgjs_color_get, nvgjs_color_set, 0),
+ JS_CGETSET_MAGIC_DEF("g", nvgjs_color_get, nvgjs_color_set, 1),
+ JS_CGETSET_MAGIC_DEF("b", nvgjs_color_get, nvgjs_color_set, 2),
+ JS_CGETSET_MAGIC_DEF("a", nvgjs_color_get, nvgjs_color_set, 3),
+ JS_PROP_STRING_DEF("[Symbol.toStringTag]", "nvgColor", JS_PROP_CONFIGURABLE),
 };
 
 static JSValue
@@ -282,6 +282,11 @@ NVGJS_DECL(Transform, Multiply) {
       mat = tmp;
   }
 
+  /* If we fell back to the local `tmp` buffer we must seed it with identity so
+     the first Multiply doesn't compose against uninitialised stack. */
+  if(mat == tmp && i == 0)
+    nvgTransformIdentity(tmp);
+
   if(argc < 1 + i)
     return JS_ThrowInternalError(ctx, "need %d arguments", 1 + i);
 
@@ -310,6 +315,11 @@ NVGJS_DECL(Transform, Premultiply) {
     else
       mat = tmp;
   }
+
+  /* Same seeding as Transform.Multiply — avoid composing into uninitialised
+     stack when caller supplied no starting matrix. */
+  if(mat == tmp && i == 0)
+    nvgTransformIdentity(tmp);
 
   if(argc < 1 + i)
     return JS_ThrowInternalError(ctx, "need %d arguments", 1 + i);
@@ -450,44 +460,44 @@ nvgjs_transform_function(JSContext* ctx, JSValueConst this_obj, int argc, JSValu
 }
 
 static const JSCFunctionListEntry nvgjs_transform_methods[] = {
-    JS_CGETSET_MAGIC_DEF("a", nvgjs_transform_get, nvgjs_transform_set, 0),
-    JS_CGETSET_MAGIC_DEF("b", nvgjs_transform_get, nvgjs_transform_set, 1),
-    JS_CGETSET_MAGIC_DEF("c", nvgjs_transform_get, nvgjs_transform_set, 2),
-    JS_CGETSET_MAGIC_DEF("d", nvgjs_transform_get, nvgjs_transform_set, 3),
-    JS_CGETSET_MAGIC_DEF("e", nvgjs_transform_get, nvgjs_transform_set, 4),
-    JS_CGETSET_MAGIC_DEF("f", nvgjs_transform_get, nvgjs_transform_set, 5),
+ JS_CGETSET_MAGIC_DEF("a", nvgjs_transform_get, nvgjs_transform_set, 0),
+ JS_CGETSET_MAGIC_DEF("b", nvgjs_transform_get, nvgjs_transform_set, 1),
+ JS_CGETSET_MAGIC_DEF("c", nvgjs_transform_get, nvgjs_transform_set, 2),
+ JS_CGETSET_MAGIC_DEF("d", nvgjs_transform_get, nvgjs_transform_set, 3),
+ JS_CGETSET_MAGIC_DEF("e", nvgjs_transform_get, nvgjs_transform_set, 4),
+ JS_CGETSET_MAGIC_DEF("f", nvgjs_transform_get, nvgjs_transform_set, 5),
 
-    JS_CGETSET_MAGIC_DEF("xx", nvgjs_transform_get, nvgjs_transform_set, 0),
-    JS_CGETSET_MAGIC_DEF("yx", nvgjs_transform_get, nvgjs_transform_set, 1),
-    JS_CGETSET_MAGIC_DEF("xy", nvgjs_transform_get, nvgjs_transform_set, 2),
-    JS_CGETSET_MAGIC_DEF("yy", nvgjs_transform_get, nvgjs_transform_set, 3),
-    JS_CGETSET_MAGIC_DEF("x0", nvgjs_transform_get, nvgjs_transform_set, 4),
-    JS_CGETSET_MAGIC_DEF("y0", nvgjs_transform_get, nvgjs_transform_set, 5),
+ JS_CGETSET_MAGIC_DEF("xx", nvgjs_transform_get, nvgjs_transform_set, 0),
+ JS_CGETSET_MAGIC_DEF("yx", nvgjs_transform_get, nvgjs_transform_set, 1),
+ JS_CGETSET_MAGIC_DEF("xy", nvgjs_transform_get, nvgjs_transform_set, 2),
+ JS_CGETSET_MAGIC_DEF("yy", nvgjs_transform_get, nvgjs_transform_set, 3),
+ JS_CGETSET_MAGIC_DEF("x0", nvgjs_transform_get, nvgjs_transform_set, 4),
+ JS_CGETSET_MAGIC_DEF("y0", nvgjs_transform_get, nvgjs_transform_set, 5),
 
-    JS_CFUNC_MAGIC_DEF("Translate", 2, nvgjs_transform_function, TRANSFORM_TRANSLATE),
-    JS_CFUNC_MAGIC_DEF("Scale", 2, nvgjs_transform_function, TRANSFORM_SCALE),
-    JS_CFUNC_MAGIC_DEF("Rotate", 1, nvgjs_transform_function, TRANSFORM_ROTATE),
-    JS_CFUNC_MAGIC_DEF("SkewX", 1, nvgjs_transform_function, TRANSFORM_SKEWX),
-    JS_CFUNC_MAGIC_DEF("SkewY", 1, nvgjs_transform_function, TRANSFORM_SKEWY),
-    JS_CFUNC_MAGIC_DEF("Multiply", 1, nvgjs_transform_function, TRANSFORM_MULTIPLY),
-    JS_CFUNC_MAGIC_DEF("Premultiply", 1, nvgjs_transform_function, TRANSFORM_PREMULTIPLY),
-    JS_CFUNC_MAGIC_DEF("Inverse", 0, nvgjs_transform_function, TRANSFORM_INVERSE),
+ JS_CFUNC_MAGIC_DEF("Translate", 2, nvgjs_transform_function, TRANSFORM_TRANSLATE),
+ JS_CFUNC_MAGIC_DEF("Scale", 2, nvgjs_transform_function, TRANSFORM_SCALE),
+ JS_CFUNC_MAGIC_DEF("Rotate", 1, nvgjs_transform_function, TRANSFORM_ROTATE),
+ JS_CFUNC_MAGIC_DEF("SkewX", 1, nvgjs_transform_function, TRANSFORM_SKEWX),
+ JS_CFUNC_MAGIC_DEF("SkewY", 1, nvgjs_transform_function, TRANSFORM_SKEWY),
+ JS_CFUNC_MAGIC_DEF("Multiply", 1, nvgjs_transform_function, TRANSFORM_MULTIPLY),
+ JS_CFUNC_MAGIC_DEF("Premultiply", 1, nvgjs_transform_function, TRANSFORM_PREMULTIPLY),
+ JS_CFUNC_MAGIC_DEF("Inverse", 0, nvgjs_transform_function, TRANSFORM_INVERSE),
 
-    JS_CFUNC_MAGIC_DEF("TransformPoint", 1, nvgjs_transform_function, TRANSFORM_POINT),
+ JS_CFUNC_MAGIC_DEF("TransformPoint", 1, nvgjs_transform_function, TRANSFORM_POINT),
 
-    JS_PROP_STRING_DEF("[Symbol.toStringTag]", "nvgTransform", JS_PROP_CONFIGURABLE),
+ JS_PROP_STRING_DEF("[Symbol.toStringTag]", "nvgTransform", JS_PROP_CONFIGURABLE),
 };
 
 static const JSCFunctionListEntry nvgjs_transform_functions[] = {
-    NVGJS_METHOD(Transform, Identity, 0),
-    NVGJS_METHOD(Transform, Translate, 2),
-    NVGJS_METHOD(Transform, Scale, 2),
-    NVGJS_METHOD(Transform, Rotate, 1),
-    NVGJS_METHOD(Transform, SkewX, 1),
-    NVGJS_METHOD(Transform, SkewY, 1),
-    NVGJS_METHOD(Transform, Multiply, 1),
-    NVGJS_METHOD(Transform, Premultiply, 1),
-    NVGJS_METHOD(Transform, Inverse, 1),
+ NVGJS_METHOD(Transform, Identity, 0),
+ NVGJS_METHOD(Transform, Translate, 2),
+ NVGJS_METHOD(Transform, Scale, 2),
+ NVGJS_METHOD(Transform, Rotate, 1),
+ NVGJS_METHOD(Transform, SkewX, 1),
+ NVGJS_METHOD(Transform, SkewY, 1),
+ NVGJS_METHOD(Transform, Multiply, 1),
+ NVGJS_METHOD(Transform, Premultiply, 1),
+ NVGJS_METHOD(Transform, Inverse, 1),
 };
 
 static JSValue
@@ -547,12 +557,12 @@ fail:
 }
 
 static JSClassDef nvgjs_paint_class = {
-    "nvgPaint",
-    .finalizer = nvgjs_paint_finalizer,
+ "nvgPaint",
+ .finalizer = nvgjs_paint_finalizer,
 };
 
 static const JSCFunctionListEntry nvgjs_paint_methods[] = {
-    JS_PROP_STRING_DEF("[Symbol.toStringTag]", "nvgPaint", JS_PROP_CONFIGURABLE),
+ JS_PROP_STRING_DEF("[Symbol.toStringTag]", "nvgPaint", JS_PROP_CONFIGURABLE),
 };
 
 static JSValue
@@ -577,8 +587,8 @@ nvgjs_context_finalizer(JSRuntime* rt, JSValue val) {
 }
 
 static JSClassDef nvgjs_context_class = {
-    .class_name = "NVGcontext",
-    .finalizer = nvgjs_context_finalizer,
+ .class_name = "NVGcontext",
+ .finalizer = nvgjs_context_finalizer,
 };
 
 #ifdef NANOVG_GL2
@@ -916,7 +926,8 @@ NVGJS_DECL(func, TransformPoint) {
   if(!(dst = nvgjs_outputarray(ctx, &size, argv[0])))
     return JS_EXCEPTION;
 
-  nvgjs_inputarray(ctx, trf, 6, argv[1]);
+  if(nvgjs_inputarray(ctx, trf, 6, argv[1]))
+    return JS_EXCEPTION;
 
   if(argc > 2) {
     for(; size >= 2; size -= 2, dst += 2, i++) {
@@ -946,9 +957,20 @@ NVGJS_DECL(Context, CreateFont) {
     return JS_ThrowInternalError(ctx, "need 2 arguments");
 
   const char* name = JS_ToCString(ctx, argv[0]);
-  const char* file = JS_ToCString(ctx, argv[1]);
+  if(!name)
+    return JS_EXCEPTION;
 
-  return JS_NewInt32(ctx, nvgCreateFont(nvg, name, file));
+  const char* file = JS_ToCString(ctx, argv[1]);
+  if(!file) {
+    JS_FreeCString(ctx, name);
+    return JS_EXCEPTION;
+  }
+
+  int ret = nvgCreateFont(nvg, name, file);
+
+  JS_FreeCString(ctx, name);
+  JS_FreeCString(ctx, file);
+  return JS_NewInt32(ctx, ret);
 }
 
 NVGJS_DECL(Context, CreateFontAtIndex) {
@@ -958,13 +980,27 @@ NVGJS_DECL(Context, CreateFontAtIndex) {
     return JS_ThrowInternalError(ctx, "need 3 arguments");
 
   const char* name = JS_ToCString(ctx, argv[0]);
-  const char* file = JS_ToCString(ctx, argv[1]);
-  int32_t index;
-
-  if(JS_ToInt32(ctx, &index, argv[2]))
+  if(!name)
     return JS_EXCEPTION;
 
-  return JS_NewInt32(ctx, nvgCreateFontAtIndex(nvg, name, file, index));
+  const char* file = JS_ToCString(ctx, argv[1]);
+  if(!file) {
+    JS_FreeCString(ctx, name);
+    return JS_EXCEPTION;
+  }
+
+  int32_t index;
+  if(JS_ToInt32(ctx, &index, argv[2])) {
+    JS_FreeCString(ctx, name);
+    JS_FreeCString(ctx, file);
+    return JS_EXCEPTION;
+  }
+
+  int ret = nvgCreateFontAtIndex(nvg, name, file, index);
+
+  JS_FreeCString(ctx, name);
+  JS_FreeCString(ctx, file);
+  return JS_NewInt32(ctx, ret);
 }
 
 NVGJS_DECL(Context, FindFont) {
@@ -974,8 +1010,13 @@ NVGJS_DECL(Context, FindFont) {
     return JS_ThrowInternalError(ctx, "need 1 arguments");
 
   const char* name = JS_ToCString(ctx, argv[0]);
+  if(!name)
+    return JS_EXCEPTION;
 
-  return JS_NewInt32(ctx, nvgFindFont(nvg, name));
+  int ret = nvgFindFont(nvg, name);
+
+  JS_FreeCString(ctx, name);
+  return JS_NewInt32(ctx, ret);
 }
 
 NVGJS_DECL(Context, BeginFrame) {
@@ -1471,8 +1512,7 @@ NVGJS_DECL(Context, LinearGradient) {
     return JS_ThrowInternalError(ctx, "need 6 arguments");
 
   if(JS_ToFloat64(ctx, &sx, argv[0]) || JS_ToFloat64(ctx, &sy, argv[1]) || JS_ToFloat64(ctx, &ex, argv[2]) ||
-     JS_ToFloat64(ctx, &ey, argv[3]) || nvgjs_tocolor(ctx, &icol, argv[4]) ||
-     nvgjs_tocolor(ctx, &ocol, argv[5]))
+     JS_ToFloat64(ctx, &ey, argv[3]) || nvgjs_tocolor(ctx, &icol, argv[4]) || nvgjs_tocolor(ctx, &ocol, argv[5]))
     return JS_EXCEPTION;
 
   return nvgjs_paint_new(ctx, nvgLinearGradient(nvg, sx, sy, ex, ey, icol, ocol));
@@ -1505,8 +1545,7 @@ NVGJS_DECL(Context, RadialGradient) {
     return JS_ThrowInternalError(ctx, "need 6 arguments");
 
   if(JS_ToFloat64(ctx, &cx, argv[0]) || JS_ToFloat64(ctx, &cy, argv[1]) || JS_ToFloat64(ctx, &inr, argv[2]) ||
-     JS_ToFloat64(ctx, &outr, argv[3]) || nvgjs_tocolor(ctx, &icol, argv[4]) ||
-     nvgjs_tocolor(ctx, &ocol, argv[5]))
+     JS_ToFloat64(ctx, &outr, argv[3]) || nvgjs_tocolor(ctx, &icol, argv[4]) || nvgjs_tocolor(ctx, &ocol, argv[5]))
     return JS_EXCEPTION;
 
   return nvgjs_paint_new(ctx, nvgRadialGradient(nvg, cx, cy, inr, outr, icol, ocol));
@@ -1644,8 +1683,7 @@ NVGJS_DECL(Context, TextBounds) {
 
   JS_FreeCString(ctx, str);
 
-  nvgjs_copyobject(
-      ctx, argv[4], (const char* const[]){"xmin", "ymin", "xmax", "ymax"}, bounds, countof(bounds));
+  nvgjs_copyobject(ctx, argv[4], (const char* const[]){"xmin", "ymin", "xmax", "ymax"}, bounds, countof(bounds));
 
   return JS_NewFloat64(ctx, ret);
 }
@@ -1685,8 +1723,7 @@ NVGJS_DECL(Context, TextBoxBounds) {
 
   JS_FreeCString(ctx, str);
 
-  nvgjs_copyobject(
-      ctx, argv[5], (const char* const[]){"xmin", "ymin", "xmax", "ymax"}, bounds, countof(bounds));
+  nvgjs_copyobject(ctx, argv[5], (const char* const[]){"xmin", "ymin", "xmax", "ymax"}, bounds, countof(bounds));
 
   return JS_UNDEFINED;
 }
@@ -1706,15 +1743,14 @@ NVGJS_DECL(Context, TextBounds2) {
   if(!(str = JS_ToCString(ctx, argv[2])))
     return JS_EXCEPTION;
 
-  {
-    float bounds[4] = {};
-    float tw = nvgTextBounds(nvg, x, y, str, NULL, bounds);
+  float bounds[4] = {};
+  float tw = nvgTextBounds(nvg, x, y, str, NULL, bounds);
+  JS_FreeCString(ctx, str);
 
-    JSValue e = JS_NewObject(ctx);
-    JS_DefinePropertyValueStr(ctx, e, "width", JS_NewFloat64(ctx, tw), JS_PROP_C_W_E);
-    JS_DefinePropertyValueStr(ctx, e, "height", JS_NewFloat64(ctx, bounds[3] - bounds[1]), JS_PROP_C_W_E);
-    return e;
-  }
+  JSValue e = JS_NewObject(ctx);
+  JS_DefinePropertyValueStr(ctx, e, "width", JS_NewFloat64(ctx, tw), JS_PROP_C_W_E);
+  JS_DefinePropertyValueStr(ctx, e, "height", JS_NewFloat64(ctx, bounds[3] - bounds[1]), JS_PROP_C_W_E);
+  return e;
 }
 
 NVGJS_DECL(Context, StrokeWidth) {
@@ -1744,10 +1780,14 @@ NVGJS_DECL(Context, CreateImage) {
   if(!(file = JS_ToCString(ctx, argv[0])))
     return JS_EXCEPTION;
 
-  if(JS_ToInt32(ctx, &flags, argv[1]))
+  if(JS_ToInt32(ctx, &flags, argv[1])) {
+    JS_FreeCString(ctx, file);
     return JS_EXCEPTION;
+  }
 
-  return JS_NewInt32(ctx, nvgCreateImage(nvg, file, flags));
+  int ret = nvgCreateImage(nvg, file, flags);
+  JS_FreeCString(ctx, file);
+  return JS_NewInt32(ctx, ret);
 }
 
 NVGJS_DECL(Context, CreateImageMem) {
@@ -1973,8 +2013,8 @@ NVGJS_DECL(Context, ImagePattern) {
     return JS_ThrowInternalError(ctx, "need 7 arguments");
 
   if(JS_ToFloat64(ctx, &ox, argv[0]) || JS_ToFloat64(ctx, &oy, argv[1]) || JS_ToFloat64(ctx, &ex, argv[2]) ||
-     JS_ToFloat64(ctx, &ey, argv[3]) || JS_ToFloat64(ctx, &angle, argv[4]) ||
-     JS_ToInt32(ctx, &image, argv[5]) || JS_ToFloat64(ctx, &alpha, argv[6]))
+     JS_ToFloat64(ctx, &ey, argv[3]) || JS_ToFloat64(ctx, &angle, argv[4]) || JS_ToInt32(ctx, &image, argv[5]) ||
+     JS_ToFloat64(ctx, &alpha, argv[6]))
     return JS_EXCEPTION;
 
   return nvgjs_paint_new(ctx, nvgImagePattern(nvg, ox, oy, ex, ey, angle, image, alpha));
@@ -2001,167 +2041,167 @@ NVGJS_DECL(Context, IsNextFillClicked)
 
 static const JSCFunctionListEntry nvgjs_funcs[] = {
 #ifdef NANOVG_GL2
-    NVGJS_FUNC(CreateGL2, 1),
-    NVGJS_FUNC(DeleteGL2, 1),
-    NVGJS_FUNC(CreateImageFromHandleGL2, 5),
-    NVGJS_FUNC(ImageHandleGL2, 2),
+ NVGJS_FUNC(CreateGL2, 1),
+ NVGJS_FUNC(DeleteGL2, 1),
+ NVGJS_FUNC(CreateImageFromHandleGL2, 5),
+ NVGJS_FUNC(ImageHandleGL2, 2),
 #endif
 #ifdef NANOVG_GL3
-    NVGJS_FUNC(CreateGL3, 1),
-    NVGJS_FUNC(DeleteGL3, 1),
-    NVGJS_FUNC(CreateImageFromHandleGL3, 5),
-    NVGJS_FUNC(ImageHandleGL3, 2),
+ NVGJS_FUNC(CreateGL3, 1),
+ NVGJS_FUNC(DeleteGL3, 1),
+ NVGJS_FUNC(CreateImageFromHandleGL3, 5),
+ NVGJS_FUNC(ImageHandleGL3, 2),
 #endif
 
-    NVGJS_FLAG(STENCIL_STROKES),
-    NVGJS_FLAG(ANTIALIAS),
-    NVGJS_FLAG(DEBUG),
+ NVGJS_FLAG(STENCIL_STROKES),
+ NVGJS_FLAG(ANTIALIAS),
+ NVGJS_FLAG(DEBUG),
 
-    NVGJS_FLAG(IMAGE_NODELETE),
+ NVGJS_FLAG(IMAGE_NODELETE),
 
-    NVGJS_FUNC(CreateFramebuffer, 4),
-    NVGJS_FUNC(BindFramebuffer, 1),
-    NVGJS_FUNC(DeleteFramebuffer, 1),
+ NVGJS_FUNC(CreateFramebuffer, 4),
+ NVGJS_FUNC(BindFramebuffer, 1),
+ NVGJS_FUNC(DeleteFramebuffer, 1),
 
-    NVGJS_FUNC(ReadPixels, 2),
+ NVGJS_FUNC(ReadPixels, 2),
 
-    NVGJS_FUNC(RadToDeg, 1),
-    NVGJS_FUNC(DegToRad, 1),
-    NVGJS_FUNC(RGB, 3),
-    NVGJS_FUNC(RGBf, 3),
-    NVGJS_FUNC(RGBA, 4),
-    NVGJS_FUNC(RGBAf, 4),
-    NVGJS_FUNC(LerpRGBA, 3),
-    NVGJS_FUNC(TransRGBA, 2),
-    NVGJS_FUNC(TransRGBAf, 2),
-    NVGJS_FUNC(HSL, 3),
-    NVGJS_FUNC(HSLA, 4),
+ NVGJS_FUNC(RadToDeg, 1),
+ NVGJS_FUNC(DegToRad, 1),
+ NVGJS_FUNC(RGB, 3),
+ NVGJS_FUNC(RGBf, 3),
+ NVGJS_FUNC(RGBA, 4),
+ NVGJS_FUNC(RGBAf, 4),
+ NVGJS_FUNC(LerpRGBA, 3),
+ NVGJS_FUNC(TransRGBA, 2),
+ NVGJS_FUNC(TransRGBAf, 2),
+ NVGJS_FUNC(HSL, 3),
+ NVGJS_FUNC(HSLA, 4),
 
-    NVGJS_FUNC(TransformPoint, 2),
+ NVGJS_FUNC(TransformPoint, 2),
 
-    NVGJS_CONST(PI),
-    NVGJS_FLAG(CCW),
-    NVGJS_FLAG(CW),
-    NVGJS_FLAG(SOLID),
-    NVGJS_FLAG(HOLE),
-    NVGJS_FLAG(BUTT),
-    NVGJS_FLAG(ROUND),
-    NVGJS_FLAG(SQUARE),
-    NVGJS_FLAG(BEVEL),
-    NVGJS_FLAG(MITER),
-    NVGJS_FLAG(ALIGN_LEFT),
-    NVGJS_FLAG(ALIGN_CENTER),
-    NVGJS_FLAG(ALIGN_RIGHT),
-    NVGJS_FLAG(ALIGN_TOP),
-    NVGJS_FLAG(ALIGN_MIDDLE),
-    NVGJS_FLAG(ALIGN_BOTTOM),
-    NVGJS_FLAG(ALIGN_BASELINE),
-    NVGJS_FLAG(ZERO),
-    NVGJS_FLAG(ONE),
-    NVGJS_FLAG(SRC_COLOR),
-    NVGJS_FLAG(ONE_MINUS_SRC_COLOR),
-    NVGJS_FLAG(DST_COLOR),
-    NVGJS_FLAG(ONE_MINUS_DST_COLOR),
-    NVGJS_FLAG(SRC_ALPHA),
-    NVGJS_FLAG(ONE_MINUS_SRC_ALPHA),
-    NVGJS_FLAG(DST_ALPHA),
-    NVGJS_FLAG(ONE_MINUS_DST_ALPHA),
-    NVGJS_FLAG(SRC_ALPHA_SATURATE),
-    NVGJS_FLAG(SOURCE_OVER),
-    NVGJS_FLAG(SOURCE_IN),
-    NVGJS_FLAG(SOURCE_OUT),
-    NVGJS_FLAG(ATOP),
-    NVGJS_FLAG(DESTINATION_OVER),
-    NVGJS_FLAG(DESTINATION_IN),
-    NVGJS_FLAG(DESTINATION_OUT),
-    NVGJS_FLAG(DESTINATION_ATOP),
-    NVGJS_FLAG(LIGHTER),
-    NVGJS_FLAG(COPY),
-    NVGJS_FLAG(XOR),
-    NVGJS_FLAG(IMAGE_GENERATE_MIPMAPS),
-    NVGJS_FLAG(IMAGE_REPEATX),
-    NVGJS_FLAG(IMAGE_REPEATY),
-    NVGJS_FLAG(IMAGE_FLIPY),
-    NVGJS_FLAG(IMAGE_PREMULTIPLIED),
-    NVGJS_FLAG(IMAGE_NEAREST),
-    NVGJS_FLAG(TEXTURE_ALPHA),
-    NVGJS_FLAG(TEXTURE_RGBA),
+ NVGJS_CONST(PI),
+ NVGJS_FLAG(CCW),
+ NVGJS_FLAG(CW),
+ NVGJS_FLAG(SOLID),
+ NVGJS_FLAG(HOLE),
+ NVGJS_FLAG(BUTT),
+ NVGJS_FLAG(ROUND),
+ NVGJS_FLAG(SQUARE),
+ NVGJS_FLAG(BEVEL),
+ NVGJS_FLAG(MITER),
+ NVGJS_FLAG(ALIGN_LEFT),
+ NVGJS_FLAG(ALIGN_CENTER),
+ NVGJS_FLAG(ALIGN_RIGHT),
+ NVGJS_FLAG(ALIGN_TOP),
+ NVGJS_FLAG(ALIGN_MIDDLE),
+ NVGJS_FLAG(ALIGN_BOTTOM),
+ NVGJS_FLAG(ALIGN_BASELINE),
+ NVGJS_FLAG(ZERO),
+ NVGJS_FLAG(ONE),
+ NVGJS_FLAG(SRC_COLOR),
+ NVGJS_FLAG(ONE_MINUS_SRC_COLOR),
+ NVGJS_FLAG(DST_COLOR),
+ NVGJS_FLAG(ONE_MINUS_DST_COLOR),
+ NVGJS_FLAG(SRC_ALPHA),
+ NVGJS_FLAG(ONE_MINUS_SRC_ALPHA),
+ NVGJS_FLAG(DST_ALPHA),
+ NVGJS_FLAG(ONE_MINUS_DST_ALPHA),
+ NVGJS_FLAG(SRC_ALPHA_SATURATE),
+ NVGJS_FLAG(SOURCE_OVER),
+ NVGJS_FLAG(SOURCE_IN),
+ NVGJS_FLAG(SOURCE_OUT),
+ NVGJS_FLAG(ATOP),
+ NVGJS_FLAG(DESTINATION_OVER),
+ NVGJS_FLAG(DESTINATION_IN),
+ NVGJS_FLAG(DESTINATION_OUT),
+ NVGJS_FLAG(DESTINATION_ATOP),
+ NVGJS_FLAG(LIGHTER),
+ NVGJS_FLAG(COPY),
+ NVGJS_FLAG(XOR),
+ NVGJS_FLAG(IMAGE_GENERATE_MIPMAPS),
+ NVGJS_FLAG(IMAGE_REPEATX),
+ NVGJS_FLAG(IMAGE_REPEATY),
+ NVGJS_FLAG(IMAGE_FLIPY),
+ NVGJS_FLAG(IMAGE_PREMULTIPLIED),
+ NVGJS_FLAG(IMAGE_NEAREST),
+ NVGJS_FLAG(TEXTURE_ALPHA),
+ NVGJS_FLAG(TEXTURE_RGBA),
 };
 
 static const JSCFunctionListEntry nvgjs_context_methods[] = {
-    NVGJS_METHOD(Context, CreateFont, 2),
-    NVGJS_METHOD(Context, CreateFontAtIndex, 3),
-    NVGJS_METHOD(Context, FindFont, 1),
-    NVGJS_METHOD(Context, BeginFrame, 3),
-    NVGJS_METHOD(Context, CancelFrame, 0),
-    NVGJS_METHOD(Context, EndFrame, 0),
-    NVGJS_METHOD(Context, Save, 0),
-    NVGJS_METHOD(Context, Restore, 0),
-    NVGJS_METHOD(Context, Reset, 0),
-    NVGJS_METHOD(Context, ShapeAntiAlias, 1),
-    NVGJS_METHOD(Context, ClosePath, 0),
-    NVGJS_METHOD(Context, Scissor, 4),
-    NVGJS_METHOD(Context, IntersectScissor, 4),
-    NVGJS_METHOD(Context, ResetScissor, 0),
+ NVGJS_METHOD(Context, CreateFont, 2),
+ NVGJS_METHOD(Context, CreateFontAtIndex, 3),
+ NVGJS_METHOD(Context, FindFont, 1),
+ NVGJS_METHOD(Context, BeginFrame, 3),
+ NVGJS_METHOD(Context, CancelFrame, 0),
+ NVGJS_METHOD(Context, EndFrame, 0),
+ NVGJS_METHOD(Context, Save, 0),
+ NVGJS_METHOD(Context, Restore, 0),
+ NVGJS_METHOD(Context, Reset, 0),
+ NVGJS_METHOD(Context, ShapeAntiAlias, 1),
+ NVGJS_METHOD(Context, ClosePath, 0),
+ NVGJS_METHOD(Context, Scissor, 4),
+ NVGJS_METHOD(Context, IntersectScissor, 4),
+ NVGJS_METHOD(Context, ResetScissor, 0),
 
-    NVGJS_METHOD(Context, MiterLimit, 1),
-    NVGJS_METHOD(Context, LineCap, 1),
-    NVGJS_METHOD(Context, LineJoin, 1),
-    NVGJS_METHOD(Context, GlobalAlpha, 1),
-    NVGJS_METHOD(Context, StrokeColor, 1),
-    NVGJS_METHOD(Context, StrokeWidth, 1),
-    NVGJS_METHOD(Context, StrokePaint, 1),
-    NVGJS_METHOD(Context, FillColor, 1),
-    NVGJS_METHOD(Context, FillPaint, 1),
-    NVGJS_METHOD(Context, LinearGradient, 6),
-    NVGJS_METHOD(Context, BoxGradient, 8),
-    NVGJS_METHOD(Context, RadialGradient, 6),
-    NVGJS_METHOD(Context, FontSize, 1),
-    NVGJS_METHOD(Context, FontBlur, 1),
-    NVGJS_METHOD(Context, TextLetterSpacing, 1),
-    NVGJS_METHOD(Context, TextLineHeight, 1),
-    NVGJS_METHOD(Context, TextAlign, 1),
-    NVGJS_METHOD(Context, FontFace, 1),
-    NVGJS_METHOD(Context, Text, 3),
-    NVGJS_METHOD(Context, TextBox, 4),
-    NVGJS_METHOD(Context, TextBounds, 5),
-    NVGJS_METHOD(Context, TextBoxBounds, 6),
-    NVGJS_METHOD(Context, TextBounds2, 3),
+ NVGJS_METHOD(Context, MiterLimit, 1),
+ NVGJS_METHOD(Context, LineCap, 1),
+ NVGJS_METHOD(Context, LineJoin, 1),
+ NVGJS_METHOD(Context, GlobalAlpha, 1),
+ NVGJS_METHOD(Context, StrokeColor, 1),
+ NVGJS_METHOD(Context, StrokeWidth, 1),
+ NVGJS_METHOD(Context, StrokePaint, 1),
+ NVGJS_METHOD(Context, FillColor, 1),
+ NVGJS_METHOD(Context, FillPaint, 1),
+ NVGJS_METHOD(Context, LinearGradient, 6),
+ NVGJS_METHOD(Context, BoxGradient, 8),
+ NVGJS_METHOD(Context, RadialGradient, 6),
+ NVGJS_METHOD(Context, FontSize, 1),
+ NVGJS_METHOD(Context, FontBlur, 1),
+ NVGJS_METHOD(Context, TextLetterSpacing, 1),
+ NVGJS_METHOD(Context, TextLineHeight, 1),
+ NVGJS_METHOD(Context, TextAlign, 1),
+ NVGJS_METHOD(Context, FontFace, 1),
+ NVGJS_METHOD(Context, Text, 3),
+ NVGJS_METHOD(Context, TextBox, 4),
+ NVGJS_METHOD(Context, TextBounds, 5),
+ NVGJS_METHOD(Context, TextBoxBounds, 6),
+ NVGJS_METHOD(Context, TextBounds2, 3),
 
-    NVGJS_METHOD(Context, CreateImage, 2),
-    NVGJS_METHOD(Context, CreateImageMem, 2),
-    NVGJS_METHOD(Context, CreateImageRGBA, 4),
-    NVGJS_METHOD(Context, UpdateImage, 2),
-    NVGJS_METHOD(Context, ImageSize, 1),
-    NVGJS_METHOD(Context, DeleteImage, 1),
-    NVGJS_METHOD(Context, ResetTransform, 0),
-    NVGJS_METHOD(Context, Transform, 6),
-    NVGJS_METHOD(Context, Translate, 2),
-    NVGJS_METHOD(Context, Rotate, 1),
-    NVGJS_METHOD(Context, SkewX, 1),
-    NVGJS_METHOD(Context, SkewY, 1),
-    NVGJS_METHOD(Context, Scale, 2),
-    NVGJS_METHOD(Context, CurrentTransform, 1),
-    NVGJS_METHOD(Context, ImagePattern, 7),
-    NVGJS_METHOD(Context, BeginPath, 0),
-    NVGJS_METHOD(Context, MoveTo, 2),
-    NVGJS_METHOD(Context, LineTo, 2),
-    NVGJS_METHOD(Context, BezierTo, 6),
-    NVGJS_METHOD(Context, QuadTo, 4),
-    NVGJS_METHOD(Context, ArcTo, 5),
-    NVGJS_METHOD(Context, Arc, 6),
-    NVGJS_METHOD(Context, Rect, 4),
-    NVGJS_METHOD(Context, Circle, 3),
-    NVGJS_METHOD(Context, Ellipse, 4),
-    NVGJS_METHOD(Context, RoundedRect, 5),
-    NVGJS_METHOD(Context, RoundedRectVarying, 8),
-    NVGJS_METHOD(Context, PathWinding, 1),
-    NVGJS_METHOD(Context, Stroke, 0),
-    NVGJS_METHOD(Context, Fill, 0),
-    /*NVGJS_FUNC(SetNextFillHoverable, 0),
-    NVGJS_FUNC(IsFillHovered, 0),
-    NVGJS_FUNC(IsNextFillClicked, 0),*/
-    JS_PROP_STRING_DEF("[Symbol.toStringTag]", "NVGcontext", JS_PROP_CONFIGURABLE),
+ NVGJS_METHOD(Context, CreateImage, 2),
+ NVGJS_METHOD(Context, CreateImageMem, 2),
+ NVGJS_METHOD(Context, CreateImageRGBA, 4),
+ NVGJS_METHOD(Context, UpdateImage, 2),
+ NVGJS_METHOD(Context, ImageSize, 1),
+ NVGJS_METHOD(Context, DeleteImage, 1),
+ NVGJS_METHOD(Context, ResetTransform, 0),
+ NVGJS_METHOD(Context, Transform, 6),
+ NVGJS_METHOD(Context, Translate, 2),
+ NVGJS_METHOD(Context, Rotate, 1),
+ NVGJS_METHOD(Context, SkewX, 1),
+ NVGJS_METHOD(Context, SkewY, 1),
+ NVGJS_METHOD(Context, Scale, 2),
+ NVGJS_METHOD(Context, CurrentTransform, 1),
+ NVGJS_METHOD(Context, ImagePattern, 7),
+ NVGJS_METHOD(Context, BeginPath, 0),
+ NVGJS_METHOD(Context, MoveTo, 2),
+ NVGJS_METHOD(Context, LineTo, 2),
+ NVGJS_METHOD(Context, BezierTo, 6),
+ NVGJS_METHOD(Context, QuadTo, 4),
+ NVGJS_METHOD(Context, ArcTo, 5),
+ NVGJS_METHOD(Context, Arc, 6),
+ NVGJS_METHOD(Context, Rect, 4),
+ NVGJS_METHOD(Context, Circle, 3),
+ NVGJS_METHOD(Context, Ellipse, 4),
+ NVGJS_METHOD(Context, RoundedRect, 5),
+ NVGJS_METHOD(Context, RoundedRectVarying, 8),
+ NVGJS_METHOD(Context, PathWinding, 1),
+ NVGJS_METHOD(Context, Stroke, 0),
+ NVGJS_METHOD(Context, Fill, 0),
+ /*NVGJS_FUNC(SetNextFillHoverable, 0),
+ NVGJS_FUNC(IsFillHovered, 0),
+ NVGJS_FUNC(IsNextFillClicked, 0),*/
+ JS_PROP_STRING_DEF("[Symbol.toStringTag]", "NVGcontext", JS_PROP_CONFIGURABLE),
 };
 
 enum {
@@ -2198,11 +2238,11 @@ nvgjs_framebuffer_wrap(JSContext* ctx, JSValueConst proto, NVGLUframebuffer* fb)
 }
 
 static const JSCFunctionListEntry nvgjs_framebuffer_methods[] = {
-    JS_CGETSET_MAGIC_DEF("fbo", nvgjs_framebuffer_get, 0, FRAMEBUFFER_FBO),
-    JS_CGETSET_MAGIC_DEF("rbo", nvgjs_framebuffer_get, 0, FRAMEBUFFER_RBO),
-    JS_CGETSET_MAGIC_DEF("texture", nvgjs_framebuffer_get, 0, FRAMEBUFFER_TEXTURE),
-    JS_CGETSET_MAGIC_DEF("image", nvgjs_framebuffer_get, 0, FRAMEBUFFER_IMAGE),
-    JS_PROP_STRING_DEF("[Symbol.toStringTag]", "NVGLUframebuffer", JS_PROP_CONFIGURABLE),
+ JS_CGETSET_MAGIC_DEF("fbo", nvgjs_framebuffer_get, 0, FRAMEBUFFER_FBO),
+ JS_CGETSET_MAGIC_DEF("rbo", nvgjs_framebuffer_get, 0, FRAMEBUFFER_RBO),
+ JS_CGETSET_MAGIC_DEF("texture", nvgjs_framebuffer_get, 0, FRAMEBUFFER_TEXTURE),
+ JS_CGETSET_MAGIC_DEF("image", nvgjs_framebuffer_get, 0, FRAMEBUFFER_IMAGE),
+ JS_PROP_STRING_DEF("[Symbol.toStringTag]", "NVGLUframebuffer", JS_PROP_CONFIGURABLE),
 };
 
 static void
@@ -2215,8 +2255,8 @@ nvgjs_framebuffer_finalizer(JSRuntime* rt, JSValue val) {
 }
 
 static JSClassDef nvgjs_framebuffer_class = {
-    .class_name = "NVGLUframebuffer",
-    .finalizer = nvgjs_framebuffer_finalizer,
+ .class_name = "NVGLUframebuffer",
+ .finalizer = nvgjs_framebuffer_finalizer,
 };
 
 static int
@@ -2246,10 +2286,7 @@ nvgjs_init(JSContext* ctx, JSModuleDef* m) {
   transform_proto = JS_NewObjectProto(ctx, js_float32array_proto);
   JS_SetPropertyFunctionList(ctx, transform_proto, nvgjs_transform_methods, countof(nvgjs_transform_methods));
   transform_ctor = JS_NewObjectProto(ctx, JS_NULL);
-  JS_SetPropertyFunctionList(ctx,
-                             transform_ctor,
-                             nvgjs_transform_functions,
-                             countof(nvgjs_transform_functions));
+  JS_SetPropertyFunctionList(ctx, transform_ctor, nvgjs_transform_functions, countof(nvgjs_transform_functions));
   // JS_SetConstructor(ctx, transform_ctor, transform_proto);
   JS_SetModuleExport(ctx, m, "Transform", transform_ctor);
 
@@ -2267,10 +2304,7 @@ nvgjs_init(JSContext* ctx, JSModuleDef* m) {
   JS_NewClass(JS_GetRuntime(ctx), nvgjs_framebuffer_class_id, &nvgjs_framebuffer_class);
 
   framebuffer_proto = JS_NewObjectProto(ctx, JS_NULL);
-  JS_SetPropertyFunctionList(ctx,
-                             framebuffer_proto,
-                             nvgjs_framebuffer_methods,
-                             countof(nvgjs_framebuffer_methods));
+  JS_SetPropertyFunctionList(ctx, framebuffer_proto, nvgjs_framebuffer_methods, countof(nvgjs_framebuffer_methods));
 
   // JS_SetModuleExport(ctx, m, "Framebuffer", framebuffer_ctor);
 

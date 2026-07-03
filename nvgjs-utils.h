@@ -8,7 +8,8 @@
 #include <cutils.h>
 
 /**
- * @brief Get a writable pointer into a Float32Array's backing store (zero-copy).
+ * @brief Get a writable pointer into a Float32Array's backing store
+ * (zero-copy).
  *
  * Used when a NanoVG function needs to write results directly into a JS-owned
  * typed array. Throws a TypeError on the QuickJS context if @p value is not a
@@ -25,12 +26,14 @@ float* nvgjs_outputarray(JSContext*, int* plength, JSValueConst);
  * @brief Like nvgjs_outputarray(), but require a minimum capacity.
  *
  * Convenience wrapper used as an output buffer for functions that produce a
- * fixed number of floats; only returns the pointer if the array is large enough.
+ * fixed number of floats; only returns the pointer if the array is large
+ * enough.
  *
  * @param ctx         QuickJS context (for exceptions).
  * @param min_length  Minimum number of float elements required.
  * @param value       The JS value, expected to be a Float32Array.
- * @return Pointer to the float data, or NULL if not a Float32Array or too short.
+ * @return Pointer to the float data, or NULL if not a Float32Array or too
+ * short.
  */
 float* nvgjs_output(JSContext*, int min_length, JSValueConst);
 
@@ -43,18 +46,21 @@ float* nvgjs_output(JSContext*, int min_length, JSValueConst);
  * Used for arguments NanoVG both reads and may write back.
  *
  * @param      ctx         QuickJS context (for exceptions).
- * @param[out] vec         Caller-provided fallback buffer (used for non-typed inputs).
+ * @param[out] vec         Caller-provided fallback buffer (used for non-typed
+ * inputs).
  * @param      min_length  Minimum number of elements required.
  * @param      vector      The JS value: Float32Array, Array, or iterable.
- * @return Pointer to usable float data (either @p vector's buffer or @p vec), or NULL on error.
+ * @return Pointer to usable float data (either @p vector's buffer or @p vec),
+ * or NULL on error.
  */
 float* nvgjs_inputoutputarray(JSContext*, float[], int min_length, JSValueConst);
 
 /**
  * @brief Read floats from named properties of a JS object into a C array.
  *
- * For each i in [0,len) reads @p vector[prop_map[i]] and converts it to a float.
- * Used to accept vector arguments given as objects, e.g. {x, y} or {r,g,b,a}.
+ * For each i in [0,len) reads @p vector[prop_map[i]] and converts it to a
+ * float. Used to accept vector arguments given as objects, e.g. {x, y} or
+ * {r,g,b,a}.
  *
  * @param      ctx       QuickJS context (for exceptions).
  * @param[out] vec       Destination buffer of at least @p len floats.
