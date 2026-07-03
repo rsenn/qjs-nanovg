@@ -2247,11 +2247,13 @@ static const JSCFunctionListEntry nvgjs_framebuffer_methods[] = {
 
 static void
 nvgjs_framebuffer_finalizer(JSRuntime* rt, JSValue val) {
-  NVGLUframebuffer* fb;
-
-  if((fb = JS_GetOpaque(val, nvgjs_framebuffer_class_id))) {
-    nvgluDeleteFramebuffer(fb);
-  }
+  /* Same ordering hazard as nvgjs_context_finalizer: nvgluDeleteFramebuffer
+   * touches GL state, but the finalizer may run after the owning GL context
+   * has already been destroyed. Callers that need deterministic teardown must
+   * call DeleteFramebuffer(fb) themselves before the window closes; that path
+   * clears the opaque slot so this finalizer becomes a no-op. */
+  (void)rt;
+  (void)val;
 }
 
 static JSClassDef nvgjs_framebuffer_class = {

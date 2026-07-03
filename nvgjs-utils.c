@@ -28,7 +28,9 @@ nvgjs_typedarray(JSContext* ctx, JSValueConst obj, int* plength, int* pbytes_per
 
     JS_FreeValue(ctx, buf);
   } else {
-    JS_GetException(ctx);
+    /* JS_GetTypedArrayBuffer threw; discard the exception so the caller can
+     * treat this as a silent "not a typed array" probe. */
+    JS_FreeValue(ctx, JS_GetException(ctx));
   }
 
   return ptr;
@@ -54,11 +56,23 @@ nvgjs_iterator(JSContext* ctx) {
 static JSValue
 nvgjs_next(JSContext* ctx, JSValueConst obj, BOOL* done_p) {
   JSValue fn = JS_GetPropertyStr(ctx, obj, "next");
+  if(JS_IsException(fn)) {
+    *done_p = TRUE;
+    return JS_EXCEPTION;
+  }
+
   JSValue result = JS_Call(ctx, fn, obj, 0, 0);
   JS_FreeValue(ctx, fn);
+
+  if(JS_IsException(result)) {
+    *done_p = TRUE;
+    return JS_EXCEPTION;
+  }
+
   JSValue done = JS_GetPropertyStr(ctx, result, "done");
   JSValue value = JS_GetPropertyStr(ctx, result, "value");
   JS_FreeValue(ctx, result);
+
   *done_p = JS_ToBool(ctx, done);
   JS_FreeValue(ctx, done);
   return value;

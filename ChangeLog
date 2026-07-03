@@ -1,3 +1,75 @@
+2026-07-04  Roman Senn  <roman.l.senn@gmail.com>
+
+	Second-round bug-fix pass. Seven more defects found on a re-read of
+	the module, all confirmed against the source. test-fixes.js grew two
+	new assertions covering the ones that are observable from JS without
+	a live GL context; final run: 29/29 pass.
+
+	* nvgjs-module.c (Context.CreateFont, Context.CreateFontAtIndex,
+	Context.FindFont, Context.CreateImage, Context.TextBounds2):
+	Every one of these called JS_ToCString to marshal a JS string into
+	the NanoVG C API and then leaked the result on every code path.
+	CreateFont/CreateFontAtIndex additionally never checked whether
+	JS_ToCString itself succeeded — a failing conversion passed NULL
+	straight into nvgCreateFont; CreateFontAtIndex leaked *both* strings
+	if JS_ToInt32(index) then failed. CreateImage did the same on the
+	JS_ToInt32(flags) path. Fix: NULL-check every JS_ToCString, and
+	JS_FreeCString on every exit — success or exception.
+
+	* nvgjs-module.c (nvgjs_copy):
+	Add the missing `else`. Previously, when the destination was a JS
+	Array, both nvgjs_copyarray and nvgjs_copyobject ran unconditionally
+	— the array ended up with indexed [0..5] values *and* named
+	"a".."f" properties polluting Object.keys(arr). Now Arrays get only
+	the indexed writes; non-Array objects still get the named-property
+	fallback.
+
+	* nvgjs-module.c (NVGJS_DECL(Transform, Multiply),
+	NVGJS_DECL(Transform, Premultiply)):
+	If the caller doesn't supply an output matrix (i.e. mat falls back
+	to the local `tmp[6]` and i stays 0), seed tmp with
+	nvgTransformIdentity so the first nvgTransformMultiply /
+	nvgTransformPremultiply doesn't compose against uninitialised stack.
+	Previously Transform.Multiply(oneArg) would write the arbitrary
+	stack contents times the input back into argv[0], silently
+	corrupting the caller's matrix.
+
+	* nvgjs-module.c (TransformPoint free function):
+	Check the return of nvgjs_inputarray(ctx, trf, 6, argv[1]) — return
+	JS_EXCEPTION on failure. Previously an invalid matrix argument left
+	`trf` uninitialised (with a stale pending exception the caller never
+	cleared) and every nvgTransformPoint call in the loop then read
+	garbage.
+
+	* nvgjs-utils.c (nvgjs_typedarray):
+	Free the JSValue returned by JS_GetException in the not-a-typed-
+	array branch. JS_GetException transfers ownership; previously that
+	JSValue was leaked on every probe of a non-typed-array input — and
+	those probes are the fast path in every nvgjs_input* reader.
+
+	* nvgjs-utils.c (nvgjs_next):
+	Add JS_IsException guards around both JS_GetPropertyStr(obj,"next")
+	and JS_Call(fn, obj). Previously a thrown iterator (missing .next,
+	throwing generator, etc.) was silently downgraded into JS_ToBool of
+	an exception value and a garbage return — the iterable-input paths
+	could produce NaNs and no visible error.
+
+	* nvgjs-module.c (nvgjs_framebuffer_finalizer):
+	Same fix as nvgjs_context_finalizer in the first round: don't call
+	nvgluDeleteFramebuffer from the GC finalizer, since the owning GL
+	context (managed by the glfw module) may already have been
+	destroyed. Callers that need deterministic teardown must call
+	DeleteFramebuffer(fb) before the window closes; DeleteFramebuffer
+	clears the opaque slot so this finalizer then becomes a no-op.
+
+	* test-fixes.js:
+	Two new Group G assertions covering:
+	  - Transform.Multiply(oneArg) leaves oneArg unchanged (proves
+	    the uninitialised-tmp fix).
+	  - Transform.Identity(plainArray) writes only indexed [0..5] and
+	    does not leak named a..f properties onto the array (proves
+	    the nvgjs_copy missing-else fix).
+
 2026-07-03  Roman Senn  <roman.l.senn@gmail.com>
 
 	Bug-fix pass on the QuickJS ↔ NanoVG binding.

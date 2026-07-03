@@ -226,6 +226,32 @@ safe('Instance .TransformPoint', () => {
   assert(p && approx(p[0], 4) && approx(p[1], 5), `T(3,4).TransformPoint(1,1) got [${p}]`);
 });
 
+/* ------------------------------------------------------------------ *
+ * Group G — second-round fixes                                       *
+ * ------------------------------------------------------------------ */
+
+safe('Transform.Multiply single-arg does not corrupt input (uninit tmp fix)', () => {
+  /* Before the fix, Transform.Multiply(oneArg) fell through with mat=tmp
+     uninitialised, then wrote garbage back into argv[0]. After the fix tmp
+     is seeded with identity, so Transform.Multiply(a) leaves `a` as a * I = a. */
+  const a = new Float32Array([2, 0, 0, 3, 5, 7]);
+  Transform.Multiply(a);
+  assert(arrApprox([...a], [2, 0, 0, 3, 5, 7], 1e-4),
+    `Transform.Multiply(a) should leave a untouched; got [${[...a]}]`);
+});
+
+safe('nvgjs_transform_copy no longer pollutes Arrays with named props', () => {
+  /* nvgjs_copy used to run copyarray AND copyobject unconditionally. So
+     Transform.Identity(arr) (via CurrentTransform-style back-copy) left the
+     array with named "a".."f" props on top of its indexed slots. */
+  const arr = [1, 2, 3, 4, 5, 6];
+  Transform.Identity(arr);
+  assert(arrApprox(arr, [1, 0, 0, 1, 0, 0], 1e-4),
+    `Identity(arr) indexed slots wrong: [${arr}]`);
+  assert(!('a' in arr) && !('b' in arr) && !('e' in arr),
+    `Identity(arr) leaked named props a/b/e onto plain Array: keys=${Object.keys(arr)}`);
+});
+
 /* ------------------------------------------------------------------ */
 console.log(`\nRESULTS: ${passed} passed, ${failed} failed`);
 if(failed > 0) {
