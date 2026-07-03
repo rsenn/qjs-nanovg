@@ -59,6 +59,7 @@ nvgjs_tocolor(JSContext* ctx, NVGcolor* color, JSValueConst value) {
 
     return nvgjs_inputarray(ctx, color->rgba, 3, value);
   }
+  return 0;
 }
 
 static JSValue
@@ -1379,7 +1380,7 @@ NVGJS_DECL(Context, LineJoin) {
   if(JS_ToInt32(ctx, &lineJoin, argv[0]))
     return JS_EXCEPTION;
 
-  nvgLineCap(nvg, lineJoin);
+  nvgLineJoin(nvg, lineJoin);
   return JS_UNDEFINED;
 }
 
