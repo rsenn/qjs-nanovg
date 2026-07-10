@@ -1,16 +1,5 @@
 import * as glfw from 'glfw';
-import { ANTIALIAS } from 'nanovg';
-import { BindFramebuffer } from 'nanovg';
-import { CreateFramebuffer } from 'nanovg';
-import { CreateGL3 } from 'nanovg';
-import { CreateImageFromHandleGL3 } from 'nanovg';
-import { DegToRad } from 'nanovg';
-import { ReadPixels } from 'nanovg';
-import { RGB } from 'nanovg';
-import { RGBA } from 'nanovg';
-import { STENCIL_STROKES } from 'nanovg';
-import { Transform } from 'nanovg';
-import { TransformPoint } from 'nanovg';
+import { ANTIALIAS, BindFramebuffer, CreateFramebuffer, CreateGL3, CreateImageFromHandleGL3, DegToRad, ReadPixels, RGB, RGBA, STENCIL_STROKES, Transform, TransformPoint } from 'nanovg';
 
 const C = console.config({ compact: true });
 
