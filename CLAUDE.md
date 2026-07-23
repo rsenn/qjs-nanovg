@@ -98,3 +98,22 @@ in `nvgjs-module.c` as the source of truth for names, not the README.
 
 C code is formatted with `clang-format` using the repo's `.clang-format`. Match the existing
 style (2-space indent, attached braces, the `NVGJS_*` macro patterns) rather than reformatting.
+
+## Track newly discovered bugs
+
+When you discover a bug that isn't the one you're currently fixing, append it to the end of the
+`BUGS` file (create it if it doesn't exist) instead of fixing it inline or silently ignoring it.
+Don't fix unrelated bugs without asking first.
+
+Format each entry like `../../../shish/BUGS`:
+
+```
+- <canonical-name>: <description, wrapped prose explaining what's wrong,
+  how it was found, and any relevant root-cause detail>
+
+    <JS repro that triggers it>
+
+```
+
+Blank line between the description and the repro, and a blank line after the repro before the
+next entry.
