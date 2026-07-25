@@ -1,0 +1,29 @@
+- dom-getnode-bypasses-element-cache: in `qjs-modules/lib/dom.js`, `GetNode()`
+  (used by every `NodeList`/`HTMLCollection` traversal, and therefore by
+  `Element.children`, `querySelector`, `querySelectorAll`, etc.) does not
+  reuse the `Element.cache` WeakMap that `Document.createElement` uses.
+  `Factory.for(owner)` returns a callable `fn`, and `GetNode` looks up the
+  constructor via `factory(type)`, i.e. `fn(type)` = `fn[TypeName(type)]?.new`
+  — the bare `.new` function. That function has no `.cache` property (the
+  memoizing `cache` method lives on the sibling wrapper object `fn[name]`,
+  not on `fn[name].new`), so `GetNode`'s `ctor.cache ? ctor.cache(...) :
+  ctor(...)` always falls through to `ctor(raw, owner)`, constructing a new
+  `Element` instance every time — even for the exact same underlying raw
+  node. Found while building `qjs-nanovg/canvas2d.js`: a `<canvas>` element
+  created via `document.createElement('canvas')` and later re-fetched via
+  `document.getElementById('canvas')` or `document.querySelector('canvas')`
+  compared unequal (`!==`) despite `Node.raw()` being identical for both,
+  silently dropping any properties (event listeners, custom accessors, etc.)
+  attached to the original instance.
+
+    import { Factory } from 'dom';
+    const factory = new Factory();
+    const document = factory.Document.new({ tagName: '#document', attributes: {}, children: [] }, factory);
+    const body = document.createElement('body');
+    document.appendChild(body);
+    const el = document.createElement('div');
+    body.appendChild(el);
+    el.myFlag = true;
+    const found = [...body.children][0];
+    console.log(found === el, found.myFlag); // expected: true true — actual: false undefined
+
