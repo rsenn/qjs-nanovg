@@ -62,6 +62,8 @@ install(TARGETS qjs-nanovg DESTINATION "${QUICKJS_C_MODULE_DIR}"
         PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ
                     WORLD_EXECUTE)
 
+install(FILES lib/canvas2d.js DESTINATION "${QUICKJS_C_MODULE_DIR}")
+
 include_directories(nanovg/src)
 if(BUILD_EXAMPLE)
   add_executable(

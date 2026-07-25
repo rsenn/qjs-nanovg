@@ -22,7 +22,7 @@
  */
 
 import Engine from './engine2d.js';
-import { canvas } from '../../canvas2d.js';
+import { canvas } from '../../lib/canvas2d.js';
 
 const TILE = 16;
 const VIEW = 640;

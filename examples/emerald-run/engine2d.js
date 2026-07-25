@@ -1,8 +1,9 @@
 /*
- * engine2d.js — a minimal tile-based 2D sprite engine for qjsm, built on
- * canvas2d.js (Canvas2D emulation over nanovg/glfw). Suitable for a
- * top-down/2.5D tile world with animated sprites: dungeon crawlers,
- * platformers-on-a-grid, that kind of thing.
+ * engine2d.js — a minimal tile-based 2D sprite engine that runs unmodified
+ * in either a real browser or under qjsm (via lib/canvas2d.js, a
+ * Canvas2D emulation over nanovg/glfw). Suitable for a top-down/2.5D tile
+ * world with animated sprites: dungeon crawlers, platformers-on-a-grid,
+ * that kind of thing.
  *
  * Public asset API (the "only 3 functions" surface):
  *   Engine.loadTileset(source, tileW, tileH)        -> Tileset
@@ -17,18 +18,39 @@
  * World maps (`mapData` for loadWorld) can be:
  *   - a 2D array of tile ids: [[0,1,2,...], [...]]  (-1 / null = empty)
  *   - a flat array + {width,height}
- *   - a Tiled (mapeditor.org) JSON export object or path — its first tile
- *     layer is used, tile ids are shifted down by 1 (Tiled reserves 0 for
- *     "empty", this engine uses -1)
+ *   - a Tiled (mapeditor.org) JSON export object, or (qjsm only) a path to
+ *     one — its first tile layer is used, tile ids are shifted down by 1
+ *     (Tiled reserves 0 for "empty", this engine uses -1). In the browser,
+ *     fetch() and JSON.parse() the export yourself and pass the object in.
  *
  * Rendering, animation, input and camera scrolling are handled by the
  * returned World/Sprite objects; see their methods below.
+ *
+ * Environment detection: under a real browser, window/document/Image/
+ * requestAnimationFrame are native and this file needs nothing else. Under
+ * qjsm, those are supplied by lib/canvas2d.js, which is only reachable
+ * through 'std'/'nanovg'/'glfw'/'dom' — modules a browser doesn't have. So
+ * both are loaded dynamically (only when NOT running in a browser) rather
+ * than with a static import, which is what lets this exact file run in
+ * either environment without edits.
  */
 
-import * as std from 'std';
-import Canvas2D, { canvas } from '../../canvas2d.js';
+const inBrowser = typeof window != 'undefined' && typeof window.document != 'undefined' && typeof window.HTMLCanvasElement != 'undefined';
 
-const nv = Canvas2D.nvg;
+let nv = null; // qjsm only: the raw nanovg context, needed for CreateImageRGBA
+let canvasEl = null;
+let loadFileSync = null; // qjsm only: std.loadFile, for path-based loadWorld()
+
+if(inBrowser) {
+  canvasEl = document.querySelector('canvas') ?? document.getElementById('canvas');
+  if(!canvasEl) throw new Error('engine2d: no <canvas> element found in the page; add one before importing engine2d.js');
+} else {
+  const std = await import('std');
+  const Canvas2D = (await import('../../lib/canvas2d.js')).default;
+  nv = Canvas2D.nvg;
+  canvasEl = Canvas2D.canvas;
+  loadFileSync = std.loadFile;
+}
 
 /* ---------------------------------------------------------------- images */
 
@@ -39,9 +61,18 @@ function createImage(source, w, h) {
     return img;
   }
 
-  if(source && source._id != null) return source; // already a loaded image/texture
+  if(source && source.pixels === undefined) return source; // already a loaded image/texture
 
   const { width = w, height = h, pixels } = source;
+
+  if(inBrowser) {
+    const off = document.createElement('canvas');
+    off.width = width;
+    off.height = height;
+    off.getContext('2d').putImageData(new ImageData(new Uint8ClampedArray(pixels), width, height), 0, 0);
+    return off;
+  }
+
   const buffer = pixels.buffer ? pixels.buffer : pixels;
   const id = nv.CreateImageRGBA(width, height, 0, buffer);
   if(id <= 0) throw new Error('createImage: failed to create image from pixel buffer');
@@ -74,7 +105,10 @@ function loadTileset(source, tileW, tileH) {
 /* ----------------------------------------------------------------- world */
 
 function normalizeMap(mapData) {
-  if(typeof mapData == 'string') mapData = JSON.parse(std.loadFile(mapData));
+  if(typeof mapData == 'string') {
+    if(!loadFileSync) throw new Error('loadWorld: string map paths are qjsm-only; in the browser fetch() the JSON and pass the parsed object instead');
+    mapData = JSON.parse(loadFileSync(mapData));
+  }
 
   if(Array.isArray(mapData) && Array.isArray(mapData[0])) return mapData; // already 2D
 
@@ -270,12 +304,12 @@ const Input = (() => {
 
   window.addEventListener('keydown', e => keys.add(e.key));
   window.addEventListener('keyup', e => keys.delete(e.key));
-  canvas.addEventListener('mousemove', e => {
+  canvasEl.addEventListener('mousemove', e => {
     mouse.x = e.clientX;
     mouse.y = e.clientY;
   });
-  canvas.addEventListener('mousedown', () => (mouse.down = true));
-  canvas.addEventListener('mouseup', () => (mouse.down = false));
+  canvasEl.addEventListener('mousedown', () => (mouse.down = true));
+  canvasEl.addEventListener('mouseup', () => (mouse.down = false));
 
   return {
     keys,
@@ -287,6 +321,7 @@ const Input = (() => {
 /* ---------------------------------------------------------------- Engine */
 
 const Engine = {
+  canvas: canvasEl,
   createImage,
   loadTileset,
   loadWorld,
@@ -298,5 +333,5 @@ const Engine = {
   Sprite,
 };
 
-export { createImage, loadTileset, loadWorld, loadSprite, Input, Tileset, World, SpriteSheet, Sprite };
+export { canvasEl as canvas, createImage, loadTileset, loadWorld, loadSprite, Input, Tileset, World, SpriteSheet, Sprite };
 export default Engine;
