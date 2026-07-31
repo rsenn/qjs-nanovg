@@ -23,7 +23,7 @@ cmake --build build
 cmake --install build      # may need sudo
 
 # Run a script — qjsm is the module-enabled QuickJS binary (NOT plain qjs)
-qjsm test-nanovg.js <title>
+qjsm examples/planets.js <title>
 ```
 
 - `-DBUILD_EXAMPLE=ON` additionally builds the upstream C `nanovg_example` and a
@@ -31,7 +31,7 @@ qjsm test-nanovg.js <title>
 - The CMake module dir auto-derives an arch suffix (e.g. `lib/x86_64-linux-gnu/quickjs`) via
   `cmake/UseMultiArch.cmake`. `FindQuickJS.cmake` locates QuickJS by searching common prefixes;
   override with `-DQUICKJS_PREFIX=...` if not found.
-- There is no test framework. `test-nanovg.js` is a runnable demo (opens a GLFW window); it is
+- There is no test framework. `examples/planets.js` is a runnable demo (opens a GLFW window); it is
   the de-facto integration check.
 
 ## Source layout
@@ -91,7 +91,7 @@ nvg.BeginFrame(w, h, 1); nvg.BeginPath(); nvg.Rect(...); nvg.Fill(); nvg.EndFram
 ```
 
 `README.md` documents a *different* lowercase/`new NVGContext()` API that does **not** match
-the current code. Treat `test-nanovg.js` and the `nvgjs_*_methods[]` / `nvgjs_funcs[]` tables
+the current code. Treat `examples/planets.js` and the `nvgjs_*_methods[]` / `nvgjs_funcs[]` tables
 in `nvgjs-module.c` as the source of truth for names, not the README.
 
 ## Formatting

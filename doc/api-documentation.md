@@ -308,4 +308,4 @@ while (!win.shouldClose) {
 DeleteGL3(nvg);
 ```
 
-See `test-nanovg.js` in the repository root for a fuller, animated example.
+See `examples/planets.js` for a fuller, animated example.
