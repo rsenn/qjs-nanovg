@@ -69,8 +69,8 @@ install(FILES lib/canvas2d.js DESTINATION "${QUICKJS_C_MODULE_DIR}")
 # Without JS_SHARED_LIBRARY, nvgjs-module.c's nvgjs_init_module macro expands to
 # js_init_module_nanovg, matching the js_init_module_<name> convention EXTERNAL_MODULES
 # expects.
-option(BUILD_STATIC_MODULE "Also build qjs-nanovg-static, a static library for linking nanovg into another interpreter binary" ON)
-if(BUILD_STATIC_MODULE)
+option(BUILD_STATIC_MODULES "Also build qjs-nanovg-static, a static library for linking nanovg into another interpreter binary" ON)
+if(BUILD_STATIC_MODULES)
   add_library(
     qjs-nanovg-static STATIC
     nvgjs-utils.h nvgjs-utils.c nvgjs-module.h nvgjs-module.c
@@ -85,7 +85,7 @@ if(BUILD_STATIC_MODULE)
                                                 ${QUICKJS_INCLUDE_DIR})
   target_link_libraries(qjs-nanovg-static PUBLIC ${GLEW_LIBRARY} OpenGL::GL ${QUICKJS_LIBRARY})
   target_compile_definitions(qjs-nanovg-static PRIVATE NANOVG_GLEW=1 NANOVG_GL3_IMPLEMENTATION=1)
-endif(BUILD_STATIC_MODULE)
+endif(BUILD_STATIC_MODULES)
 
 include_directories(nanovg/src)
 if(BUILD_EXAMPLE)
