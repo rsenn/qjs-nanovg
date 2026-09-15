@@ -2323,6 +2323,7 @@ nvgjs_init(JSContext* ctx, JSModuleDef* m) {
 #define nvgjs_init_module js_init_module
 #else
 #define VISIBLE
+#define nvgjs_init_module js_init_module_nanovg
 #endif
 
 VISIBLE JSModuleDef*

@@ -1,6 +1,6 @@
-project(qjs-nanovg C)
-
 cmake_minimum_required(VERSION 3.5)
+
+project(qjs-nanovg VERSION 0.9 LANGUAGES C)
 
 message("Building project [1;31m${PROJECT_NAME}[0m")
 
@@ -63,6 +63,29 @@ install(TARGETS qjs-nanovg DESTINATION "${QUICKJS_C_MODULE_DIR}"
                     WORLD_EXECUTE)
 
 install(FILES lib/canvas2d.js DESTINATION "${QUICKJS_C_MODULE_DIR}")
+
+# Static counterpart for embedders that want nanovg linked directly into their own
+# interpreter binary (e.g. qjsm's EXTERNAL_MODULES) instead of dlopen'd at runtime.
+# Without JS_SHARED_LIBRARY, nvgjs-module.c's nvgjs_init_module macro expands to
+# js_init_module_nanovg, matching the js_init_module_<name> convention EXTERNAL_MODULES
+# expects.
+option(BUILD_STATIC_MODULE "Also build qjs-nanovg-static, a static library for linking nanovg into another interpreter binary" ON)
+if(BUILD_STATIC_MODULE)
+  add_library(
+    qjs-nanovg-static STATIC
+    nvgjs-utils.h nvgjs-utils.c nvgjs-module.h nvgjs-module.c
+    nanovg/src/nanovg.c
+    nanovg/src/nanovg.h
+    nanovg/src/nanovg_gl.h)
+
+  set_target_properties(qjs-nanovg-static PROPERTIES OUTPUT_NAME nanovg POSITION_INDEPENDENT_CODE ON
+                                                       COMPILE_FLAGS "${MODULE_COMPILE_FLAGS}")
+
+  target_include_directories(qjs-nanovg-static PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/nanovg/src
+                                                ${QUICKJS_INCLUDE_DIR})
+  target_link_libraries(qjs-nanovg-static PUBLIC ${GLEW_LIBRARY} OpenGL::GL ${QUICKJS_LIBRARY})
+  target_compile_definitions(qjs-nanovg-static PRIVATE NANOVG_GLEW=1 NANOVG_GL3_IMPLEMENTATION=1)
+endif(BUILD_STATIC_MODULE)
 
 include_directories(nanovg/src)
 if(BUILD_EXAMPLE)
