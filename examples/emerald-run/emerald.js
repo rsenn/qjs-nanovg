@@ -67,14 +67,14 @@ function makePlayerPixels() {
   const frames = 4;
   return makeBuffer(TILE * frames, TILE, (x, y) => {
     const frame = Math.floor(x / TILE);
-    const lx = x % TILE - TILE / 2;
+    const lx = (x % TILE) - TILE / 2;
     const bob = [0, -1, 0, 1][frame];
     const ly = y - TILE / 2 - bob;
-    const bodyDist = Math.sqrt(lx * lx + (ly * 0.85) * (ly * 0.85));
+    const bodyDist = Math.sqrt(lx * lx + ly * 0.85 * (ly * 0.85));
     if(bodyDist < 5.5) return [220, 60, 50, 255]; // torso/head, red tunic
     if(bodyDist < 6.5) return [140, 30, 25, 255]; // outline
     const footSide = frame % 2 == 0 ? -1 : 1;
-    if(y > TILE - 4 && Math.abs(x % TILE - (TILE / 2 + footSide * 3)) < 2) return [70, 45, 20, 255]; // feet
+    if(y > TILE - 4 && Math.abs((x % TILE) - (TILE / 2 + footSide * 3)) < 2) return [70, 45, 20, 255]; // feet
     return [0, 0, 0, 0];
   });
 }
@@ -116,7 +116,7 @@ function generateDungeon(cols, rows, steps) {
 
 function openTiles(grid) {
   const open = [];
-  for(let y = 0; y < grid.length; y++) for(let x = 0; x < grid[0].length; x++) if(grid[y][x] == 0) open.push([x, y]);
+  for(let y = 0; y < grid.length; y++) for (let x = 0; x < grid[0].length; x++) if(grid[y][x] == 0) open.push([x, y]);
   return open;
 }
 
@@ -149,9 +149,7 @@ const GEM_COUNT = 20;
 const gems = [];
 const gemImage = Engine.createImage(makeEmeraldPixels(), TILE, TILE);
 for(const [gx, gy] of shuffle(open.filter(([x, y]) => x != startX || y != startY)).slice(0, GEM_COUNT)) {
-  gems.push(
-    Engine.loadSprite(world, gemImage, TILE, TILE, { idle: { frames: [0], fps: 1 } }, gx * TILE, gy * TILE, 'idle'),
-  );
+  gems.push(Engine.loadSprite(world, gemImage, TILE, TILE, { idle: { frames: [0], fps: 1 } }, gx * TILE, gy * TILE, 'idle'));
 }
 
 function shuffle(arr) {

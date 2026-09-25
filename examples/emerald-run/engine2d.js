@@ -170,7 +170,7 @@ class World {
     const ty0 = Math.floor(y / this.tileH);
     const tx1 = Math.floor((x + w - 1) / this.tileW);
     const ty1 = Math.floor((y + h - 1) / this.tileH);
-    for(let ty = ty0; ty <= ty1; ty++) for(let tx = tx0; tx <= tx1; tx++) if(this.isSolidTile(tx, ty)) return true;
+    for(let ty = ty0; ty <= ty1; ty++) for (let tx = tx0; tx <= tx1; tx++) if(this.isSolidTile(tx, ty)) return true;
     return false;
   }
 
@@ -202,9 +202,7 @@ class World {
     const tx1 = Math.min(this.cols - 1, Math.ceil((camX + viewW) / this.tileW));
     const ty1 = Math.min(this.rows - 1, Math.ceil((camY + viewH) / this.tileH));
 
-    for(let ty = ty0; ty <= ty1; ty++)
-      for(let tx = tx0; tx <= tx1; tx++)
-        this.tileset.draw(ctx, this.grid[ty][tx], tx * this.tileW - camX, ty * this.tileH - camY);
+    for(let ty = ty0; ty <= ty1; ty++) for (let tx = tx0; tx <= tx1; tx++) this.tileset.draw(ctx, this.grid[ty][tx], tx * this.tileW - camX, ty * this.tileH - camY);
 
     // painter's algorithm: draw back-to-front by y (simple 2.5D depth)
     for(const entity of [...this.entities].sort((a, b) => a.y - b.y)) entity.render?.(ctx, camX, camY);
