@@ -24,7 +24,6 @@ class WindowProxy extends EventTarget {
   }
 
   requestAnimationFrame(callback) {
-    // Map requestAnimationFrame timing to the event loop tick / performance counter
     return setTimeout(() => callback(glfw.getTime() * 1000), 16);
   }
 
@@ -33,7 +32,10 @@ class WindowProxy extends EventTarget {
   }
 }
 
-export const window = (globalThis.window = new WindowProxy());
+export const window = new WindowProxy();
+
+// Populate globalThis targets immediately on load
+globalThis.window = window;
 globalThis.document = document;
 
 // 3. Create a stateful Canvas element class backed by EventTarget
@@ -58,36 +60,32 @@ class CanvasElement extends EventTarget {
   }
 
   getContext(type) {
-    if(type === 'webgl' || type === 'webgl2' || type === 'experimental-webgl') {
-      // Returns a context stub; actual rendering is handled via qjs-glfw + NanoVG context current
+    if (type === 'webgl' || type === 'webgl2' || type === 'experimental-webgl') {
       return { canvas: this };
     }
     return null;
   }
 }
 
-// Extract or fallback to the canvas element from the parsed document
 const originalGetElementById = document.getElementById?.bind(document);
 const parsedCanvasNode = originalGetElementById ? originalGetElementById('canvas') : document.querySelector?.('canvas');
 
 export const canvas = new CanvasElement(parsedCanvasNode);
 
-// Override getElementById so standard queries for 'id="canvas"' return our interactive canvas instance
-if(document.getElementById) {
-  document.getElementById = id => {
-    if(id === 'canvas') return canvas;
+if (document.getElementById) {
+  document.getElementById = (id) => {
+    if (id === 'canvas') return canvas;
     return originalGetElementById(id);
   };
 }
 
-// 4. Emulated Browser Window Bridge (Wraps qjs-glfw and forwards events to DOM elements)
+// 4. Emulated Browser Window Bridge
 export class EmulatedBrowserWindow {
   constructor(width = 1024, height = 768, title = 'QuickJS Emulated Browser') {
     glfw.Window.defaultHints();
     this.glfwWindow = new glfw.Window(width, height, title);
     this.glfwWindow.makeContextCurrent();
 
-    // Sync dimensions across canvas and window globals
     canvas.width = width;
     canvas.height = height;
     window.innerWidth = width;
@@ -99,7 +97,6 @@ export class EmulatedBrowserWindow {
   _setupEventBridge() {
     const win = this.glfwWindow;
 
-    // Helper to calculate relative cursor positions
     const getPos = (x, y) => ({
       clientX: x,
       clientY: y,
@@ -119,7 +116,7 @@ export class EmulatedBrowserWindow {
     };
 
     win.handleKey = (key, scancode, action) => {
-      if(action === 0) return; // keyup can be handled similarly if needed
+      if (action === 0) return;
       const event = Object.assign(new Event('keydown'), { keyCode: key, target: window });
       window.dispatchEvent(event);
     };
@@ -137,6 +134,9 @@ export class EmulatedBrowserWindow {
     this.glfwWindow.destroy();
   }
 }
+
+// Automatically spin up a default window and make its GL context current on module load
+export const defaultWindow = new EmulatedBrowserWindow(1024, 768, 'QuickJS Emulated Browser');
 
 // Export event loop poller
 export async function poll() {
