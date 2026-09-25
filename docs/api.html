@@ -16,6 +16,9 @@
   <path d="M4 30 C 4 6, 22 6, 22 20 S 40 34, 40 10" fill="none" style="stroke:var(--accent)" stroke-width="4" stroke-linecap="round"/>
   <text x="50" y="29" font-family="ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif" font-weight="700" font-size="26" letter-spacing="-0.5" fill="currentColor">Nano<tspan style="fill:var(--accent)">VG</tspan></text>
 </svg></span> <span class="brand-name">qjs-nanovg</span></a>
+  <div class="search">
+    <input id="site-search" type="search" placeholder="Search docs… ( / )" autocomplete="off" spellcheck="false">
+  </div>
   <nav class="topnav">
     <a href="../docs/api.html">API</a>
     <a href="../canvas2d.html">Canvas2D</a>
@@ -38,13 +41,15 @@ native module <code>nanovg</code>. This document is generated from the actual ex
 <p>Run scripts with <code>qjsm</code> (the module-enabled QuickJS), which loads the installed <code>nanovg.so</code>.
 A current OpenGL context must already exist (typically created via the separate <code>glfw</code> module)
 before calling <code>CreateGL3</code>.</p>
-<p>&gt; <strong>Conventions</strong>
-&gt; - All method and function names are <strong>PascalCase</strong>.
-&gt; - Angles are in <strong>radians</strong> (use <code>DegToRad</code>/<code>RadToDeg</code> to convert).
-&gt; - Image and font handles are plain integer ids.
-&gt; - A <em>color argument</em> accepts a <code>Color</code> object or a plain array <code>[r, g, b]</code> / <code>[r, g, b, a]</code>
-&gt;   of <strong>0..1 floats</strong> (this is the raw <code>NVGcolor</code> layout, regardless of how the color was
-&gt;   constructed).</p>
+<p><strong>Conventions</strong></p>
+<ul>
+<li>All method and function names are <strong>PascalCase</strong>.</li>
+<li>Angles are in <strong>radians</strong> (use <code>DegToRad</code>/<code>RadToDeg</code> to convert).</li>
+<li>Image and font handles are plain integer ids.</li>
+<li>A <em>color argument</em> accepts a <code>Color</code> object or a plain array <code>[r, g, b]</code> / <code>[r, g, b, a]</code>
+of <strong>0..1 floats</strong> (this is the raw <code>NVGcolor</code> layout, regardless of how the color was
+constructed).</li>
+</ul>
 <hr>
 <h2 id="module-exports"><a class="anchor" href="#module-exports" aria-hidden="true">#</a>Module exports</h2>
 <h3 id="named-classobject-exports"><a class="anchor" href="#named-classobject-exports" aria-hidden="true">#</a>Named class/object exports</h3>
@@ -57,6 +62,10 @@ before calling <code>CreateGL3</code>.</p>
 module is compiled with <code>NANOVG_GL2</code>; this build uses GL3.)</em></p>
 <h4 id="framebuffers"><a class="anchor" href="#framebuffers" aria-hidden="true">#</a>Framebuffers</h4>
 <div class="tablewrap"><table><thead><tr><th>Function</th><th>Returns</th><th>Description</th></tr></thead><tbody><tr><td><code id="framebuffers-createframebuffer">CreateFramebuffer(ctx, w, h, imageFlags)</code><a class="member-anchor" href="#framebuffers-createframebuffer" aria-hidden="true">#</a></td><td>framebuffer object</td><td>Creates an offscreen <code>NVGLUframebuffer</code>. Throws on failure.</td></tr><tr><td><code id="framebuffers-bindframebuffer">BindFramebuffer(fb)</code><a class="member-anchor" href="#framebuffers-bindframebuffer" aria-hidden="true">#</a></td><td><code>undefined</code></td><td>Binds the framebuffer for rendering; pass <code>null</code> to bind the default framebuffer.</td></tr><tr><td><code id="framebuffers-deleteframebuffer">DeleteFramebuffer(fb)</code><a class="member-anchor" href="#framebuffers-deleteframebuffer" aria-hidden="true">#</a></td><td><code>undefined</code></td><td>Destroys the framebuffer.</td></tr></tbody></table></div>
+<p>The framebuffer object returned by <code>CreateFramebuffer</code> has four read-only integer properties:</p>
+<div class="tablewrap"><table><thead><tr><th>Property</th><th>Description</th></tr></thead><tbody><tr><td><code id="framebuffers-fbo">fbo</code><a class="member-anchor" href="#framebuffers-fbo" aria-hidden="true">#</a></td><td>OpenGL framebuffer object id.</td></tr><tr><td><code id="framebuffers-rbo">rbo</code><a class="member-anchor" href="#framebuffers-rbo" aria-hidden="true">#</a></td><td>OpenGL renderbuffer id (the stencil attachment).</td></tr><tr><td><code id="framebuffers-texture">texture</code><a class="member-anchor" href="#framebuffers-texture" aria-hidden="true">#</a></td><td>OpenGL texture id of the colour attachment. Pass it to <code>CreateImageFromHandleGL3</code> to draw the framebuffer's contents.</td></tr><tr><td><code id="framebuffers-image">image</code><a class="member-anchor" href="#framebuffers-image" aria-hidden="true">#</a></td><td>NanoVG image id of the colour attachment.</td></tr></tbody></table></div>
+<p>Its <code>Symbol.toStringTag</code> is <code>NVGLUframebuffer</code>. Call <code>DeleteFramebuffer(fb)</code> yourself before the
+window closes: the garbage collector does not free it, because the GL context may already be gone.</p>
 <h4 id="pixel-read-back"><a class="anchor" href="#pixel-read-back" aria-hidden="true">#</a>Pixel read-back</h4>
 <div class="tablewrap"><table><thead><tr><th>Function</th><th>Returns</th><th>Description</th></tr></thead><tbody><tr><td><code id="pixel-read-back-readpixels">ReadPixels(w, h)</code><a class="member-anchor" href="#pixel-read-back-readpixels" aria-hidden="true">#</a></td><td><code>ArrayBuffer</code></td><td>Reads the <code>(0,0,w,h)</code> region of the current GL framebuffer as RGBA bytes (<code>w*h*4</code> bytes).</td></tr></tbody></table></div>
 <h4 id="angle-helpers"><a class="anchor" href="#angle-helpers" aria-hidden="true">#</a>Angle helpers</h4>
@@ -80,10 +89,10 @@ module is compiled with <code>NANOVG_GL2</code>; this build uses GL3.)</em></p>
 <li><strong>Image flags:</strong> <code>IMAGE_GENERATE_MIPMAPS</code>, <code>IMAGE_REPEATX</code>, <code>IMAGE_REPEATY</code>, <code>IMAGE_FLIPY</code>,
 <code>IMAGE_PREMULTIPLIED</code>, <code>IMAGE_NEAREST</code>, <code>IMAGE_NODELETE</code></li>
 <li><strong>Texture type:</strong> <code>TEXTURE_ALPHA</code>, <code>TEXTURE_RGBA</code></li>
-<li><strong>Blend factors:</strong> <code>ZERO</code>, <code>ONE</code>, <code>SRC_COLOR</code>, <code>ONE_MINUS_SRC_COLOR</code>, <code>DST_COLOR</code>,
+<li><strong>Blend factors</strong> (exported, but no function accepts them yet, see <em>Not yet bound</em>): <code>ZERO</code>, <code>ONE</code>, <code>SRC_COLOR</code>, <code>ONE_MINUS_SRC_COLOR</code>, <code>DST_COLOR</code>,
 <code>ONE_MINUS_DST_COLOR</code>, <code>SRC_ALPHA</code>, <code>ONE_MINUS_SRC_ALPHA</code>, <code>DST_ALPHA</code>,
 <code>ONE_MINUS_DST_ALPHA</code>, <code>SRC_ALPHA_SATURATE</code></li>
-<li><strong>Composite operations:</strong> <code>SOURCE_OVER</code>, <code>SOURCE_IN</code>, <code>SOURCE_OUT</code>, <code>ATOP</code>,
+<li><strong>Composite operations</strong> (same: <code>GlobalCompositeOperation</code> is not bound): <code>SOURCE_OVER</code>, <code>SOURCE_IN</code>, <code>SOURCE_OUT</code>, <code>ATOP</code>,
 <code>DESTINATION_OVER</code>, <code>DESTINATION_IN</code>, <code>DESTINATION_OUT</code>, <code>DESTINATION_ATOP</code>, <code>LIGHTER</code>,
 <code>COPY</code>, <code>XOR</code></li>
 </ul>
@@ -118,12 +127,45 @@ module is compiled with <code>NANOVG_GL2</code>; this build uses GL3.)</em></p>
 <p>These build/modify matrices. When called without a target matrix they return a new <code>Transform</code>;
 when the first argument is a matrix they operate on it in place. They are chainable (return the
 matrix), e.g. <code>Transform.Scale(3, 3).Rotate(angle).Translate(1, 1)</code>.</p>
-<div class="tablewrap"><table><thead><tr><th>Function</th><th>Description</th></tr></thead><tbody><tr><td><code id="static-functions-on-the-transform-export-transform-identity">Transform.Identity([mat])</code><a class="member-anchor" href="#static-functions-on-the-transform-export-transform-identity" aria-hidden="true">#</a></td><td>Identity matrix.</td></tr><tr><td><code id="static-functions-on-the-transform-export-transform-translate">Transform.Translate([mat,] x, y)</code><a class="member-anchor" href="#static-functions-on-the-transform-export-transform-translate" aria-hidden="true">#</a></td><td>Translation.</td></tr><tr><td><code id="static-functions-on-the-transform-export-transform-scale">Transform.Scale([mat,] x, y)</code><a class="member-anchor" href="#static-functions-on-the-transform-export-transform-scale" aria-hidden="true">#</a></td><td>Scaling.</td></tr><tr><td><code id="static-functions-on-the-transform-export-transform-rotate">Transform.Rotate([mat,] angle)</code><a class="member-anchor" href="#static-functions-on-the-transform-export-transform-rotate" aria-hidden="true">#</a></td><td>Rotation (radians).</td></tr><tr><td><code id="static-functions-on-the-transform-export-transform-skewx">Transform.SkewX([mat,] angle)</code><a class="member-anchor" href="#static-functions-on-the-transform-export-transform-skewx" aria-hidden="true">#</a></td><td>X skew.</td></tr><tr><td><code id="static-functions-on-the-transform-export-transform-skewy">Transform.SkewY([mat,] angle)</code><a class="member-anchor" href="#static-functions-on-the-transform-export-transform-skewy" aria-hidden="true">#</a></td><td>Y skew.</td></tr><tr><td><code id="static-functions-on-the-transform-export-transform-multiply">Transform.Multiply(mat, ...matrices)</code><a class="member-anchor" href="#static-functions-on-the-transform-export-transform-multiply" aria-hidden="true">#</a></td><td>Post-multiplies <code>mat</code> by the given matrices.</td></tr><tr><td><code id="static-functions-on-the-transform-export-transform-premultiply">Transform.Premultiply(mat, ...matrices)</code><a class="member-anchor" href="#static-functions-on-the-transform-export-transform-premultiply" aria-hidden="true">#</a></td><td>Pre-multiplies <code>mat</code> by the given matrices.</td></tr><tr><td><code id="static-functions-on-the-transform-export-transform-inverse">Transform.Inverse(mat)</code><a class="member-anchor" href="#static-functions-on-the-transform-export-transform-inverse" aria-hidden="true">#</a></td><td>Inverts <code>mat</code>. Throws if non-invertible.</td></tr></tbody></table></div>
+<div class="tablewrap"><table><thead><tr><th>Function</th><th>Description</th></tr></thead><tbody><tr><td><code id="static-functions-on-the-transform-export-transform-identity">Transform.Identity([mat])</code><a class="member-anchor" href="#static-functions-on-the-transform-export-transform-identity" aria-hidden="true">#</a></td><td>Identity matrix.</td></tr><tr><td><code id="static-functions-on-the-transform-export-transform-translate">Transform.Translate([mat,] x, y)</code><a class="member-anchor" href="#static-functions-on-the-transform-export-transform-translate" aria-hidden="true">#</a></td><td>Translation.</td></tr><tr><td><code id="static-functions-on-the-transform-export-transform-scale">Transform.Scale([mat,] x, y)</code><a class="member-anchor" href="#static-functions-on-the-transform-export-transform-scale" aria-hidden="true">#</a></td><td>Scaling.</td></tr><tr><td><code id="static-functions-on-the-transform-export-transform-rotate">Transform.Rotate([mat,] angle)</code><a class="member-anchor" href="#static-functions-on-the-transform-export-transform-rotate" aria-hidden="true">#</a></td><td>Rotation (radians).</td></tr><tr><td><code id="static-functions-on-the-transform-export-transform-skewx">Transform.SkewX([mat,] angle)</code><a class="member-anchor" href="#static-functions-on-the-transform-export-transform-skewx" aria-hidden="true">#</a></td><td>X skew.</td></tr><tr><td><code id="static-functions-on-the-transform-export-transform-skewy">Transform.SkewY([mat,] angle)</code><a class="member-anchor" href="#static-functions-on-the-transform-export-transform-skewy" aria-hidden="true">#</a></td><td>Y skew.</td></tr><tr><td><code id="static-functions-on-the-transform-export-transform-multiply">Transform.Multiply(mat, ...matrices)</code><a class="member-anchor" href="#static-functions-on-the-transform-export-transform-multiply" aria-hidden="true">#</a></td><td>Post-multiplies <code>mat</code> by the given matrices.</td></tr><tr><td><code id="static-functions-on-the-transform-export-transform-premultiply">Transform.Premultiply(mat, ...matrices)</code><a class="member-anchor" href="#static-functions-on-the-transform-export-transform-premultiply" aria-hidden="true">#</a></td><td>Pre-multiplies <code>mat</code> by the given matrices.</td></tr><tr><td><code id="static-functions-on-the-transform-export-transform-inverse">Transform.Inverse(dst, src)</code><a class="member-anchor" href="#static-functions-on-the-transform-export-transform-inverse" aria-hidden="true">#</a></td><td>Writes the inverse of <code>src</code> into <code>dst</code>. Throws if <code>src</code> is not invertible. Both arguments are required; <code>Transform.Inverse(mat)</code> throws <code>need 2 arguments</code>.</td></tr></tbody></table></div>
 <h3 id="instance-methods-on-a-transform-value"><a class="anchor" href="#instance-methods-on-a-transform-value" aria-hidden="true">#</a>Instance methods (on a transform value)</h3>
 <p>A transform value also carries chainable instance methods <code>Translate</code>, <code>Scale</code>, <code>Rotate</code>,
 <code>SkewX</code>, <code>SkewY</code>, <code>Multiply</code>, <code>Premultiply</code>, <code>Inverse</code>, and <code>TransformPoint(x, y)</code> (which
-returns the transformed point as <code>[x, y]</code>).</p>
+returns the transformed point as <code>[x, y]</code>). They modify the transform in place and return it,
+so they chain. <code>m.Inverse()</code> inverts <code>m</code> in place and ignores any argument.</p>
 <hr>
+<h2 id="errors"><a class="anchor" href="#errors" aria-hidden="true">#</a>Errors</h2>
+<p>Errors are ordinary JavaScript exceptions:</p>
+<div class="tablewrap"><table><thead><tr><th>Situation</th><th>Exception</th></tr></thead><tbody><tr><td>Too few arguments, e.g. <code>RGBA()</code> or <code>Transform.Translate()</code></td><td><code>InternalError: need N arguments</code> (or <code>need x, y arguments</code>, <code>need angle argument</code>)</td></tr><tr><td>A <code>Context</code> method called on something that is not a <code>Context</code></td><td><code>TypeError: NVGcontext object expected</code></td></tr><tr><td>A vector argument of the wrong type or too short</td><td><code>TypeError</code> (<code>expecting a Float32Array, Array or Iterable</code>) or <code>RangeError</code> (<code>... must have at least N elements</code>)</td></tr><tr><td><code>CreateGL3</code> with no current OpenGL context</td><td><code>InternalError: nvg.CreateGL3: Could not init glew.</code></td></tr><tr><td><code>CreateFramebuffer</code> fails</td><td><code>InternalError: Failed creating NVGLUframebuffer [WxH] (flags)</code></td></tr><tr><td><code>Transform.Inverse</code> on a singular matrix</td><td><code>InternalError: nvgTransformInverse failed</code></td></tr></tbody></table></div>
+<p>Create the OpenGL context (for example with <code>glfw</code>) and make it current before calling <code>CreateGL3</code>.</p>
+<h2 id="not-yet-bound"><a class="anchor" href="#not-yet-bound" aria-hidden="true">#</a>Not yet bound</h2>
+<p>These NanoVG functions have no binding yet (14 of the 104 in <code>nanovg.h</code>):</p>
+<ul>
+<li><strong>Fonts:</strong> <code>nvgCreateFontMem</code>, <code>nvgCreateFontMemAtIndex</code> (fonts from memory), <code>nvgFontFaceId</code>,
+<code>nvgAddFallbackFont</code>, <code>nvgAddFallbackFontId</code>, <code>nvgResetFallbackFonts</code>, <code>nvgResetFallbackFontsId</code>
+(fallback fonts).</li>
+<li><strong>Text measurement:</strong> <code>nvgTextMetrics</code>, <code>nvgTextGlyphPositions</code>, <code>nvgTextBreakLines</code>.</li>
+<li><strong>Compositing:</strong> <code>nvgGlobalCompositeOperation</code>, <code>nvgGlobalCompositeBlendFunc</code>,
+<code>nvgGlobalCompositeBlendFuncSeparate</code>. The <code>SOURCE_OVER</code>... and blend factor constants are
+exported, but there is nothing to pass them to.</li>
+<li><strong>Debugging:</strong> <code>nvgDebugDumpPathCache</code>.</li>
+</ul>
+<h2 id="using-paints"><a class="anchor" href="#using-paints" aria-hidden="true">#</a>Using paints</h2>
+<p>A <code>Paint</code> is what the gradient and pattern methods return. Pass it to <code>FillPaint</code> or <code>StrokePaint</code>
+inside a path, as <code>examples/planets.js</code> does with an image:</p>
+<div class="codeblock" data-lang="js"><pre><code class="language-js"><span class="t-kw">const</span> <span class="t-id">id</span> <span class="t-op">=</span> <span class="t-id">nvg</span>.<span class="t-fn">CreateImage</span>(<span class="t-str">'picture.png'</span>, <span class="t-num">0</span>);
+<span class="t-kw">const</span> [<span class="t-id">w</span>, <span class="t-id">h</span>] <span class="t-op">=</span> <span class="t-id">nvg</span>.<span class="t-fn">ImageSize</span>(<span class="t-id">id</span>);
+<span class="t-kw">const</span> <span class="t-id">pattern</span> <span class="t-op">=</span> <span class="t-id">nvg</span>.<span class="t-fn">ImagePattern</span>(<span class="t-num">0</span>, <span class="t-num">0</span>, <span class="t-id">w</span>, <span class="t-id">h</span>, <span class="t-num">0</span>, <span class="t-id">id</span>, <span class="t-num">1</span>);
+
+<span class="t-id">nvg</span>.<span class="t-fn">BeginPath</span>();
+<span class="t-id">nvg</span>.<span class="t-fn">Rect</span>(<span class="t-num">0</span>, <span class="t-num">0</span>, <span class="t-id">w</span>, <span class="t-id">h</span>);
+<span class="t-id">nvg</span>.<span class="t-fn">FillPaint</span>(<span class="t-id">pattern</span>);
+<span class="t-id">nvg</span>.<span class="t-fn">Fill</span>();</code></pre></div>
+<p>The gradient methods work the same way and take colours built with <code>RGB</code>/<code>RGBA</code>:</p>
+<div class="codeblock" data-lang="js"><pre><code class="language-js"><span class="t-kw">const</span> <span class="t-id">paint</span> <span class="t-op">=</span> <span class="t-id">nvg</span>.<span class="t-fn">LinearGradient</span>(<span class="t-num">0</span>, <span class="t-num">0</span>, <span class="t-num">0</span>, <span class="t-num">100</span>, <span class="t-fn">RGBA</span>(<span class="t-num">255</span>, <span class="t-num">192</span>, <span class="t-num">0</span>, <span class="t-num">255</span>), <span class="t-fn">RGBA</span>(<span class="t-num">255</span>, <span class="t-num">0</span>, <span class="t-num">0</span>, <span class="t-num">255</span>));</code></pre></div>
+<h2 id="reading-pixels-back"><a class="anchor" href="#reading-pixels-back" aria-hidden="true">#</a>Reading pixels back</h2>
+<p><code>ReadPixels(w, h)</code> returns an <code>ArrayBuffer</code> of <code>w * h * 4</code> RGBA bytes from the current OpenGL
+framebuffer. Call it after drawing and before <code>swapBuffers()</code>.</p>
 <h2 id="minimal-example"><a class="anchor" href="#minimal-example" aria-hidden="true">#</a>Minimal example</h2>
 <div class="codeblock" data-lang="js"><pre><code class="language-js"><span class="t-kw">import</span> <span class="t-op">*</span> <span class="t-id">as</span> <span class="t-id">glfw</span> <span class="t-kw">from</span> <span class="t-str">'glfw'</span>;
 <span class="t-kw">import</span> { <span class="t-type">CreateGL3</span>, <span class="t-type">STENCIL_STROKES</span>, <span class="t-type">ANTIALIAS</span>, <span class="t-type">RGB</span>, <span class="t-type">RGBA</span> } <span class="t-kw">from</span> <span class="t-str">'nanovg'</span>;
@@ -158,12 +200,14 @@ returns the transformed point as <code>[x, y]</code>).</p>
 <p>See <code>examples/planets.js</code> for a fuller, animated example.</p></article>
 <p class="editlink"><a href="https://github.com/rsenn/qjs-nanovg/blob/main/doc/api-documentation.md">Edit this page on GitHub →</a></p>
 </main>
-<nav class="toc"><h3>On this page</h3><ul><li class="lvl2"><a href="#module-exports">Module exports</a></li><li class="lvl3"><a href="#named-classobject-exports">Named class/object exports</a></li><li class="lvl3"><a href="#free-functions">Free functions</a></li><li class="lvl2"><a href="#constants">Constants</a></li><li class="lvl2"><a href="#context-methods">Context methods</a></li><li class="lvl3"><a href="#frame">Frame</a></li><li class="lvl3"><a href="#state">State</a></li><li class="lvl3"><a href="#path-building">Path building</a></li><li class="lvl3"><a href="#fill--stroke-style">Fill &amp; stroke style</a></li><li class="lvl3"><a href="#gradients--paints">Gradients &amp; paints</a></li><li class="lvl3"><a href="#scissor-clipping">Scissor (clipping)</a></li><li class="lvl3"><a href="#transforms">Transforms</a></li><li class="lvl3"><a href="#images">Images</a></li><li class="lvl3"><a href="#fonts--text">Fonts &amp; text</a></li><li class="lvl2"><a href="#transform-helpers">Transform helpers</a></li><li class="lvl3"><a href="#static-functions-on-the-transform-export">Static functions (on the Transform export)</a></li><li class="lvl3"><a href="#instance-methods-on-a-transform-value">Instance methods (on a transform value)</a></li><li class="lvl2"><a href="#minimal-example">Minimal example</a></li></ul></nav>
+<nav class="toc"><h3>On this page</h3><ul><li class="lvl2"><a href="#module-exports">Module exports</a></li><li class="lvl3"><a href="#named-classobject-exports">Named class/object exports</a></li><li class="lvl3"><a href="#free-functions">Free functions</a></li><li class="lvl2"><a href="#constants">Constants</a></li><li class="lvl2"><a href="#context-methods">Context methods</a></li><li class="lvl3"><a href="#frame">Frame</a></li><li class="lvl3"><a href="#state">State</a></li><li class="lvl3"><a href="#path-building">Path building</a></li><li class="lvl3"><a href="#fill--stroke-style">Fill &amp; stroke style</a></li><li class="lvl3"><a href="#gradients--paints">Gradients &amp; paints</a></li><li class="lvl3"><a href="#scissor-clipping">Scissor (clipping)</a></li><li class="lvl3"><a href="#transforms">Transforms</a></li><li class="lvl3"><a href="#images">Images</a></li><li class="lvl3"><a href="#fonts--text">Fonts &amp; text</a></li><li class="lvl2"><a href="#transform-helpers">Transform helpers</a></li><li class="lvl3"><a href="#static-functions-on-the-transform-export">Static functions (on the Transform export)</a></li><li class="lvl3"><a href="#instance-methods-on-a-transform-value">Instance methods (on a transform value)</a></li><li class="lvl2"><a href="#errors">Errors</a></li><li class="lvl2"><a href="#not-yet-bound">Not yet bound</a></li><li class="lvl2"><a href="#using-paints">Using paints</a></li><li class="lvl2"><a href="#reading-pixels-back">Reading pixels back</a></li><li class="lvl2"><a href="#minimal-example">Minimal example</a></li></ul></nav>
 </div>
 <footer class="sitefoot">
   <p>qjs-nanovg — MIT. Built from the repo's own markdown by
      <a href="https://github.com/rsenn/rsenn/tree/main/tools/site">rsenn/rsenn tools/site</a>.</p>
 </footer>
+<script src="../assets/search-index.js"></script>
+<script src="../assets/search.js"></script>
 <script>
 document.querySelector('.themetoggle').addEventListener('click', function () {
   var d = document.documentElement;
