@@ -1,6 +1,10 @@
 import { Parser } from 'dom';
 import { EventTarget } from 'events';
 import * as glfw from 'glfw';
+import { performance } from 'perf_hooks';
+
+// Expose performance globally
+globalThis.performance = performance;
 
 // 1. Initialize a valid DOM Document using the 'dom' Parser module
 export const document = new Parser().parseFromString(`
@@ -24,8 +28,7 @@ class WindowProxy extends EventTarget {
   }
 
   requestAnimationFrame(callback) {
-    // Standard rAF timing mapping to milliseconds via glfw.getTime()
-    return setTimeout(() => callback(glfw.getTime() * 1000), 16);
+    return setTimeout(() => callback(performance.now()), 16);
   }
 
   cancelAnimationFrame(id) {
