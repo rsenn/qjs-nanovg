@@ -1,9 +1,9 @@
 import { Parser } from 'dom';
 import { EventTarget } from 'events';
-import * as glfw from 'qjs-glfw';
+import * as glfw from 'glfw';
 
 // 1. Initialize a valid DOM Document using the 'dom' Parser module
-export const document = new Parser().parseAsString(`
+export const document = new Parser().parseFromString(`
   <html>
     <head>
       <title>QuickJS Browser Emulator</title>
