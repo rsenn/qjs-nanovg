@@ -29,12 +29,15 @@ function tick(candle, price) {
 }
 
 function main() {
-  const canvas = document.getElementById('canvas') || document.querySelector('canvas') || (() => {
-    const c = document.createElement('canvas');
-    c.id = 'canvas';
-    document.body.appendChild(c);
-    return c;
-  })();
+  const canvas =
+    document.getElementById('canvas') ||
+    document.querySelector('canvas') ||
+    (() => {
+      const c = document.createElement('canvas');
+      c.id = 'canvas';
+      document.body.appendChild(c);
+      return c;
+    })();
 
   const nvg = CreateGL3(ANTIALIAS);
 
@@ -61,7 +64,7 @@ function main() {
   let candleStart = Date.now();
   let paused = false;
 
-  window.addEventListener('keydown', (e) => {
+  window.addEventListener('keydown', e => {
     if(e.code === 'Space') {
       paused = !paused;
       e.preventDefault();
@@ -81,7 +84,7 @@ function main() {
     const width = window.innerWidth;
     const height = window.innerHeight;
 
-    if (canvas.width !== width || canvas.height !== height) {
+    if(canvas.width !== width || canvas.height !== height) {
       canvas.width = width;
       canvas.height = height;
     }
@@ -110,7 +113,8 @@ function main() {
     const slotW = plotW / MAX_CANDLES;
     const bodyW = Math.max(2, slotW * 0.6);
 
-    let lo = Infinity, hi = -Infinity;
+    let lo = Infinity,
+      hi = -Infinity;
     for(let c of candles) {
       if(c.low < lo) lo = c.low;
       if(c.high > hi) hi = c.high;

@@ -33,7 +33,7 @@ class WindowProxy extends EventTarget {
   }
 }
 
-export const window = globalThis.window = new WindowProxy();
+export const window = (globalThis.window = new WindowProxy());
 globalThis.document = document;
 
 // 3. Create a stateful Canvas element class backed by EventTarget
@@ -53,12 +53,12 @@ class CanvasElement extends EventTarget {
       width: this.width,
       height: this.height,
       right: this.width,
-      bottom: this.height
+      bottom: this.height,
     };
   }
 
   getContext(type) {
-    if (type === 'webgl' || type === 'webgl2' || type === 'experimental-webgl') {
+    if(type === 'webgl' || type === 'webgl2' || type === 'experimental-webgl') {
       // Returns a context stub; actual rendering is handled via qjs-glfw + NanoVG context current
       return { canvas: this };
     }
@@ -73,9 +73,9 @@ const parsedCanvasNode = originalGetElementById ? originalGetElementById('canvas
 export const canvas = new CanvasElement(parsedCanvasNode);
 
 // Override getElementById so standard queries for 'id="canvas"' return our interactive canvas instance
-if (document.getElementById) {
-  document.getElementById = (id) => {
-    if (id === 'canvas') return canvas;
+if(document.getElementById) {
+  document.getElementById = id => {
+    if(id === 'canvas') return canvas;
     return originalGetElementById(id);
   };
 }
@@ -105,7 +105,7 @@ export class EmulatedBrowserWindow {
       clientY: y,
       offsetX: x,
       offsetY: y,
-      target: canvas
+      target: canvas,
     });
 
     win.handleCursorPos = (x, y) => {
@@ -119,7 +119,7 @@ export class EmulatedBrowserWindow {
     };
 
     win.handleKey = (key, scancode, action) => {
-      if (action === 0) return; // keyup can be handled similarly if needed
+      if(action === 0) return; // keyup can be handled similarly if needed
       const event = Object.assign(new Event('keydown'), { keyCode: key, target: window });
       window.dispatchEvent(event);
     };

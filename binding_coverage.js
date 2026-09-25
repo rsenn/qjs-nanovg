@@ -88,7 +88,7 @@ function parseArgs(argv) {
     if(!m) die(`unrecognized argument: ${a}`);
     const key = m[1],
       val = m[2];
-    switch(key) {
+    switch (key) {
       case 'objects':
         opts.objects = val;
         break;
@@ -117,9 +117,9 @@ function parseArgs(argv) {
         die(`unknown option: --${key}`);
     }
   }
-  if(opts.libs.length === 0 && opts.libDirs.length === 0)  {
-opts.libs.push('build/x86_64-linux-debug/CMakeFiles/qjs-nanovg.dir/nanovg/src/nanovg.c.o');
-}
+  if(opts.libs.length === 0 && opts.libDirs.length === 0) {
+    opts.libs.push('build/x86_64-linux-debug/CMakeFiles/qjs-nanovg.dir/nanovg/src/nanovg.c.o');
+  }
   return opts;
 }
 
@@ -144,7 +144,10 @@ function run(cmd) {
 function listFiles(dir, pattern) {
   const [entries, err] = os.readdir(dir);
   if(err) die(`cannot read directory: ${dir}`);
-  return entries.filter(n => pattern.test(n)).sort().map(n => `${dir}/${n}`);
+  return entries
+    .filter(n => pattern.test(n))
+    .sort()
+    .map(n => `${dir}/${n}`);
 }
 
 // Parses one line of `nm -A ...` output. -A prefixes every line with the
@@ -297,7 +300,10 @@ function renderText(report, verbose, color) {
     const header = lib.overall.implemented === 0 ? 'not bound' : `bound (${formatPct(lib.overall.percentage)})`;
     lines.push(`--- ${name}: ${header} ---`);
     if(!verbose && lib.overall.implemented === 0) continue;
-    for(const [label, cat] of [['functions', lib.functions], ['data', lib.data]]) {
+    for(const [label, cat] of [
+      ['functions', lib.functions],
+      ['data', lib.data],
+    ]) {
       if(!cat.list.length) continue;
       lines.push(`  ${label} (${cat.implemented}/${cat.total}):`);
       for(const sym of cat.list) {

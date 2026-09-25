@@ -19,12 +19,15 @@ const COL = {
 };
 
 function main() {
-  const canvas = document.getElementById('canvas') || document.querySelector('canvas') || (() => {
-    const c = document.createElement('canvas');
-    c.id = 'canvas';
-    document.body.appendChild(c);
-    return c;
-  })();
+  const canvas =
+    document.getElementById('canvas') ||
+    document.querySelector('canvas') ||
+    (() => {
+      const c = document.createElement('canvas');
+      c.id = 'canvas';
+      document.body.appendChild(c);
+      return c;
+    })();
 
   const nvg = CreateGL3(ANTIALIAS);
 
@@ -76,10 +79,10 @@ function main() {
   }
 
   function save() {
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(polylines, null, 2));
+    const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(polylines, null, 2));
     const downloadAnchor = document.createElement('a');
-    downloadAnchor.setAttribute("href", dataStr);
-    downloadAnchor.setAttribute("download", SAVE_PATH);
+    downloadAnchor.setAttribute('href', dataStr);
+    downloadAnchor.setAttribute('download', SAVE_PATH);
     document.body.appendChild(downloadAnchor);
     downloadAnchor.click();
     downloadAnchor.remove();
@@ -89,14 +92,14 @@ function main() {
   }
 
   // Event Listeners
-  window.addEventListener('mousemove', (e) => {
+  window.addEventListener('mousemove', e => {
     const rect = canvas.getBoundingClientRect();
     mouse.x = e.clientX - rect.left;
     mouse.y = e.clientY - rect.top;
     if(drag) polylines[drag.pl][drag.pt] = { x: mouse.x, y: mouse.y };
   });
 
-  window.addEventListener('mousedown', (e) => {
+  window.addEventListener('mousedown', e => {
     const width = window.innerWidth;
     const saveBtn = { x: width - 116, y: 16, w: 100, h: 34 };
 
@@ -119,13 +122,13 @@ function main() {
     }
   });
 
-  window.addEventListener('mouseup', (e) => {
+  window.addEventListener('mouseup', e => {
     if(e.button === 0) drag = null;
   });
 
   window.addEventListener('contextmenu', e => e.preventDefault());
 
-  window.addEventListener('keydown', (e) => {
+  window.addEventListener('keydown', e => {
     if(e.key === 's' || e.key === 'S') save();
   });
 
@@ -142,7 +145,7 @@ function main() {
     const width = window.innerWidth;
     const height = window.innerHeight;
 
-    if (canvas.width !== width || canvas.height !== height) {
+    if(canvas.width !== width || canvas.height !== height) {
       canvas.width = width;
       canvas.height = height;
     }

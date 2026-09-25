@@ -1,12 +1,15 @@
 import { CreateGL3, ANTIALIAS, RGBA } from './nanovg.js';
 
 // 1. Locate or create the target canvas element in the webpage
-const canvas = document.getElementById('canvas') || document.querySelector('canvas') || (() => {
-  const c = document.createElement('canvas');
-  c.id = 'canvas';
-  document.body.appendChild(c);
-  return c;
-})();
+const canvas =
+  document.getElementById('canvas') ||
+  document.querySelector('canvas') ||
+  (() => {
+    const c = document.createElement('canvas');
+    c.id = 'canvas';
+    document.body.appendChild(c);
+    return c;
+  })();
 
 // 2. Initialize the NanoVG WebGL rendering context
 const nvg = CreateGL3(ANTIALIAS);
@@ -17,7 +20,7 @@ function render() {
   const height = window.innerHeight;
 
   // Sync canvas drawing buffer size with viewport dimensions
-  if (canvas.width !== width || canvas.height !== height) {
+  if(canvas.width !== width || canvas.height !== height) {
     canvas.width = width;
     canvas.height = height;
   }
@@ -55,8 +58,8 @@ function render() {
   // Define Planets: [orbit distance, radius, orbital speed, color]
   const planets = [
     { dist: 130, radius: 10, speed: 1.4, color: RGBA(90, 170, 255, 255) }, // Inner Planet
-    { dist: 210, radius: 15, speed: 0.9, color: RGBA(230, 80, 50, 255) },  // Mid Planet
-    { dist: 300, radius: 12, speed: 0.5, color: RGBA(110, 230, 150, 255) } // Outer Planet
+    { dist: 210, radius: 15, speed: 0.9, color: RGBA(230, 80, 50, 255) }, // Mid Planet
+    { dist: 300, radius: 12, speed: 0.5, color: RGBA(110, 230, 150, 255) }, // Outer Planet
   ];
 
   // Render Each Orbiting Planet

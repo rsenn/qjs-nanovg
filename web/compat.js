@@ -52,8 +52,7 @@ export function values(ns) {
   out.lerp = [-1, 0, 0.25, 1, 2].map(u => arr(LerpRGBA(RGBA(10, 20, 30, 40), RGBAf(1, 0.5, 0.25, 0.125), u)));
   out.trans = [arr(TransRGBA(RGB(10, 20, 30), 128)), arr(TransRGBAf(RGB(10, 20, 30), 0.3)), arr(TransRGBA([0.1, 0.2, 0.3], 255))];
   out.hsl = [];
-  for(const h of [-0.25, 0, 0.1, 0.5, 0.9, 1.3])
-    for(const s of [0, 0.5, 1]) for(const l of [0, 0.3, 0.5, 0.8, 1]) out.hsl.push(arr(HSL(h, s, l)), arr(HSLA(h, s, l, 100)));
+  for(const h of [-0.25, 0, 0.1, 0.5, 0.9, 1.3]) for (const s of [0, 0.5, 1]) for (const l of [0, 0.3, 0.5, 0.8, 1]) out.hsl.push(arr(HSL(h, s, l)), arr(HSLA(h, s, l, 100)));
 
   const c = RGB(1, 2, 3);
   c.r = 0.5;
@@ -79,7 +78,14 @@ export function values(ns) {
   out.inverse2 = [inv2 === inv, arr(inv)];
 
   const chain = T.Scale(2, 3).Rotate(0.5).Translate(1, 1);
-  out.chain = [arr(chain), arr(T.Scale(2, 3).Scale(2)), arr(T.Translate(1, 2).Multiply(T.Scale(2, 3))), arr(T.Translate(1, 2).Premultiply(T.Scale(2, 3))), arr(T.Scale(2, 4).Inverse()), arr(T.Scale(2, 3).SkewX(0.1).SkewY(0.2))];
+  out.chain = [
+    arr(chain),
+    arr(T.Scale(2, 3).Scale(2)),
+    arr(T.Translate(1, 2).Multiply(T.Scale(2, 3))),
+    arr(T.Translate(1, 2).Premultiply(T.Scale(2, 3))),
+    arr(T.Scale(2, 4).Inverse()),
+    arr(T.Scale(2, 3).SkewX(0.1).SkewY(0.2)),
+  ];
   const tp = T.Translate(10, 20).Scale(2, 2);
   out.point = [tp.TransformPoint(1, 2), tp.TransformPoint([3, 4])];
 

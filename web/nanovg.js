@@ -297,8 +297,30 @@ export class Transform extends Float32Array {
 }
 tag(Transform.prototype, 'nvgTransform');
 
-KEYS.forEach((k, i) => getter(Transform.prototype, k, function() { return this[i]; }, function(v) { this[i] = v; }));
-['xx', 'yx', 'xy', 'yy', 'x0', 'y0'].forEach((k, i) => getter(Transform.prototype, k, function() { return this[i]; }, function(v) { this[i] = v; }));
+KEYS.forEach((k, i) =>
+  getter(
+    Transform.prototype,
+    k,
+    function() {
+      return this[i];
+    },
+    function(v) {
+      this[i] = v;
+    },
+  ),
+);
+['xx', 'yx', 'xy', 'yy', 'x0', 'y0'].forEach((k, i) =>
+  getter(
+    Transform.prototype,
+    k,
+    function() {
+      return this[i];
+    },
+    function(v) {
+      this[i] = v;
+    },
+  ),
+);
 
 // Static form builds a new matrix (or fills one passed first); instance form premultiplies onto this one.
 const staticResult = (mat, tmp, i, args) => {
@@ -362,7 +384,10 @@ for(const [name, [length, message, n]] of Object.entries(staticOps)) {
   });
 }
 
-for(const [name, op] of [['Multiply', mul], ['Premultiply', premul]]) {
+for(const [name, op] of [
+  ['Multiply', mul],
+  ['Premultiply', premul],
+]) {
   def(Transform, name, 1, (...args) => {
     const tmp = new Float32Array(6);
     let mat = tmp;
@@ -543,11 +568,21 @@ for(const [name, [length, kinds, needed = length, result]] of Object.entries(SPE
       for(let k = 0; k < kinds.length; k++) {
         const a = args[k];
         switch (kinds[k]) {
-          case 'f': out.push(+a); break;
-          case 'i': out.push(a | 0); break;
-          case 'b': out.push(a ? 1 : 0); break;
-          case 'c': out.push(...toColor(a)); break;
-          case 'p': m.HEAPU8.set(paintBytes(a), m._nvgw_PaintPtr()); break;
+          case 'f':
+            out.push(+a);
+            break;
+          case 'i':
+            out.push(a | 0);
+            break;
+          case 'b':
+            out.push(a ? 1 : 0);
+            break;
+          case 'c':
+            out.push(...toColor(a));
+            break;
+          case 'p':
+            m.HEAPU8.set(paintBytes(a), m._nvgw_PaintPtr());
+            break;
           case 's': {
             const s = String(a);
             const size = m.lengthBytesUTF8(s) + 1;
@@ -691,9 +726,7 @@ export const DeleteGL3 = func('DeleteGL3', 1, 0, ([nvg]) => {
   contexts.delete(nvg);
 });
 
-export const CreateImageFromHandleGL3 = func('CreateImageFromHandleGL3', 5, 0, ([nvg, tex, w, h, flags]) =>
-  m._nvgw_CreateImageFromHandle(ptrOf(nvg), tex >>> 0, w | 0, h | 0, flags | 0),
-);
+export const CreateImageFromHandleGL3 = func('CreateImageFromHandleGL3', 5, 0, ([nvg, tex, w, h, flags]) => m._nvgw_CreateImageFromHandle(ptrOf(nvg), tex >>> 0, w | 0, h | 0, flags | 0));
 
 export const ImageHandleGL3 = func('ImageHandleGL3', 2, 0, ([nvg, image]) => m._nvgw_ImageHandle(ptrOf(nvg), image | 0) >>> 0);
 

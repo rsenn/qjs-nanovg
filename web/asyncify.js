@@ -14,8 +14,7 @@ export function asyncify(source) {
   const literals = [];
   const stack = [];
 
-  const nameOf = (fn, parent) =>
-    fn.id?.name ?? (parent?.type == 'Property' || parent?.type == 'MethodDefinition' ? parent.key.name : parent?.type == 'VariableDeclarator' ? parent.id.name : null);
+  const nameOf = (fn, parent) => fn.id?.name ?? (parent?.type == 'Property' || parent?.type == 'MethodDefinition' ? parent.key.name : parent?.type == 'VariableDeclarator' ? parent.id.name : null);
 
   (function visit(node, parent) {
     const isFn = FUNCTIONS.has(node.type);
