@@ -157,3 +157,20 @@ export const defaultWindow = new EmulatedBrowserWindow(1024, 768, 'QuickJS Emula
 export async function poll() {
   await glfw.poll();
 }
+
+// Automatically load target script passed via command line arguments if available
+const targetScript = scriptArgs[1]; // qjsm passes arguments after script name
+if (targetScript) {
+  import(targetScript).catch(err => {
+    console.error(`Failed to load target script ${targetScript}:`, err);
+  });
+} else {
+  // Fallback idle loop if no script provided
+  async function keepAlive() {
+    while (!defaultWindow.shouldClose) {
+      await poll();
+      await new Promise(r => setTimeout(r, 5));
+    }
+  }
+  keepAlive();
+}
