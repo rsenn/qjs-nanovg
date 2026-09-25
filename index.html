@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>qjs-nanovg — Canvas-style 2D vector graphics for QuickJS</title>
+<meta name="description" content="qjs-nanovg — Canvas-style 2D vector graphics for QuickJS. NanoVG antialiased OpenGL vector graphics as a loadable QuickJS module: paths, gradients, text, images, framebuffers.">
+<link rel="stylesheet" href="assets/base.css">
+<link rel="stylesheet" href="assets/theme.css">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="landing" data-site="qjs-nanovg" data-root="">
+<header class="topbar">
+  <a class="brand" href="index.html"><span class="logo" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 168 40" role="img" aria-label="NanoVG">
+  <path d="M4 30 C 4 6, 22 6, 22 20 S 40 34, 40 10" fill="none" style="stroke:var(--accent)" stroke-width="4" stroke-linecap="round"/>
+  <text x="50" y="29" font-family="ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif" font-weight="700" font-size="26" letter-spacing="-0.5" fill="currentColor">Nano<tspan style="fill:var(--accent)">VG</tspan></text>
+</svg></span> <span class="brand-name">qjs-nanovg</span></a>
+  <nav class="topnav">
+    <a href="docs/api.html">API</a>
+    <a href="examples.html">Examples</a>
+    <a href="https://github.com/rsenn/qjs-nanovg" target="_blank" rel="noopener">GitHub</a>
+  </nav>
+  <button class="themetoggle" type="button" aria-label="Toggle colour scheme">◐</button>
+</header>
+<section class="hero">
+  <div>
+    <span class="eyebrow">QuickJS · OpenGL · NanoVG</span>
+    <h1>qjs-nanovg: draw antialiased vector graphics from a script</h1>
+    <p class="lede">NanoVG's Canvas-style API (paths, gradients, text, images) as a loadable QuickJS module. Point it at a GLFW window and draw.</p>
+    <div class="cta">
+      <a class="btn primary" href="docs/api.html">API reference</a>
+      <a class="btn" href="examples.html">Examples</a>
+      <a class="btn" href="https://github.com/rsenn/qjs-nanovg" target="_blank" rel="noopener">GitHub</a>
+    </div>
+  </div>
+  <div class="codeblock" data-lang="js"><pre><code class="language-js"><span class="t-kw">import</span> <span class="t-op">*</span> <span class="t-id">as</span> <span class="t-id">glfw</span> <span class="t-kw">from</span> <span class="t-str">'glfw'</span>;
+<span class="t-kw">import</span> { <span class="t-type">CreateGL3</span>, <span class="t-type">ANTIALIAS</span>, <span class="t-type">RGBA</span> } <span class="t-kw">from</span> <span class="t-str">'nanovg'</span>;
+
+<span class="t-kw">const</span> <span class="t-id">win</span> <span class="t-op">=</span> <span class="t-kw">new</span> <span class="t-id">glfw</span>.<span class="t-fn">Window</span>(<span class="t-num">800</span>, <span class="t-num">600</span>, <span class="t-str">'NanoVG'</span>);
+<span class="t-id">glfw</span>.<span class="t-prop">context</span>.<span class="t-prop">current</span> <span class="t-op">=</span> <span class="t-id">win</span>;
+<span class="t-kw">const</span> <span class="t-id">nvg</span> <span class="t-op">=</span> <span class="t-fn">CreateGL3</span>(<span class="t-type">ANTIALIAS</span>);
+
+<span class="t-kw">while</span>(<span class="t-op">!</span><span class="t-id">win</span>.<span class="t-prop">shouldClose</span>) {
+  <span class="t-id">nvg</span>.<span class="t-fn">BeginFrame</span>(<span class="t-num">800</span>, <span class="t-num">600</span>, <span class="t-num">1</span>);
+  <span class="t-id">nvg</span>.<span class="t-fn">BeginPath</span>();
+  <span class="t-id">nvg</span>.<span class="t-fn">RoundedRect</span>(<span class="t-num">100</span>, <span class="t-num">100</span>, <span class="t-num">200</span>, <span class="t-num">150</span>, <span class="t-num">12</span>);
+  <span class="t-id">nvg</span>.<span class="t-fn">FillColor</span>(<span class="t-fn">RGBA</span>(<span class="t-num">255</span>, <span class="t-num">128</span>, <span class="t-num">0</span>, <span class="t-num">255</span>));
+  <span class="t-id">nvg</span>.<span class="t-fn">Fill</span>();
+  <span class="t-id">nvg</span>.<span class="t-fn">EndFrame</span>();
+  <span class="t-id">win</span>.<span class="t-fn">swapBuffers</span>();
+  <span class="t-id">glfw</span>.<span class="t-fn">poll</span>();
+}</code></pre></div>
+</section>
+
+<main>
+  <section class="section">
+    <h2>Why qjs-nanovg</h2>
+    <p class="sub">Canvas-like drawing without a browser: the whole binding is one C file on top of NanoVG.</p>
+    <div class="grid">
+      <article class="card"><span class="ico">01</span><h3>Canvas-style API</h3><p>Paths, bezier and arc segments, fill and stroke, linear, box and radial gradients, scissor clipping and transform stacks, all as methods on one context.</p></article>
+      <article class="card"><span class="ico">02</span><h3>Text, images, framebuffers</h3><p>Load fonts and images by id, lay out and align text, render into offscreen framebuffers and read pixels back with <code>ReadPixels</code>.</p></article>
+      <article class="card"><span class="ico">03</span><h3>Small and loadable</h3><p>A single <code>nvgjs-module.c</code> (about 2,300 lines) plus NanoVG itself, built to <code>nanovg.so</code>. It needs QuickJS, GLEW and OpenGL; the window comes from the <code>glfw</code> module.</p></article>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>Install</h2>
+    <div class="codeblock" data-lang="sh"><pre><code class="language-sh"><span class="t-id">git</span> <span class="t-id">clone</span> <span class="t-op">--recursive</span> <span class="t-id">https</span>://<span class="t-id">github.com</span>/<span class="t-id">rsenn</span>/<span class="t-id">qjs-nanovg.git</span>
+<span class="t-id">cd</span> <span class="t-id">qjs-nanovg</span>
+<span class="t-id">cmake</span> <span class="t-op">-B</span> <span class="t-id">build</span> <span class="t-op">-DCMAKE_BUILD_TYPE</span>=<span class="t-id">Release</span>
+<span class="t-id">cmake</span> <span class="t-op">--build</span> <span class="t-id">build</span>
+<span class="t-id">sudo</span> <span class="t-id">cmake</span> <span class="t-op">--install</span> <span class="t-id">build</span>      <span class="t-cm"># installs nanovg.so for qjsm</span>
+<span class="t-id">qjsm</span> <span class="t-id">examples</span>/<span class="t-id">planets.js</span></code></pre></div>
+  </section>
+</main>
+
+<footer class="sitefoot">
+  <p>qjs-nanovg — MIT. Built from the repo's own markdown by
+     <a href="https://github.com/rsenn/rsenn/tree/main/tools/site">rsenn/rsenn tools/site</a>.</p>
+</footer>
+<script>
+document.querySelector('.themetoggle').addEventListener('click', function () {
+  var d = document.documentElement;
+  var dark = d.dataset.theme ? d.dataset.theme === 'dark'
+    : matchMedia('(prefers-color-scheme: dark)').matches;
+  d.dataset.theme = dark ? 'light' : 'dark';
+  try { localStorage.setItem('theme', d.dataset.theme); } catch (e) {}
+});
+</script>
+</body>
+</html>

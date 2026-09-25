@@ -1,0 +1,10 @@
+/* qjs-nanovg — imprint. Override tokens once with light-dark(light, dark);
+   see tools/site/README.md "Theming" for the full token and hook list. */
+:root {
+  --accent:      light-dark(#2e7d32, #8cb88e);
+  --accent-fg:   light-dark(#ffffff, #0d1114);
+  --accent-soft: light-dark(#e6efe6, #162417);
+
+  /* --bg / --fg / --line ... tint the neutrals toward the accent hue */
+  /* --radius: 8px;  --font-display: var(--sans);  --hero-bg: none; */
+}
