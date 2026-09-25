@@ -87,6 +87,29 @@ if(BUILD_STATIC_MODULES)
   target_compile_definitions(qjs-nanovg-static PRIVATE NANOVG_GLEW=1 NANOVG_GL3_IMPLEMENTATION=1)
 endif(BUILD_STATIC_MODULES)
 
+# Browser build of the same bindings (NanoVG on WebGL2 through Emscripten). The output lands in
+# web/ beside the JS API that wraps it, so web/ is runnable straight after a normal build.
+option(BUILD_WEB "Also build web/nanovg-web.js and web/nanovg-web.wasm with Emscripten" ON)
+if(BUILD_WEB)
+  find_program(EMCC emcc HINTS "$ENV{EMSDK}/upstream/emscripten" "$ENV{EMSCRIPTEN}")
+
+  if(EMCC)
+    set(WEB_DIR ${CMAKE_CURRENT_SOURCE_DIR}/web)
+    set(WEB_OUTPUT ${WEB_DIR}/nanovg-web.js ${WEB_DIR}/nanovg-web.wasm)
+
+    add_custom_command(
+      OUTPUT ${WEB_OUTPUT}
+      COMMAND ${CMAKE_COMMAND} -E env EMCC=${EMCC} sh ${WEB_DIR}/build.sh
+      DEPENDS ${WEB_DIR}/nanovg-web.c ${WEB_DIR}/build.sh nanovg/src/nanovg.c nanovg/src/nanovg.h
+              nanovg/src/nanovg_gl.h nanovg/src/nanovg_gl_utils.h
+      COMMENT "Building web/nanovg-web.js with Emscripten"
+      VERBATIM)
+    add_custom_target(qjs-nanovg-web ALL DEPENDS ${WEB_OUTPUT})
+  else(EMCC)
+    message(STATUS "emcc not found, skipping the web build (use -DEMCC=/path/to/emcc, or set EMSDK)")
+  endif(EMCC)
+endif(BUILD_WEB)
+
 include_directories(nanovg/src)
 if(BUILD_EXAMPLE)
   add_executable(

@@ -302,7 +302,7 @@ NVGJS_DECL(Transform, Multiply) {
   if(mat == tmp)
     return i ? nvgjs_transform_copy(ctx, argv[0], tmp) : nvgjs_transform_new(ctx, tmp);
 
-  return mat == NULL ? JS_UNDEFINED : JS_DupValue(ctx, this_obj);
+  return JS_DupValue(ctx, argv[0]);
 }
 
 NVGJS_DECL(Transform, Premultiply) {
@@ -334,7 +334,7 @@ NVGJS_DECL(Transform, Premultiply) {
   if(mat == tmp)
     return i ? nvgjs_transform_copy(ctx, argv[0], tmp) : nvgjs_transform_new(ctx, tmp);
 
-  return mat == NULL ? JS_UNDEFINED : JS_DupValue(ctx, this_obj);
+  return JS_DupValue(ctx, argv[0]);
 }
 
 NVGJS_DECL(Transform, Inverse) {
@@ -359,7 +359,7 @@ NVGJS_DECL(Transform, Inverse) {
   if(mat == tmp)
     return i ? nvgjs_transform_copy(ctx, argv[0], tmp) : nvgjs_transform_new(ctx, tmp);
 
-  return mat == NULL ? JS_UNDEFINED : JS_DupValue(ctx, this_obj);
+  return JS_DupValue(ctx, argv[0]);
 }
 
 enum {
