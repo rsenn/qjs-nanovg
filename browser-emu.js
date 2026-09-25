@@ -75,7 +75,7 @@ class CanvasElement extends EventTarget {
   }
 
   getContext(type) {
-    if (type === 'webgl' || type === 'webgl2' || type === 'experimental-webgl') {
+    if(type === 'webgl' || type === 'webgl2' || type === 'experimental-webgl') {
       return { canvas: this };
     }
     return null;
@@ -87,9 +87,9 @@ const parsedCanvasNode = originalGetElementById ? originalGetElementById('canvas
 
 export const canvas = new CanvasElement(parsedCanvasNode);
 
-if (document.getElementById) {
-  document.getElementById = (id) => {
-    if (id === 'canvas') return canvas;
+if(document.getElementById) {
+  document.getElementById = id => {
+    if(id === 'canvas') return canvas;
     return originalGetElementById(id);
   };
 }
@@ -131,7 +131,7 @@ export class EmulatedBrowserWindow {
     };
 
     win.handleKey = (key, scancode, action) => {
-      if (action === 0) return;
+      if(action === 0) return;
       const event = Object.assign(new Event('keydown'), { keyCode: key, target: window });
       window.dispatchEvent(event);
     };
@@ -160,14 +160,14 @@ export async function poll() {
 
 // Automatically load target script passed via command line arguments if available
 const targetScript = scriptArgs[1]; // qjsm passes arguments after script name
-if (targetScript) {
+if(targetScript) {
   import(targetScript).catch(err => {
     console.error(`Failed to load target script ${targetScript}:`, err);
   });
 } else {
   // Fallback idle loop if no script provided
   async function keepAlive() {
-    while (!defaultWindow.shouldClose) {
+    while(!defaultWindow.shouldClose) {
       await poll();
       await new Promise(r => setTimeout(r, 5));
     }
