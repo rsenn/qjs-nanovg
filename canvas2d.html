@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Canvas2D — qjs-nanovg</title>
+<meta name="description" content="qjs-nanovg — Canvas-style 2D vector graphics for QuickJS. NanoVG antialiased OpenGL vector graphics as a loadable QuickJS module: paths, gradients, text, images, framebuffers.">
+<link rel="stylesheet" href="assets/base.css">
+<link rel="stylesheet" href="assets/theme.css">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="page" data-site="qjs-nanovg" data-root="">
+<header class="topbar">
+  <a class="brand" href="index.html"><span class="logo" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 168 40" role="img" aria-label="NanoVG">
+  <path d="M4 30 C 4 6, 22 6, 22 20 S 40 34, 40 10" fill="none" style="stroke:var(--accent)" stroke-width="4" stroke-linecap="round"/>
+  <text x="50" y="29" font-family="ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif" font-weight="700" font-size="26" letter-spacing="-0.5" fill="currentColor">Nano<tspan style="fill:var(--accent)">VG</tspan></text>
+</svg></span> <span class="brand-name">qjs-nanovg</span></a>
+  <nav class="topnav">
+    <a href="docs/api.html">API</a>
+    <a href="canvas2d.html">Canvas2D</a>
+    <a href="examples.html">Examples</a>
+    <a href="https://github.com/rsenn/qjs-nanovg" target="_blank" rel="noopener">GitHub</a>
+  </nav>
+  <button class="themetoggle" type="button" aria-label="Toggle colour scheme">◐</button>
+</header>
+<main class="doc">
+<article>
+<h1>Canvas2D on qjsm</h1>
+<p><code>lib/canvas2d.js</code> is a thin <code>CanvasRenderingContext2D</code> emulation built on the <code>nanovg</code>, <code>glfw</code> and <code>dom</code> modules. Import it for its side effects and scripts written for the browser Canvas API (<code>getContext('2d')</code>, <code>requestAnimationFrame</code>, <code>drawImage</code>) run mostly unmodified in a real GLFW window.</p>
+
+<h2>Usage</h2>
+<div class="codeblock" data-lang="js"><pre><code class="language-js"><span class="t-kw">import</span> <span class="t-str">'canvas2d.js'</span>;   <span class="t-cm">// installed next to nanovg.so; or use a relative path</span>
+
+<span class="t-kw">const</span> <span class="t-id">canvas</span> <span class="t-op">=</span> <span class="t-id">document</span>.<span class="t-fn">getElementById</span>(<span class="t-str">'canvas'</span>);
+<span class="t-kw">const</span> <span class="t-id">ctx</span> <span class="t-op">=</span> <span class="t-id">canvas</span>.<span class="t-fn">getContext</span>(<span class="t-str">'2d'</span>);
+
+<span class="t-kw">function</span> <span class="t-fn">loop</span>(<span class="t-id">t</span>) {
+  <span class="t-id">ctx</span>.<span class="t-fn">clearRect</span>(<span class="t-num">0</span>, <span class="t-num">0</span>, <span class="t-id">canvas</span>.<span class="t-prop">width</span>, <span class="t-id">canvas</span>.<span class="t-prop">height</span>);
+  <span class="t-id">ctx</span>.<span class="t-fn">fillRect</span>(<span class="t-num">10</span>, <span class="t-num">10</span>, <span class="t-num">100</span>, <span class="t-num">100</span>);
+  <span class="t-fn">requestAnimationFrame</span>(<span class="t-id">loop</span>);
+}
+<span class="t-fn">requestAnimationFrame</span>(<span class="t-id">loop</span>);</code></pre></div>
+<p>Importing sets up a <code>window</code> and a <code>document</code> with one <code>&lt;canvas id="canvas"&gt;</code> in <code>document.body</code>. The module also exports <code>window</code>, <code>document</code>, <code>canvas</code>, <code>Image</code>, <code>requestAnimationFrame</code>, <code>cancelAnimationFrame</code>, <code>registerFont</code> and the context classes, so you can import them by name instead:</p>
+<div class="codeblock" data-lang="js"><pre><code class="language-js"><span class="t-kw">import</span> { <span class="t-id">canvas</span> } <span class="t-kw">from</span> <span class="t-str">'./lib/canvas2d.js'</span>;
+
+<span class="t-id">canvas</span>.<span class="t-prop">width</span> <span class="t-op">=</span> <span class="t-num">640</span>;
+<span class="t-id">canvas</span>.<span class="t-prop">height</span> <span class="t-op">=</span> <span class="t-num">640</span>;
+<span class="t-kw">const</span> <span class="t-id">ctx</span> <span class="t-op">=</span> <span class="t-id">canvas</span>.<span class="t-fn">getContext</span>(<span class="t-str">'2d'</span>);</code></pre></div>
+<p><code>cmake --install</code> copies <code>canvas2d.js</code> into the same directory as <code>nanovg.so</code>.</p>
+
+<h2>Real-world use</h2>
+<p><code>examples/emerald-run/</code> is a tile-based game whose engine runs unchanged in a browser and under qjsm through this file. It is a large project, so it is not reproduced on the <a href="examples.html">examples page</a>; browse it <a href="https://github.com/rsenn/qjs-nanovg/tree/main/examples/emerald-run">on GitHub</a>.</p>
+
+<h2>Known gaps</h2>
+<p>It is a thin emulation, not a pixel-perfect one:</p>
+<ul>
+  <li>Content is not kept between frames: redraw the whole canvas every frame.</li>
+  <li><code>clearRect()</code> paints with the clear colour; it does not make pixels transparent.</li>
+  <li><code>clip()</code> supports only a single <code>rect()</code> or <code>roundRect()</code> path.</li>
+  <li>Gradients use only the first and last colour stop.</li>
+  <li><code>strokeText()</code> draws filled text; <code>globalCompositeOperation</code>, <code>imageSmoothingEnabled</code> and line dashing are accepted but ignored.</li>
+  <li>Images and fonts load synchronously from local files only; <code>onload</code> fires immediately.</li>
+</ul>
+</article>
+</main>
+
+<footer class="sitefoot">
+  <p>qjs-nanovg — MIT. Built from the repo's own markdown by
+     <a href="https://github.com/rsenn/rsenn/tree/main/tools/site">rsenn/rsenn tools/site</a>.</p>
+</footer>
+<script>
+document.querySelector('.themetoggle').addEventListener('click', function () {
+  var d = document.documentElement;
+  var dark = d.dataset.theme ? d.dataset.theme === 'dark'
+    : matchMedia('(prefers-color-scheme: dark)').matches;
+  d.dataset.theme = dark ? 'light' : 'dark';
+  try { localStorage.setItem('theme', d.dataset.theme); } catch (e) {}
+});
+</script>
+</body>
+</html>

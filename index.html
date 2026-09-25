@@ -18,6 +18,7 @@
 </svg></span> <span class="brand-name">qjs-nanovg</span></a>
   <nav class="topnav">
     <a href="docs/api.html">API</a>
+    <a href="canvas2d.html">Canvas2D</a>
     <a href="examples.html">Examples</a>
     <a href="https://github.com/rsenn/qjs-nanovg" target="_blank" rel="noopener">GitHub</a>
   </nav>
@@ -30,6 +31,7 @@
     <p class="lede">NanoVG's Canvas-style API (paths, gradients, text, images) as a loadable QuickJS module. Point it at a GLFW window and draw.</p>
     <div class="cta">
       <a class="btn primary" href="docs/api.html">API reference</a>
+      <a class="btn" href="canvas2d.html">Canvas2D</a>
       <a class="btn" href="examples.html">Examples</a>
       <a class="btn" href="https://github.com/rsenn/qjs-nanovg" target="_blank" rel="noopener">GitHub</a>
     </div>
@@ -62,6 +64,19 @@
       <article class="card"><span class="ico">02</span><h3>Text, images, framebuffers</h3><p>Load fonts and images by id, lay out and align text, render into offscreen framebuffers and read pixels back with <code>ReadPixels</code>.</p></article>
       <article class="card"><span class="ico">03</span><h3>Small and loadable</h3><p>A single <code>nvgjs-module.c</code> (about 2,300 lines) plus NanoVG itself, built to <code>nanovg.so</code>. It needs QuickJS, GLEW and OpenGL; the window comes from the <code>glfw</code> module.</p></article>
     </div>
+  </section>
+
+  <section class="section">
+    <h2>Or write it as browser Canvas</h2>
+    <p class="sub">Already have code for <code>getContext('2d')</code>? <code>canvas2d.js</code> emulates the Canvas 2D API on top of NanoVG, so <code>requestAnimationFrame</code> loops run in a GLFW window under qjsm.</p>
+    <div class="codeblock" data-lang="js"><pre><code class="language-js"><span class="t-kw">import</span> <span class="t-str">'canvas2d.js'</span>;
+
+<span class="t-kw">const</span> <span class="t-id">ctx</span> <span class="t-op">=</span> <span class="t-id">document</span>.<span class="t-fn">getElementById</span>(<span class="t-str">'canvas'</span>).<span class="t-fn">getContext</span>(<span class="t-str">'2d'</span>);
+<span class="t-fn">requestAnimationFrame</span>(<span class="t-kw">function</span> <span class="t-fn">loop</span>() {
+  <span class="t-id">ctx</span>.<span class="t-fn">fillRect</span>(<span class="t-num">10</span>, <span class="t-num">10</span>, <span class="t-num">100</span>, <span class="t-num">100</span>);
+  <span class="t-fn">requestAnimationFrame</span>(<span class="t-id">loop</span>);
+});</code></pre></div>
+    <p><a href="canvas2d.html">Canvas2D usage and known gaps →</a></p>
   </section>
 
   <section class="section">
