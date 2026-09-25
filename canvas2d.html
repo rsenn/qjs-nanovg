@@ -33,9 +33,9 @@
 <p><code>lib/canvas2d.js</code> is a thin <code>CanvasRenderingContext2D</code> emulation built on the <code>nanovg</code>, <code>glfw</code> and <code>dom</code> modules. Import it for its side effects and scripts written for the browser Canvas API (<code>getContext('2d')</code>, <code>requestAnimationFrame</code>, <code>drawImage</code>) run mostly unmodified in a real GLFW window.</p>
 
 <h2>Usage</h2>
-<div class="codeblock" data-lang="js"><pre><code class="language-js"><span class="t-kw">import</span> <span class="t-str">'canvas2d.js'</span>;   <span class="t-cm">// installed next to nanovg.so; or use a relative path</span>
+<p>qjsm has no DOM and no <code>requestAnimationFrame</code>. <code>canvas2d.js</code> provides them: importing it opens a GLFW window with a NanoVG context behind it and exports a <code>canvas</code> element and a <code>requestAnimationFrame</code> to draw with.</p>
+<div class="codeblock" data-lang="js"><pre><code class="language-js"><span class="t-kw">import</span> { <span class="t-id">canvas</span>, <span class="t-id">requestAnimationFrame</span> } <span class="t-kw">from</span> <span class="t-str">'canvas2d.js'</span>;   <span class="t-cm">// installed next to nanovg.so</span>
 
-<span class="t-kw">const</span> <span class="t-id">canvas</span> <span class="t-op">=</span> <span class="t-id">document</span>.<span class="t-fn">getElementById</span>(<span class="t-str">'canvas'</span>);
 <span class="t-kw">const</span> <span class="t-id">ctx</span> <span class="t-op">=</span> <span class="t-id">canvas</span>.<span class="t-fn">getContext</span>(<span class="t-str">'2d'</span>);
 
 <span class="t-kw">function</span> <span class="t-fn">loop</span>(<span class="t-id">t</span>) {
@@ -44,16 +44,7 @@
   <span class="t-fn">requestAnimationFrame</span>(<span class="t-id">loop</span>);
 }
 <span class="t-fn">requestAnimationFrame</span>(<span class="t-id">loop</span>);</code></pre></div>
-<p>Importing sets up a <code>window</code> and a <code>document</code> with one <code>&lt;canvas id="canvas"&gt;</code> in <code>document.body</code>. The module also exports <code>window</code>, <code>document</code>, <code>canvas</code>, <code>Image</code>, <code>requestAnimationFrame</code>, <code>cancelAnimationFrame</code>, <code>registerFont</code> and the context classes, so you can import them by name instead:</p>
-<div class="codeblock" data-lang="js"><pre><code class="language-js"><span class="t-kw">import</span> { <span class="t-id">canvas</span> } <span class="t-kw">from</span> <span class="t-str">'./lib/canvas2d.js'</span>;
-
-<span class="t-id">canvas</span>.<span class="t-prop">width</span> <span class="t-op">=</span> <span class="t-num">640</span>;
-<span class="t-id">canvas</span>.<span class="t-prop">height</span> <span class="t-op">=</span> <span class="t-num">640</span>;
-<span class="t-kw">const</span> <span class="t-id">ctx</span> <span class="t-op">=</span> <span class="t-id">canvas</span>.<span class="t-fn">getContext</span>(<span class="t-str">'2d'</span>);</code></pre></div>
-<p><code>cmake --install</code> copies <code>canvas2d.js</code> into the same directory as <code>nanovg.so</code>.</p>
-
-<h2>Real-world use</h2>
-<p><code>examples/emerald-run/</code> is a tile-based game whose engine runs unchanged in a browser and under qjsm through this file. It is a large project, so it is not reproduced on the <a href="examples.html">examples page</a>; browse it <a href="https://github.com/rsenn/qjs-nanovg/tree/main/examples/emerald-run">on GitHub</a>.</p>
+<p>The canvas is 800&times;600 by default; set <code>canvas.width</code> and <code>canvas.height</code> to change it. The other exports are <code>window</code>, <code>document</code>, <code>Image</code>, <code>cancelAnimationFrame</code>, <code>registerFont</code> and the context classes. Importing also defines <code>window</code>, <code>document</code> and <code>requestAnimationFrame</code> as globals, so code written for a browser runs unchanged, but new code is clearer with the named imports. <code>cmake --install</code> copies <code>canvas2d.js</code> into the same directory as <code>nanovg.so</code>.</p>
 
 <h2>Known gaps</h2>
 <p>It is a thin emulation, not a pixel-perfect one:</p>
