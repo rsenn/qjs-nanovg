@@ -1,191 +1,131 @@
-# qjs-nanovg Reference
+# qjs-nanovg
 
-QuickJS bindings for NanoVG — a small antialiased 2D vector graphics library
-modelled after the HTML5 Canvas API, rendered with OpenGL.
+[QuickJS](https://bellard.org/quickjs/) bindings for [NanoVG](https://github.com/memononen/nanovg), a small antialiased 2D vector graphics library modelled after the HTML5 Canvas API and rendered with OpenGL.
 
-Import: `import { NVGContext, RGB, RGBA, ... } from 'nanovg';`
-
-## Typical render loop (with GLFW)
+The bindings are a native module. It builds to a shared library, `nanovg.so`, that `qjsm` (the module-enabled QuickJS) loads on `import ... from 'nanovg'`:
 
 ```js
-import { Window, poll, CONTEXT_VERSION_MAJOR, CONTEXT_VERSION_MINOR,
-         OPENGL_PROFILE, OPENGL_CORE_PROFILE, OPENGL_FORWARD_COMPAT } from 'glfw';
-import { NVGContext, RGBA } from 'nanovg';
+import { CreateGL3, RGBA, ANTIALIAS, STENCIL_STROKES } from 'nanovg';
+```
 
-Window.hint(CONTEXT_VERSION_MAJOR, 3);
-Window.hint(CONTEXT_VERSION_MINOR, 2);
-Window.hint(OPENGL_PROFILE, OPENGL_CORE_PROFILE);
-Window.hint(OPENGL_FORWARD_COMPAT, true);
+The module only draws. The OpenGL context and window come from a separate module, `glfw`.
 
-const win = new Window(800, 600, 'NanoVG');
-win.makeContextCurrent();
+## Requirements
 
-const vg = new NVGContext();
+| Needed | For |
+|---|---|
+| QuickJS with `qjsm` and its development headers | building and running the module |
+| GLEW, OpenGL | linking `nanovg.so` |
+| CMake 3.5+ | building |
+| The `glfw` QuickJS module | opening a window and getting a GL context |
+| The `nanovg/` submodule (a fork of NanoVG) | `git clone --recursive`, or `git submodule update --init` |
+
+## Build and install
+
+```sh
+cmake -B build -DCMAKE_BUILD_TYPE=Debug
+cmake --build build
+cmake --install build      # may need sudo
+```
+
+`cmake --install` copies `nanovg.so` and `lib/canvas2d.js` into QuickJS's C-module directory, which CMake prints during configure (`C module directory: ...`). Override the QuickJS location with `-DQUICKJS_PREFIX=...`.
+
+| Option | Default | Effect |
+|---|---|---|
+| `BUILD_STATIC_MODULES` | ON | Also builds `libnanovg.a` (`qjs-nanovg-static`), for linking nanovg into your own interpreter, for example through qjsm's `EXTERNAL_MODULES`. |
+| `BUILD_WEB` | ON | Also builds the browser version in `web/` when `emcc` is found. See [web/README.md](web/README.md). |
+| `BUILD_EXAMPLE` | OFF | Builds the upstream C example, `nanovg_example`, and a `run_example` target. |
+
+If a `markdown` executable is found, the pages in `doc/` are also converted to HTML and installed.
+
+## Usage
+
+The API uses PascalCase names. A context is created with the free function `CreateGL3(flags)`, not with `new`:
+
+```js
+import * as glfw from 'glfw';
+import { CreateGL3, DeleteGL3, STENCIL_STROKES, ANTIALIAS, RGB, RGBA } from 'nanovg';
+
+glfw.Window.hint(glfw.CONTEXT_VERSION_MAJOR, 3);
+glfw.Window.hint(glfw.CONTEXT_VERSION_MINOR, 2);
+glfw.Window.hint(glfw.OPENGL_PROFILE, glfw.OPENGL_CORE_PROFILE);
+glfw.Window.hint(glfw.OPENGL_FORWARD_COMPAT, true);
+
+const win = (glfw.context.current = new glfw.Window(1024, 768, 'NanoVG'));
+const { width, height } = win.size;
+
+const nvg = CreateGL3(STENCIL_STROKES | ANTIALIAS);
 
 while (!win.shouldClose) {
-  const { width, height } = win.size;
-  const { width: fw, height: fh } = win.framebufferSize;
+  nvg.BeginFrame(width, height, 1);
 
-  vg.beginFrame(width, height, fw / width);
+  nvg.BeginPath();
+  nvg.Rect(100, 100, 200, 150);
+  nvg.FillColor(RGBA(255, 128, 0, 255));
+  nvg.Fill();
+  nvg.StrokeColor(RGB(255, 255, 255));
+  nvg.StrokeWidth(3);
+  nvg.Stroke();
 
-  // --- draw here ---
-  vg.beginPath();
-  vg.rect(100, 100, 200, 150);
-  vg.fillColor(RGBA(255, 128, 0, 255));
-  vg.fill();
-  // -----------------
-
-  vg.endFrame();
+  nvg.EndFrame();
   win.swapBuffers();
-  poll();
+  glfw.poll();
 }
+
+DeleteGL3(nvg);
 ```
 
-## `NVGContext` class
+Run it with `qjsm script.js`, not plain `qjs`: `qjs` lacks the globals these scripts use and swallows uncaught errors in module mode.
 
-### Constructor
+## API
 
-```js
-const vg = new NVGContext([flags]);
-// flags: NVG_ANTIALIAS | NVG_STENCIL_STROKES | NVG_DEBUG
+The complete reference, generated from the exports in `nvgjs-module.c`, is [doc/api-documentation.md](doc/api-documentation.md). In short:
+
+| Area | Where |
+|---|---|
+| `CreateGL3`, `DeleteGL3`, framebuffers, `ReadPixels`, image handle interop | free functions |
+| `RGB`, `RGBA`, `RGBf`, `RGBAf`, `LerpRGBA`, `TransRGBA`, `HSL`, `HSLA`, `DegToRad`, `RadToDeg` | free functions; colors are `Float32Array`-backed `Color` values |
+| Frame, state, paths, fill and stroke, gradients and paints, scissor, transforms, images, fonts and text | methods on the context returned by `CreateGL3` |
+| `Transform` | static helpers and chainable instance methods on a 6-float `Float32Array` |
+| Constants such as `ANTIALIAS`, `ALIGN_LEFT`, `CCW`, `IMAGE_REPEATX` | module exports, without the `NVG_` prefix |
+
+Vector arguments are flexible: a `Float32Array`, a plain array, an iterable, or separate scalar arguments are all accepted where a vector is expected.
+
+## Examples
+
+| File | What it is |
+|---|---|
+| `examples/planets.js` | Animated orbits with transforms, save/restore and image patterns. The quickest check that the module works. |
+| `examples/curve-editor.js` | Interactive editor for lines, quadratic and cubic Béziers, with text buttons. |
+| `examples/polyline-editor.js` | Interactive polyline editor. |
+| `examples/forex.js` | Candlestick chart driven by a simulated price feed. |
+| `examples/emerald-run/` | A small tile-based dungeon crawler built on `engine2d.js` (`qjsm --std emerald.js`). |
+
+```sh
+qjsm examples/planets.js
 ```
 
-### Frame
+`lib/canvas2d.js` is a thin `CanvasRenderingContext2D` emulation on top of `nanovg`, `glfw` and `dom`, so scripts written for the browser canvas can run under `qjsm`. Its header lists the known gaps.
 
-```js
-vg.beginFrame(windowWidth, windowHeight, devicePixelRatio)
-vg.cancelFrame()
-vg.endFrame()
-```
+## Browser version
 
-### State save/restore
+The same API also runs in the browser: NanoVG compiled to WebAssembly with Emscripten, drawing on WebGL2. It has its own documentation and a live demo, see [web/README.md](web/README.md).
 
-```js
-vg.save()      // push current state
-vg.restore()   // pop state
-vg.reset()     // reset to defaults
-```
+## Source layout
 
-### Paths
+| File | Role |
+|---|---|
+| `nvgjs-module.c`, `nvgjs-module.h` | The whole binding: classes, methods, free functions, constants, module init. |
+| `nvgjs-utils.c`, `nvgjs-utils.h` | Argument marshalling helpers (vector or scalar arguments, typed-array output). |
+| `nanovg/` | The NanoVG fork (submodule); its `nanovg.c` is compiled in. |
+| `lib/canvas2d.js` | Canvas2D emulation, installed next to `nanovg.so`. |
+| `examples/` | Runnable scripts. |
+| `doc/` | API reference. |
+| `web/` | Browser build. |
+| `BUGS`, `TODO.md` | Known bugs; NanoVG functions not yet bound. |
 
-```js
-vg.beginPath()
-vg.moveTo(x, y)
-vg.lineTo(x, y)
-vg.bezierTo(c1x, c1y, c2x, c2y, x, y)
-vg.quadTo(cx, cy, x, y)
-vg.arcTo(x1, y1, x2, y2, radius)
-vg.arc(cx, cy, r, a0, a1, dir)   // dir: NVG_CW or NVG_CCW
-vg.rect(x, y, w, h)
-vg.roundedRect(x, y, w, h, r)
-vg.roundedRectVarying(x, y, w, h, rtl, rtr, rbr, rbl)
-vg.ellipse(cx, cy, rx, ry)
-vg.circle(cx, cy, r)
-vg.closePath()
-vg.pathWinding(dir)   // NVG_SOLID or NVG_HOLE
-```
+C code follows the repo's `.clang-format`.
 
-### Fill & Stroke
+## License
 
-```js
-vg.fill()
-vg.stroke()
-vg.fillColor(color)          // color from RGB() / RGBA()
-vg.fillPaint(paint)          // paint from gradient / imagePattern
-vg.strokeColor(color)
-vg.strokePaint(paint)
-vg.strokeWidth(width)
-vg.miterLimit(limit)
-vg.lineCap(cap)    // NVG_BUTT, NVG_ROUND, NVG_SQUARE
-vg.lineJoin(join)  // NVG_MITER, NVG_ROUND, NVG_BEVEL
-vg.globalAlpha(alpha)
-```
-
-### Transforms
-
-```js
-vg.resetTransform()
-vg.transform(a, b, c, d, e, f)   // raw 2D matrix
-vg.translate(x, y)
-vg.rotate(angle)                  // radians
-vg.skewX(angle)
-vg.skewY(angle)
-vg.scale(x, y)
-vg.currentTransform()             // → [a,b,c,d,e,f]
-```
-
-### Clipping/Scissors
-
-```js
-vg.scissor(x, y, w, h)
-vg.intersectScissor(x, y, w, h)
-vg.resetScissor()
-```
-
-### Gradients & Paints (return paint objects)
-
-```js
-vg.linearGradient(sx, sy, ex, ey, icol, ocol)
-vg.boxGradient(x, y, w, h, r, f, icol, ocol)
-vg.radialGradient(cx, cy, inr, outr, icol, ocol)
-vg.imagePattern(ox, oy, ex, ey, angle, image, alpha)
-```
-
-### Images
-
-```js
-const img = vg.createImage(filename, flags)
-const img = vg.createImageMem(flags, data)         // data: ArrayBuffer
-const img = vg.createImageRGBA(w, h, flags, data)
-vg.updateImage(image, data)
-vg.imageSize(image)   // → { w, h }
-vg.deleteImage(image)
-```
-
-Image flags: `NVG_IMAGE_GENERATE_MIPMAPS`, `NVG_IMAGE_REPEATX`, `NVG_IMAGE_REPEATY`,
-`NVG_IMAGE_FLIPY`, `NVG_IMAGE_PREMULTIPLIED`, `NVG_IMAGE_NEAREST`.
-
-### Fonts & Text
-
-```js
-const font = vg.createFont(name, filename)
-const font = vg.createFontMem(name, data)
-vg.addFallbackFont(baseFont, fallbackFont)
-vg.fontSize(size)
-vg.fontBlur(blur)
-vg.textLetterSpacing(spacing)
-vg.textLineHeight(lineHeight)
-vg.textAlign(align)   // NVG_ALIGN_LEFT|CENTER|RIGHT  + NVG_ALIGN_TOP|MIDDLE|BOTTOM|BASELINE
-vg.fontFaceId(font)
-vg.fontFace(name)
-vg.text(x, y, string)
-vg.textBox(x, y, breakRowWidth, string)
-vg.textBounds(x, y, string)   // → { minx, miny, maxx, maxy, advance }
-vg.textBoxBounds(x, y, breakRowWidth, string)   // → bounds
-vg.textMetrics()              // → { ascender, descender, lineh }
-```
-
-Text align constants: `NVG_ALIGN_LEFT`, `NVG_ALIGN_CENTER`, `NVG_ALIGN_RIGHT`,
-`NVG_ALIGN_TOP`, `NVG_ALIGN_MIDDLE`, `NVG_ALIGN_BOTTOM`, `NVG_ALIGN_BASELINE`.
-
-## Color helpers (free functions)
-
-```js
-RGB(r, g, b)                    // → NVGcolor, components 0–255
-RGBA(r, g, b, a)                // → NVGcolor, components 0–255
-RGBf(r, g, b)                   // → NVGcolor, components 0.0–1.0
-RGBAf(r, g, b, a)
-LerpRGBA(c0, c1, u)             // → interpolated color
-TransRGBA(c, a)                 // → color with new alpha (0–255)
-TransRGBAf(c, a)                // → color with new alpha (0.0–1.0)
-HSL(h, s, l)
-HSLA(h, s, l, a)
-```
-
-## Context flags
-
-`NVG_ANTIALIAS`, `NVG_STENCIL_STROKES`, `NVG_DEBUG`
-
-## Winding
-
-`NVG_CW`, `NVG_CCW`, `NVG_SOLID`, `NVG_HOLE`
+MIT, see [LICENSE](LICENSE). NanoVG itself is under the zlib license, see `nanovg/LICENSE.txt`.

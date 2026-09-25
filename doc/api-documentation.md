@@ -2,8 +2,7 @@
 
 JavaScript bindings for [NanoVG](https://github.com/memononen/nanovg) exposed as the QuickJS
 native module `nanovg`. This document is generated from the actual exports in
-`nvgjs-module.c` — it is the authoritative reference for names and signatures (the top-level
-`README.md` documents an older, lowercase API that does **not** match the code).
+`nvgjs-module.c` — it is the authoritative reference for names and signatures.
 
 ```js
 import {

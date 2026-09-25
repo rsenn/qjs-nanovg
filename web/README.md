@@ -2,7 +2,7 @@
 
 NanoVG compiled to WebAssembly with Emscripten, drawing on WebGL2, behind a JavaScript module that mirrors the native `nanovg` QuickJS module (`nvgjs-module.c`). Scripts written for `qjsm` run in the browser with the same `import ... from 'nanovg'`.
 
-Live demo: <https://transistorisiert.ch/nanovg/>
+Live demo: [transistorisiert.ch/nanovg](https://transistorisiert.ch/nanovg/)
 
 ## Layout
 
