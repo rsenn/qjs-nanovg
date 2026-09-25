@@ -1,0 +1,20 @@
+<!doctype html>
+<meta charset="utf-8"><title>nanovg web lines</title>
+<canvas id="canvas" width="400" height="300"></canvas>
+<script type="module">
+import { CreateGL3, RGB, STENCIL_STROKES, ANTIALIAS } from './nanovg.js';
+
+const nvg = CreateGL3(STENCIL_STROKES | ANTIALIAS);
+const colors = [RGB(255, 80, 80), RGB(80, 220, 120), RGB(80, 140, 255), RGB(255, 220, 60)];
+
+nvg.BeginFrame(400, 300, 1);
+nvg.StrokeWidth(6);
+colors.forEach((c, i) => {
+  nvg.BeginPath();
+  nvg.MoveTo(40, 50 + i * 60);
+  nvg.LineTo(360, 30 + i * 70);
+  nvg.StrokeColor(c);
+  nvg.Stroke();
+});
+nvg.EndFrame();
+</script>
