@@ -15,13 +15,14 @@ Run scripts with `qjsm` (the module-enabled QuickJS), which loads the installed 
 A current OpenGL context must already exist (typically created via the separate `glfw` module)
 before calling `CreateGL3`.
 
-> **Conventions**
-> - All method and function names are **PascalCase**.
-> - Angles are in **radians** (use `DegToRad`/`RadToDeg` to convert).
-> - Image and font handles are plain integer ids.
-> - A *color argument* accepts a `Color` object or a plain array `[r, g, b]` / `[r, g, b, a]`
->   of **0..1 floats** (this is the raw `NVGcolor` layout, regardless of how the color was
->   constructed).
+**Conventions**
+
+- All method and function names are **PascalCase**.
+- Angles are in **radians** (use `DegToRad`/`RadToDeg` to convert).
+- Image and font handles are plain integer ids.
+- A *color argument* accepts a `Color` object or a plain array `[r, g, b]` / `[r, g, b, a]`
+  of **0..1 floats** (this is the raw `NVGcolor` layout, regardless of how the color was
+  constructed).
 
 ---
 
@@ -59,6 +60,18 @@ module is compiled with `NANOVG_GL2`; this build uses GL3.)*
 | `CreateFramebuffer(ctx, w, h, imageFlags)` | framebuffer object | Creates an offscreen `NVGLUframebuffer`. Throws on failure. |
 | `BindFramebuffer(fb)` | `undefined` | Binds the framebuffer for rendering; pass `null` to bind the default framebuffer. |
 | `DeleteFramebuffer(fb)` | `undefined` | Destroys the framebuffer. |
+
+The framebuffer object returned by `CreateFramebuffer` has four read-only integer properties:
+
+| Property | Description |
+|----------|-------------|
+| `fbo` | OpenGL framebuffer object id. |
+| `rbo` | OpenGL renderbuffer id (the stencil attachment). |
+| `texture` | OpenGL texture id of the colour attachment. Pass it to `CreateImageFromHandleGL3` to draw the framebuffer's contents. |
+| `image` | NanoVG image id of the colour attachment. |
+
+Its `Symbol.toStringTag` is `NVGLUframebuffer`. Call `DeleteFramebuffer(fb)` yourself before the
+window closes: the garbage collector does not free it, because the GL context may already be gone.
 
 #### Pixel read-back
 
@@ -111,10 +124,10 @@ Exported as module properties (integers unless noted).
 - **Image flags:** `IMAGE_GENERATE_MIPMAPS`, `IMAGE_REPEATX`, `IMAGE_REPEATY`, `IMAGE_FLIPY`,
   `IMAGE_PREMULTIPLIED`, `IMAGE_NEAREST`, `IMAGE_NODELETE`
 - **Texture type:** `TEXTURE_ALPHA`, `TEXTURE_RGBA`
-- **Blend factors:** `ZERO`, `ONE`, `SRC_COLOR`, `ONE_MINUS_SRC_COLOR`, `DST_COLOR`,
+- **Blend factors** (exported, but no function accepts them yet, see *Not yet bound*): `ZERO`, `ONE`, `SRC_COLOR`, `ONE_MINUS_SRC_COLOR`, `DST_COLOR`,
   `ONE_MINUS_DST_COLOR`, `SRC_ALPHA`, `ONE_MINUS_SRC_ALPHA`, `DST_ALPHA`,
   `ONE_MINUS_DST_ALPHA`, `SRC_ALPHA_SATURATE`
-- **Composite operations:** `SOURCE_OVER`, `SOURCE_IN`, `SOURCE_OUT`, `ATOP`,
+- **Composite operations** (same: `GlobalCompositeOperation` is not bound): `SOURCE_OVER`, `SOURCE_IN`, `SOURCE_OUT`, `ATOP`,
   `DESTINATION_OVER`, `DESTINATION_IN`, `DESTINATION_OUT`, `DESTINATION_ATOP`, `LIGHTER`,
   `COPY`, `XOR`
 
@@ -263,15 +276,71 @@ matrix), e.g. `Transform.Scale(3, 3).Rotate(angle).Translate(1, 1)`.
 | `Transform.SkewY([mat,] angle)` | Y skew. |
 | `Transform.Multiply(mat, ...matrices)` | Post-multiplies `mat` by the given matrices. |
 | `Transform.Premultiply(mat, ...matrices)` | Pre-multiplies `mat` by the given matrices. |
-| `Transform.Inverse(mat)` | Inverts `mat`. Throws if non-invertible. |
+| `Transform.Inverse(dst, src)` | Writes the inverse of `src` into `dst`. Throws if `src` is not invertible. Both arguments are required; `Transform.Inverse(mat)` throws `need 2 arguments`. |
 
 ### Instance methods (on a transform value)
 
 A transform value also carries chainable instance methods `Translate`, `Scale`, `Rotate`,
 `SkewX`, `SkewY`, `Multiply`, `Premultiply`, `Inverse`, and `TransformPoint(x, y)` (which
-returns the transformed point as `[x, y]`).
+returns the transformed point as `[x, y]`). They modify the transform in place and return it,
+so they chain. `m.Inverse()` inverts `m` in place and ignores any argument.
 
 ---
+
+## Errors
+
+Errors are ordinary JavaScript exceptions:
+
+| Situation | Exception |
+|-----------|-----------|
+| Too few arguments, e.g. `RGBA()` or `Transform.Translate()` | `InternalError: need N arguments` (or `need x, y arguments`, `need angle argument`) |
+| A `Context` method called on something that is not a `Context` | `TypeError: NVGcontext object expected` |
+| A vector argument of the wrong type or too short | `TypeError` (`expecting a Float32Array, Array or Iterable`) or `RangeError` (`... must have at least N elements`) |
+| `CreateGL3` with no current OpenGL context | `InternalError: nvg.CreateGL3: Could not init glew.` |
+| `CreateFramebuffer` fails | `InternalError: Failed creating NVGLUframebuffer [WxH] (flags)` |
+| `Transform.Inverse` on a singular matrix | `InternalError: nvgTransformInverse failed` |
+
+Create the OpenGL context (for example with `glfw`) and make it current before calling `CreateGL3`.
+
+## Not yet bound
+
+These NanoVG functions have no binding yet (14 of the 104 in `nanovg.h`):
+
+- **Fonts:** `nvgCreateFontMem`, `nvgCreateFontMemAtIndex` (fonts from memory), `nvgFontFaceId`,
+  `nvgAddFallbackFont`, `nvgAddFallbackFontId`, `nvgResetFallbackFonts`, `nvgResetFallbackFontsId`
+  (fallback fonts).
+- **Text measurement:** `nvgTextMetrics`, `nvgTextGlyphPositions`, `nvgTextBreakLines`.
+- **Compositing:** `nvgGlobalCompositeOperation`, `nvgGlobalCompositeBlendFunc`,
+  `nvgGlobalCompositeBlendFuncSeparate`. The `SOURCE_OVER`... and blend factor constants are
+  exported, but there is nothing to pass them to.
+- **Debugging:** `nvgDebugDumpPathCache`.
+
+## Using paints
+
+A `Paint` is what the gradient and pattern methods return. Pass it to `FillPaint` or `StrokePaint`
+inside a path, as `examples/planets.js` does with an image:
+
+```js
+const id = nvg.CreateImage('picture.png', 0);
+const [w, h] = nvg.ImageSize(id);
+const pattern = nvg.ImagePattern(0, 0, w, h, 0, id, 1);
+
+nvg.BeginPath();
+nvg.Rect(0, 0, w, h);
+nvg.FillPaint(pattern);
+nvg.Fill();
+```
+
+The gradient methods work the same way and take colours built with `RGB`/`RGBA`:
+
+```js
+const paint = nvg.LinearGradient(0, 0, 0, 100, RGBA(255, 192, 0, 255), RGBA(255, 0, 0, 255));
+```
+
+## Reading pixels back
+
+`ReadPixels(w, h)` returns an `ArrayBuffer` of `w * h * 4` RGBA bytes from the current OpenGL
+framebuffer. Call it after drawing and before `swapBuffers()`.
 
 ## Minimal example
 
