@@ -24,6 +24,7 @@ class WindowProxy extends EventTarget {
   }
 
   requestAnimationFrame(callback) {
+    // Standard rAF timing mapping to milliseconds via glfw.getTime()
     return setTimeout(() => callback(glfw.getTime() * 1000), 16);
   }
 
@@ -34,11 +35,22 @@ class WindowProxy extends EventTarget {
 
 export const window = new WindowProxy();
 
+// 3. Implement requestAnimationFrame globally and export it
+export function requestAnimationFrame(callback) {
+  return window.requestAnimationFrame(callback);
+}
+
+export function cancelAnimationFrame(id) {
+  return window.cancelAnimationFrame(id);
+}
+
 // Populate globalThis targets immediately on load
 globalThis.window = window;
 globalThis.document = document;
+globalThis.requestAnimationFrame = requestAnimationFrame;
+globalThis.cancelAnimationFrame = cancelAnimationFrame;
 
-// 3. Create a stateful Canvas element class backed by EventTarget
+// 4. Create a stateful Canvas element class backed by EventTarget
 class CanvasElement extends EventTarget {
   constructor(node) {
     super();
@@ -79,7 +91,7 @@ if (document.getElementById) {
   };
 }
 
-// 4. Emulated Browser Window Bridge
+// 5. Emulated Browser Window Bridge
 export class EmulatedBrowserWindow {
   constructor(width = 1024, height = 768, title = 'QuickJS Emulated Browser') {
     glfw.Window.defaultHints();
