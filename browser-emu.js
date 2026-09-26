@@ -2,9 +2,12 @@ import { Parser } from 'dom';
 import { EventTarget } from 'events';
 import * as glfw from 'glfw';
 import { performance } from 'perf_hooks';
+import { URL } from 'url';
+import { clearTimeout, setTimeout } from 'os';
 
-// Expose performance globally
+// Expose performance and URL globally
 globalThis.performance = performance;
+globalThis.URL = URL;
 
 // 1. Initialize a valid DOM Document using the 'dom' Parser module
 export const document = new Parser().parseFromString(`
@@ -28,7 +31,11 @@ class WindowProxy extends EventTarget {
   }
 
   requestAnimationFrame(callback) {
-    return setTimeout(() => callback(performance.now()), 16);
+    return setTimeout(() => {
+      callback(performance.now());
+      defaultWindow.swapBuffers();
+      glfw.poll();
+    }, 16);
   }
 
   cancelAnimationFrame(id) {
@@ -98,8 +105,12 @@ if(document.getElementById) {
 export class EmulatedBrowserWindow {
   constructor(width = 1024, height = 768, title = 'QuickJS Emulated Browser') {
     glfw.Window.defaultHints();
-    this.glfwWindow = new glfw.Window(width, height, title);
-    this.glfwWindow.makeContextCurrent();
+    glfw.Window.hint(glfw.CONTEXT_VERSION_MAJOR, 3);
+    glfw.Window.hint(glfw.CONTEXT_VERSION_MINOR, 2);
+    glfw.Window.hint(glfw.OPENGL_PROFILE, glfw.OPENGL_CORE_PROFILE);
+    glfw.Window.hint(glfw.OPENGL_FORWARD_COMPAT, true);
+    glfw.Window.hint(glfw.SAMPLES, 4);
+    this.glfwWindow = glfw.context.current = new glfw.Window(width, height, title);
 
     canvas.width = width;
     canvas.height = height;
@@ -120,20 +131,32 @@ export class EmulatedBrowserWindow {
       target: canvas,
     });
 
+    let cursor = { x: 0, y: 0 };
+    const domButton = [0, 2, 1];
+
+    // qjsm has no global Event class; EventTarget accepts any object with a `type`.
+    const makeEvent = (type, props) => ({ type, preventDefault() {}, ...props });
+
     win.handleCursorPos = (x, y) => {
-      canvas.dispatchEvent(Object.assign(new Event('mousemove'), getPos(x, y)));
+      cursor = { x, y };
+      window.dispatchEvent(makeEvent('mousemove', getPos(x, y)));
     };
 
     win.handleMouseButton = (button, action) => {
       const type = action === 1 ? 'mousedown' : 'mouseup';
-      const event = Object.assign(new Event(type), { button, ...getPos(0, 0) });
-      canvas.dispatchEvent(event);
+      window.dispatchEvent(makeEvent(type, { button: domButton[button] ?? button, ...getPos(cursor.x, cursor.y) }));
     };
 
     win.handleKey = (key, scancode, action) => {
       if(action === 0) return;
-      const event = Object.assign(new Event('keydown'), { keyCode: key, target: window });
-      window.dispatchEvent(event);
+      window.dispatchEvent(
+        makeEvent('keydown', {
+          keyCode: key,
+          key: String.fromCodePoint(key),
+          code: key === glfw.KEY_SPACE ? 'Space' : `Key${String.fromCodePoint(key)}`,
+          target: window,
+        }),
+      );
     };
   }
 

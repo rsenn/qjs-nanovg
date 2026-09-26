@@ -1,4 +1,4 @@
-import { CreateGL3, ANTIALIAS, RGBA } from './nanovg.js';
+import { CreateGL3, ANTIALIAS, RGBA } from '../nanovg.js';
 
 // 1. Locate or create the target canvas element in the webpage
 const canvas =

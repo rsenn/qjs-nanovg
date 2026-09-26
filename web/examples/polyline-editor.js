@@ -1,4 +1,4 @@
-import { ALIGN_CENTER, ALIGN_LEFT, ALIGN_MIDDLE, ALIGN_RIGHT, ANTIALIAS, CreateGL3, RGB } from './nanovg.js';
+import { ALIGN_CENTER, ALIGN_LEFT, ALIGN_MIDDLE, ALIGN_RIGHT, ANTIALIAS, CreateGL3, RGB } from '../nanovg.js';
 
 const HANDLE_R = 6;
 const HIT_R = 10;

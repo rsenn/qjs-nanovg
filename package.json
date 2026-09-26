@@ -1,0 +1,5 @@
+{
+  "_moduleAliases": {
+    "web/nanovg.js": "nanovg"
+  }
+}
