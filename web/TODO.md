@@ -59,7 +59,7 @@ What has not been verified or is deliberately different:
 
 - `CreateFont`/`CreateImage` only find files that were written to the virtual FS first; `run.js`
   finds them by scanning string literals, so paths built at runtime are missed.
-- `glfw` shim: no `handleSize`/resize events, no joystick, no touch; `std` shim only has `open(path, 'w')`.
+- `glfw` shim: no `handleSize`/resize events, no joystick, no multi-touch (one finger acts as the mouse, see `nanovg.js`); `std` shim only has `open(path, 'w')`.
   Scripts using other modules (`os`, `dom`, ... as `../lib/canvas2d.js` does) do not run.
 - Blocking `glfw.poll()` loops only work through the by-name rewrite in `asyncify.js`.
 - `ReadPixels` on the default framebuffer only returns the frame in the same task as the drawing.

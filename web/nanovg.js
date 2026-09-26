@@ -780,3 +780,42 @@ export const ReadPixels = func('ReadPixels', 2, 0, ([w, h]) => {
     m._free(ptr);
   }
 });
+
+// One finger drives the same bubbling MouseEvents as a mouse, so the glfw shim (canvas/window
+// listeners) and scripts listening on window need no touch code.
+const touchAsMouse = canvas => {
+  let id = null;
+  const fire = (type, t, buttons) =>
+    canvas.dispatchEvent(new MouseEvent(type, { bubbles: true, cancelable: true, button: 0, buttons, clientX: t.clientX, clientY: t.clientY, screenX: t.screenX, screenY: t.screenY }));
+  const tracked = e => Array.from(e.changedTouches).find(t => t.identifier === id);
+  const opts = { passive: false };
+
+  // preventDefault stops the browser from adding its own emulated mouse events after the touch.
+  canvas.style.touchAction = 'none';
+  canvas.addEventListener('touchstart', e => {
+    e.preventDefault();
+    if(id !== null) return;
+    const t = e.changedTouches[0];
+    id = t.identifier;
+    fire('mousemove', t, 0);
+    fire('mousedown', t, 1);
+  }, opts);
+  canvas.addEventListener('touchmove', e => {
+    e.preventDefault();
+    const t = tracked(e);
+    if(t) fire('mousemove', t, 1);
+  }, opts);
+  for(const type of ['touchend', 'touchcancel'])
+    canvas.addEventListener(type, e => {
+      e.preventDefault();
+      const t = tracked(e);
+      if(!t) return;
+      id = null;
+      fire('mouseup', t, 0);
+    }, opts);
+};
+
+if(typeof document !== 'undefined') {
+  const canvas = document.getElementById('canvas');
+  if(canvas) touchAsMouse(canvas);
+}
