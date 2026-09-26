@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>qjs-nanovg in the browser — qjs-nanovg</title>
+<meta name="description" content="qjs-nanovg — Canvas-style 2D vector graphics for QuickJS. NanoVG antialiased OpenGL vector graphics as a loadable QuickJS module: paths, gradients, text, images, framebuffers. Also builds to WebAssembly for the browser.">
+<link rel="stylesheet" href="../assets/base.css">
+<link rel="stylesheet" href="../assets/theme.css">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="has-sidebar" data-site="qjs-nanovg" data-root="../">
+<header class="topbar">
+  <a class="brand" href="../index.html"><span class="logo" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 168 40" role="img" aria-label="NanoVG">
+  <path d="M4 30 C 4 6, 22 6, 22 20 S 40 34, 40 10" fill="none" style="stroke:var(--accent)" stroke-width="4" stroke-linecap="round"/>
+  <text x="50" y="29" font-family="ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif" font-weight="700" font-size="26" letter-spacing="-0.5" fill="currentColor">Nano<tspan style="fill:var(--accent)">VG</tspan></text>
+</svg></span> <span class="brand-name">qjs-nanovg</span></a>
+  <div class="search">
+    <input id="site-search" type="search" placeholder="Search docs… ( / )" autocomplete="off" spellcheck="false">
+  </div>
+  <nav class="topnav">
+    <a href="../docs/api.html">API</a>
+    <a href="../docs/web.html">Browser</a>
+    <a href="../canvas2d.html">Canvas2D</a>
+    <a href="../examples.html">Examples</a>
+    <a href="https://github.com/rsenn/qjs-nanovg" target="_blank" rel="noopener">GitHub</a>
+  </nav>
+  <button class="themetoggle" type="button" aria-label="Toggle colour scheme">◐</button>
+</header>
+<div class="layout">
+<aside class="sidebar"><div class="navgroup"><h3>Start here</h3><ul><li><a href="../getting-started.html">Getting started</a></li></ul></div><div class="navgroup"><h3>Reference</h3><ul><li><a href="api.html">API reference</a></li></ul></div><div class="navgroup"><h3>Browser</h3><ul><li><a href="web.html" class="here">Browser version</a></li></ul></div><div class="navgroup"><h3>Examples</h3><ul><li><a href="../examples.html">Examples</a></li></ul></div></aside>
+<main class="doc">
+<article><h1 id="qjs-nanovg-in-the-browser"><a class="anchor" href="#qjs-nanovg-in-the-browser" aria-hidden="true">#</a>qjs-nanovg in the browser</h1>
+<p>NanoVG compiled to WebAssembly with Emscripten, drawing on WebGL2, behind a JavaScript module that mirrors the native <code>nanovg</code> QuickJS module (<code>nvgjs-module.c</code>). Scripts written for <code>qjsm</code> run in the browser with the same <code>import ... from 'nanovg'</code>.</p>
+<p>Live demo: <a href="https://transistorisiert.ch/nanovg/" target="_blank" rel="noopener">transistorisiert.ch/nanovg</a></p>
+<h2 id="layout"><a class="anchor" href="#layout" aria-hidden="true">#</a>Layout</h2>
+<div class="tablewrap"><table><thead><tr><th>File</th><th>Role</th></tr></thead><tbody><tr><td><code>nanovg-web.c</code></td><td>C side. Thin exports (<code>nvgw_*</code>) over NanoVG's GLES3 backend. Every function takes the <code>NVGcontext*</code>, so several contexts can coexist.</td></tr><tr><td><code>nanovg.js</code></td><td>The <code>nanovg</code> module: the full native API surface on top of the wasm exports.</td></tr><tr><td><code>nanovg-web.js</code>, <code>nanovg-web.wasm</code></td><td>Emscripten output (committed, rebuilt by <code>build.sh</code> / CMake).</td></tr><tr><td><code>build.sh</code></td><td>The <code>emcc</code> command line, the single source of truth for build flags.</td></tr><tr><td><code>glfw.js</code>, <code>std.js</code></td><td>Browser stand-ins for the <code>glfw</code> and <code>std</code> modules the demos import.</td></tr><tr><td><code>asyncify.js</code>, <code>run.js</code>, <code>run.html</code></td><td>Loader that runs an unmodified example script in a page.</td></tr><tr><td><code>index.html</code></td><td>Landing page with all three demos.</td></tr><tr><td><code>compat*.js</code>, <code>test-api.*</code></td><td>Compatibility checks against the native module (see Testing).</td></tr><tr><td><code>deploy.sh</code></td><td>Copies the files a web server needs into a directory.</td></tr><tr><td><code>acorn.mjs</code>, <code>fonts/DejaVuSans.ttf</code></td><td>Vendored parser used by <code>asyncify.js</code>; font the demos load.</td></tr></tbody></table></div>
+<h2 id="building"><a class="anchor" href="#building" aria-hidden="true">#</a>Building</h2>
+<p>The web build is part of a normal CMake build when <code>emcc</code> is found:</p>
+<div class="codeblock" data-lang="sh"><pre><code class="language-sh"><span class="t-id">cmake</span> <span class="t-op">-B</span> <span class="t-id">build</span> &amp;&amp; <span class="t-id">cmake</span> <span class="t-op">--build</span> <span class="t-id">build</span>          <span class="t-cm"># also builds web/nanovg-web.{js,wasm}</span>
+<span class="t-id">cmake</span> <span class="t-op">-B</span> <span class="t-id">build</span> <span class="t-op">-DEMCC</span>=/<span class="t-id">path</span>/<span class="t-id">to</span>/<span class="t-id">emcc</span>            <span class="t-cm"># point at a specific emcc</span>
+<span class="t-id">cmake</span> <span class="t-op">-B</span> <span class="t-id">build</span> <span class="t-op">-DBUILD_WEB</span>=<span class="t-id">OFF</span>                 <span class="t-cm"># skip it</span></code></pre></div>
+<p><code>emcc</code> is looked up on <code>PATH</code>, then under <code>$EMSDK/upstream/emscripten</code> and <code>$EMSCRIPTEN</code>. Without one, CMake prints a status message and builds everything else. The output is written into this directory, so <code>git status</code> shows the two artifacts as modified after a rebuild.</p>
+<p>Without CMake:</p>
+<div class="codeblock" data-lang="sh"><pre><code class="language-sh"><span class="t-id">EMCC</span>=/<span class="t-id">path</span>/<span class="t-id">to</span>/<span class="t-id">emcc</span> <span class="t-id">sh</span> <span class="t-id">web</span>/<span class="t-id">build.sh</span></code></pre></div>
+<p>The build uses <code>-sMIN_WEBGL_VERSION=2 -sMAX_WEBGL_VERSION=2 -sMODULARIZE -sEXPORT_ES6 -sALLOW_MEMORY_GROWTH -sFORCE_FILESYSTEM=1</code>. <code>-sGROWABLE_ARRAYBUFFERS=0</code> is needed because Chrome's <code>TextDecoder</code> rejects the resizable buffers Emscripten 6 uses by default.</p>
+<h2 id="running"><a class="anchor" href="#running" aria-hidden="true">#</a>Running</h2>
+<p><code>run.html</code> loads <code>./examples/&lt;name&gt;.js</code>, so serve a directory that has the examples next to the page. <code>deploy.sh</code> builds that layout:</p>
+<div class="codeblock" data-lang="sh"><pre><code class="language-sh"><span class="t-id">sh</span> <span class="t-id">web</span>/<span class="t-id">deploy.sh</span> /<span class="t-id">tmp</span>/<span class="t-id">nanovg-site</span>
+<span class="t-id">cd</span> /<span class="t-id">tmp</span>/<span class="t-id">nanovg-site</span> &amp;&amp; <span class="t-id">python3</span> <span class="t-op">-m</span> <span class="t-id">http.server</span> <span class="t-num">8000</span></code></pre></div>
+<div class="tablewrap"><table><thead><tr><th>URL</th><th>Shows</th></tr></thead><tbody><tr><td><code>/index.html#planets</code></td><td>Landing page, planets tab (also <code>#curve-editor</code>, <code>#polyline-editor</code>)</td></tr><tr><td><code>/run.html?example=curve-editor</code></td><td>One example on its own page</td></tr></tbody></table></div>
+<p><code>test-api.html</code> can be served straight from <code>web/</code>.</p>
+<p>Use a normal, visible tab. Browsers pause <code>requestAnimationFrame</code> in background tabs, which freezes the demos.</p>
+<h2 id="how-it-works"><a class="anchor" href="#how-it-works" aria-hidden="true">#</a>How it works</h2>
+<h3 id="drawing"><a class="anchor" href="#drawing" aria-hidden="true">#</a>Drawing</h3>
+<p><code>nanovg.js</code> awaits <code>createModule()</code> at import time. <code>CreateGL3(flags)</code> creates one WebGL2 context on the <code>#canvas</code> element (stencil on, MSAA off, because NanoVG does its own antialiasing) and then a <code>NVGcontext</code> per call. Later calls reuse the WebGL context. Call it after the canvas has its final size, as no viewport is set later (same as native).</p>
+<h3 id="api-layer"><a class="anchor" href="#api-layer" aria-hidden="true">#</a>API layer</h3>
+<p>Context methods are generated from a table in <code>nanovg.js</code>: declared length, argument kinds, arguments required. The generated methods:</p>
+<ul>
+<li>throw <code>InternalError: need N arguments</code> where the native code does</li>
+<li>convert arguments as the C code does (<code>+x</code> for floats, <code>x | 0</code> for ints, strings copied into wasm memory, colors read from arrays)</li>
+<li>report the same <code>length</code>, <code>name</code> and property flags, so the API surface matches the native module exactly</li>
+</ul>
+<p><code>Color</code>, <code>Transform</code> and <code>Paint</code> are classes (<code>Color</code> and <code>Transform</code> extend <code>Float32Array</code>). <code>Transform</code> follows the native argument protocol, including the optional in/out matrix first argument. Optional text <code>end</code> arguments count code points, as native does.</p>
+<h3 id="files"><a class="anchor" href="#files" aria-hidden="true">#</a>Files</h3>
+<p>Browsers cannot read files synchronously, so <code>CreateFont(name, path)</code> and <code>CreateImage(path, flags)</code> read from Emscripten's in-memory file system through the real <code>nvgCreateFont</code> / <code>nvgCreateImage</code>. Decoding and failure results (<code>-1</code> for fonts, <code>0</code> for images) therefore match native.</p>
+<p>Put bytes there with the one extra export:</p>
+<div class="codeblock" data-lang="js"><pre><code class="language-js"><span class="t-kw">import</span> { <span class="t-id">writeFile</span>, <span class="t-type">CreateGL3</span> } <span class="t-kw">from</span> <span class="t-str">'nanovg'</span>;
+
+<span class="t-fn">writeFile</span>(<span class="t-str">'/fonts/DejaVuSans.ttf'</span>, <span class="t-kw">await</span> (<span class="t-kw">await</span> <span class="t-fn">fetch</span>(<span class="t-str">'DejaVuSans.ttf'</span>)).<span class="t-fn">arrayBuffer</span>());
+<span class="t-kw">const</span> <span class="t-id">nvg</span> <span class="t-op">=</span> <span class="t-fn">CreateGL3</span>(<span class="t-num">0</span>);
+<span class="t-id">nvg</span>.<span class="t-fn">CreateFont</span>(<span class="t-str">'sans'</span>, <span class="t-str">'/fonts/DejaVuSans.ttf'</span>);</code></pre></div>
+<p><code>run.js</code> does this automatically: it collects the string literals of the example that end in <code>.ttf</code> or an image extension, fetches them (fonts from <code>./fonts/&lt;basename&gt;</code>, images from <code>./&lt;path&gt;</code>) and writes them at the exact path the script uses.</p>
+<h3 id="running-the-demos-unchanged"><a class="anchor" href="#running-the-demos-unchanged" aria-hidden="true">#</a>Running the demos unchanged</h3>
+<p>The demos loop with a blocking <code>while(...) { ...; glfw.poll(); }</code>. A browser only shows a frame when the script yields, so <code>asyncify.js</code> rewrites the source before it runs: every function that calls <code>poll()</code>, directly or through other functions, is matched by name and made <code>async</code>, and each call to it gets an <code>await</code>. <code>poll()</code> in <code>glfw.js</code> resolves on the next animation frame.</p>
+<h3 id="shims"><a class="anchor" href="#shims" aria-hidden="true">#</a>Shims</h3>
+<div class="tablewrap"><table><thead><tr><th>Module</th><th>Provided</th></tr></thead><tbody><tr><td><code>glfw</code></td><td><code>Window</code> (<code>hint</code>, <code>size</code>, <code>shouldClose</code>, <code>swapBuffers</code>, <code>destroy</code>, the <code>handleCursorPos</code>, <code>handleMouseButton</code>, <code>handleKey</code> and <code>handleCharMods</code> callbacks), <code>context.current</code>, <code>poll()</code>, key and window-hint constants</td></tr><tr><td><code>std</code></td><td><code>open(path, 'w')</code> with <code>puts</code> and <code>close</code>; closing downloads the file</td></tr></tbody></table></div>
+<p>Mouse and keyboard only. A cursor position is reported before every button event, as GLFW does.</p>
+<h2 id="differences-from-the-native-module"><a class="anchor" href="#differences-from-the-native-module" aria-hidden="true">#</a>Differences from the native module</h2>
+<ul>
+<li><code>CreateFont</code>/<code>CreateImage</code> need their files in the virtual file system first (see Files).</li>
+<li><code>Color</code>, <code>Paint</code>, <code>Context</code> are constructible and <code>CreateImageMem</code>/<code>CreateImageRGBA</code> also accept typed arrays. The native objects are plain, non-callable objects.</li>
+<li><code>writeFile</code> is web-only.</li>
+<li>There is no <code>CreateGL2</code>; the native GL3 build does not export it either.</li>
+<li><code>ReadPixels</code> reads the bound framebuffer. On the default framebuffer, call it in the same task as the drawing, before yielding.</li>
+<li><code>BeginFrame</code> does not clear or set the viewport, matching native.</li>
+<li>Float math is done in doubles and stored as float32, so results can differ from the C code in the last bit.</li>
+</ul>
+<h2 id="testing"><a class="anchor" href="#testing" aria-hidden="true">#</a>Testing</h2>
+<p><strong>API surface and pure math</strong>, native against web (needs <code>qjsm</code>, <code>node</code>, and a built <code>nanovg.so</code>):</p>
+<div class="codeblock" data-lang="sh"><pre><code class="language-sh"><span class="t-id">qjsm</span> <span class="t-id">web</span>/<span class="t-id">compat-native.js</span> /<span class="t-id">path</span>/<span class="t-id">to</span>/<span class="t-id">nanovg.so</span> &gt; <span class="t-id">native.json</span>
+<span class="t-id">node</span> <span class="t-id">web</span>/<span class="t-id">compat-node.js</span> &gt; <span class="t-id">web.json</span>
+<span class="t-id">node</span> <span class="t-id">web</span>/<span class="t-id">compat-diff.js</span> <span class="t-id">native.json</span> <span class="t-id">web.json</span>     <span class="t-cm"># prints "identical" or the differences</span></code></pre></div>
+<p>The diff covers export names and values, every function's <code>length</code>, <code>name</code> and property flags, class tags, transform and color results, and error messages. <code>writeFile</code> is the only allowed extra.</p>
+<p><strong>Rendering and everything that needs GL</strong>: open <code>test-api.html</code> in Chrome. It calls every context method against a real WebGL2 context, checks pixels read back from the default framebuffer and from a framebuffer object, and sets the page title to <code>PASS &lt;n&gt;</code> or <code>FAIL &lt;n&gt;</code> with the details in the page.</p>
+<h2 id="deploying"><a class="anchor" href="#deploying" aria-hidden="true">#</a>Deploying</h2>
+<p><code>deploy.sh</code> copies the site into <code>/var/www/html/nanovg</code> by default (or the directory you pass). nginx needs two MIME types that <code>mime.types</code> lacks:</p>
+<div class="codeblock" data-lang="nginx"><pre><code class="language-nginx">location = /nanovg { return 301 $scheme://$host/nanovg/; }
+location ^~ /nanovg/ {
+  include mime.types;
+  types {
+    application/wasm wasm;
+    application/javascript mjs;
+  }
+  index index.html;
+  add_header Cache-Control "no-cache";
+}</code></pre></div>
+<p>Without the <code>wasm</code> type the module still loads through Emscripten's fallback, but with a console warning. Without the <code>mjs</code> type the browser refuses <code>acorn.mjs</code>.</p>
+<p>Not deployed: any example images (the demos do not draw them; <code>planets.js</code> still requests two and gets a 404).</p>
+<h2 id="limitations"><a class="anchor" href="#limitations" aria-hidden="true">#</a>Limitations</h2>
+<ul>
+<li>Touch input is not handled.</li>
+<li><code>asyncify.js</code> matches functions by name, so two unrelated functions with the same name where only one calls <code>poll()</code> would both get an <code>await</code>.</li>
+<li>Esc and Q end an example's loop; reload the page to restart.</li>
+</ul></article>
+<p class="editlink"><a href="https://github.com/rsenn/qjs-nanovg/blob/main/web/README.md">Edit this page on GitHub →</a></p>
+</main>
+<nav class="toc"><h3>On this page</h3><ul><li class="lvl2"><a href="#layout">Layout</a></li><li class="lvl2"><a href="#building">Building</a></li><li class="lvl2"><a href="#running">Running</a></li><li class="lvl2"><a href="#how-it-works">How it works</a></li><li class="lvl3"><a href="#drawing">Drawing</a></li><li class="lvl3"><a href="#api-layer">API layer</a></li><li class="lvl3"><a href="#files">Files</a></li><li class="lvl3"><a href="#running-the-demos-unchanged">Running the demos unchanged</a></li><li class="lvl3"><a href="#shims">Shims</a></li><li class="lvl2"><a href="#differences-from-the-native-module">Differences from the native module</a></li><li class="lvl2"><a href="#testing">Testing</a></li><li class="lvl2"><a href="#deploying">Deploying</a></li><li class="lvl2"><a href="#limitations">Limitations</a></li></ul></nav>
+</div>
+<footer class="sitefoot">
+  <p>qjs-nanovg — MIT. Built from the repo's own markdown by
+     <a href="https://github.com/rsenn/rsenn/tree/main/tools/site">rsenn/rsenn tools/site</a>.</p>
+</footer>
+<script src="../assets/search-index.js"></script>
+<script src="../assets/search.js"></script>
+<script>
+document.querySelector('.themetoggle').addEventListener('click', function () {
+  var d = document.documentElement;
+  var dark = d.dataset.theme ? d.dataset.theme === 'dark'
+    : matchMedia('(prefers-color-scheme: dark)').matches;
+  d.dataset.theme = dark ? 'light' : 'dark';
+  try { localStorage.setItem('theme', d.dataset.theme); } catch (e) {}
+});
+</script>
+</body>
+</html>

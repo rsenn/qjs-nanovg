@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>qjs-nanovg — qjs-nanovg</title>
+<meta name="description" content="qjs-nanovg — Canvas-style 2D vector graphics for QuickJS. NanoVG antialiased OpenGL vector graphics as a loadable QuickJS module: paths, gradients, text, images, framebuffers. Also builds to WebAssembly for the browser.">
+<link rel="stylesheet" href="assets/base.css">
+<link rel="stylesheet" href="assets/theme.css">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="has-sidebar" data-site="qjs-nanovg" data-root="">
+<header class="topbar">
+  <a class="brand" href="index.html"><span class="logo" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 168 40" role="img" aria-label="NanoVG">
+  <path d="M4 30 C 4 6, 22 6, 22 20 S 40 34, 40 10" fill="none" style="stroke:var(--accent)" stroke-width="4" stroke-linecap="round"/>
+  <text x="50" y="29" font-family="ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif" font-weight="700" font-size="26" letter-spacing="-0.5" fill="currentColor">Nano<tspan style="fill:var(--accent)">VG</tspan></text>
+</svg></span> <span class="brand-name">qjs-nanovg</span></a>
+  <div class="search">
+    <input id="site-search" type="search" placeholder="Search docs… ( / )" autocomplete="off" spellcheck="false">
+  </div>
+  <nav class="topnav">
+    <a href="docs/api.html">API</a>
+    <a href="docs/web.html">Browser</a>
+    <a href="canvas2d.html">Canvas2D</a>
+    <a href="examples.html">Examples</a>
+    <a href="https://github.com/rsenn/qjs-nanovg" target="_blank" rel="noopener">GitHub</a>
+  </nav>
+  <button class="themetoggle" type="button" aria-label="Toggle colour scheme">◐</button>
+</header>
+<div class="layout">
+<aside class="sidebar"><div class="navgroup"><h3>Start here</h3><ul><li><a href="getting-started.html" class="here">Getting started</a></li></ul></div><div class="navgroup"><h3>Reference</h3><ul><li><a href="docs/api.html">API reference</a></li></ul></div><div class="navgroup"><h3>Browser</h3><ul><li><a href="docs/web.html">Browser version</a></li></ul></div><div class="navgroup"><h3>Examples</h3><ul><li><a href="examples.html">Examples</a></li></ul></div></aside>
+<main class="doc">
+<article><h1 id="qjs-nanovg"><a class="anchor" href="#qjs-nanovg" aria-hidden="true">#</a>qjs-nanovg</h1>
+<p><a href="https://bellard.org/quickjs/" target="_blank" rel="noopener">QuickJS</a> bindings for <a href="https://github.com/memononen/nanovg" target="_blank" rel="noopener">NanoVG</a>, a small antialiased 2D vector graphics library modelled after the HTML5 Canvas API and rendered with OpenGL.</p>
+<p>The bindings are a native module. It builds to a shared library, <code>nanovg.so</code>, that <code>qjsm</code> (the module-enabled QuickJS) loads on <code>import ... from 'nanovg'</code>:</p>
+<div class="codeblock" data-lang="js"><pre><code class="language-js"><span class="t-kw">import</span> { <span class="t-type">CreateGL3</span>, <span class="t-type">RGBA</span>, <span class="t-type">ANTIALIAS</span>, <span class="t-type">STENCIL_STROKES</span> } <span class="t-kw">from</span> <span class="t-str">'nanovg'</span>;</code></pre></div>
+<p>The module only draws. The OpenGL context and window come from a separate module, <code>glfw</code>.</p>
+<h2 id="requirements"><a class="anchor" href="#requirements" aria-hidden="true">#</a>Requirements</h2>
+<div class="tablewrap"><table><thead><tr><th>Needed</th><th>For</th></tr></thead><tbody><tr><td>QuickJS with <code>qjsm</code> and its development headers</td><td>building and running the module</td></tr><tr><td>GLEW, OpenGL</td><td>linking <code>nanovg.so</code></td></tr><tr><td>CMake 3.5+</td><td>building</td></tr><tr><td>The <code>glfw</code> QuickJS module</td><td>opening a window and getting a GL context</td></tr><tr><td>The <code>nanovg/</code> submodule (a fork of NanoVG)</td><td><code>git clone --recursive</code>, or <code>git submodule update --init</code></td></tr></tbody></table></div>
+<h2 id="build-and-install"><a class="anchor" href="#build-and-install" aria-hidden="true">#</a>Build and install</h2>
+<div class="codeblock" data-lang="sh"><pre><code class="language-sh"><span class="t-id">cmake</span> <span class="t-op">-B</span> <span class="t-id">build</span> <span class="t-op">-DCMAKE_BUILD_TYPE</span>=<span class="t-id">Debug</span>
+<span class="t-id">cmake</span> <span class="t-op">--build</span> <span class="t-id">build</span>
+<span class="t-id">cmake</span> <span class="t-op">--install</span> <span class="t-id">build</span>      <span class="t-cm"># may need sudo</span></code></pre></div>
+<p><code>cmake --install</code> copies <code>nanovg.so</code> and <code>lib/canvas2d.js</code> into QuickJS's C-module directory, which CMake prints during configure (<code>C module directory: ...</code>). Override the QuickJS location with <code>-DQUICKJS_PREFIX=...</code>.</p>
+<div class="tablewrap"><table><thead><tr><th>Option</th><th>Default</th><th>Effect</th></tr></thead><tbody><tr><td><code>BUILD_STATIC_MODULES</code></td><td>ON</td><td>Also builds <code>libnanovg.a</code> (<code>qjs-nanovg-static</code>), for linking nanovg into your own interpreter, for example through qjsm's <code>EXTERNAL_MODULES</code>.</td></tr><tr><td><code>BUILD_WEB</code></td><td>ON</td><td>Also builds the browser version in <code>web/</code> when <code>emcc</code> is found. See <a href="docs/web.html">web/README.md</a>.</td></tr><tr><td><code>BUILD_EXAMPLE</code></td><td>OFF</td><td>Builds the upstream C example, <code>nanovg_example</code>, and a <code>run_example</code> target.</td></tr></tbody></table></div>
+<p>If a <code>markdown</code> executable is found, the pages in <code>doc/</code> are also converted to HTML and installed.</p>
+<h2 id="usage"><a class="anchor" href="#usage" aria-hidden="true">#</a>Usage</h2>
+<p>The API uses PascalCase names. A context is created with the free function <code>CreateGL3(flags)</code>, not with <code>new</code>:</p>
+<div class="codeblock" data-lang="js"><pre><code class="language-js"><span class="t-kw">import</span> <span class="t-op">*</span> <span class="t-id">as</span> <span class="t-id">glfw</span> <span class="t-kw">from</span> <span class="t-str">'glfw'</span>;
+<span class="t-kw">import</span> { <span class="t-type">CreateGL3</span>, <span class="t-type">DeleteGL3</span>, <span class="t-type">STENCIL_STROKES</span>, <span class="t-type">ANTIALIAS</span>, <span class="t-type">RGB</span>, <span class="t-type">RGBA</span> } <span class="t-kw">from</span> <span class="t-str">'nanovg'</span>;
+
+<span class="t-id">glfw</span>.<span class="t-type">Window</span>.<span class="t-fn">hint</span>(<span class="t-id">glfw</span>.<span class="t-type">CONTEXT_VERSION_MAJOR</span>, <span class="t-num">3</span>);
+<span class="t-id">glfw</span>.<span class="t-type">Window</span>.<span class="t-fn">hint</span>(<span class="t-id">glfw</span>.<span class="t-type">CONTEXT_VERSION_MINOR</span>, <span class="t-num">2</span>);
+<span class="t-id">glfw</span>.<span class="t-type">Window</span>.<span class="t-fn">hint</span>(<span class="t-id">glfw</span>.<span class="t-type">OPENGL_PROFILE</span>, <span class="t-id">glfw</span>.<span class="t-type">OPENGL_CORE_PROFILE</span>);
+<span class="t-id">glfw</span>.<span class="t-type">Window</span>.<span class="t-fn">hint</span>(<span class="t-id">glfw</span>.<span class="t-type">OPENGL_FORWARD_COMPAT</span>, <span class="t-atom">true</span>);
+
+<span class="t-kw">const</span> <span class="t-id">win</span> <span class="t-op">=</span> (<span class="t-id">glfw</span>.<span class="t-prop">context</span>.<span class="t-prop">current</span> <span class="t-op">=</span> <span class="t-kw">new</span> <span class="t-id">glfw</span>.<span class="t-fn">Window</span>(<span class="t-num">1024</span>, <span class="t-num">768</span>, <span class="t-str">'NanoVG'</span>));
+<span class="t-kw">const</span> { <span class="t-id">width</span>, <span class="t-id">height</span> } <span class="t-op">=</span> <span class="t-id">win</span>.<span class="t-prop">size</span>;
+
+<span class="t-kw">const</span> <span class="t-id">nvg</span> <span class="t-op">=</span> <span class="t-fn">CreateGL3</span>(<span class="t-type">STENCIL_STROKES</span> <span class="t-op">|</span> <span class="t-type">ANTIALIAS</span>);
+
+<span class="t-kw">while</span> (<span class="t-op">!</span><span class="t-id">win</span>.<span class="t-prop">shouldClose</span>) {
+  <span class="t-id">nvg</span>.<span class="t-fn">BeginFrame</span>(<span class="t-id">width</span>, <span class="t-id">height</span>, <span class="t-num">1</span>);
+
+  <span class="t-id">nvg</span>.<span class="t-fn">BeginPath</span>();
+  <span class="t-id">nvg</span>.<span class="t-fn">Rect</span>(<span class="t-num">100</span>, <span class="t-num">100</span>, <span class="t-num">200</span>, <span class="t-num">150</span>);
+  <span class="t-id">nvg</span>.<span class="t-fn">FillColor</span>(<span class="t-fn">RGBA</span>(<span class="t-num">255</span>, <span class="t-num">128</span>, <span class="t-num">0</span>, <span class="t-num">255</span>));
+  <span class="t-id">nvg</span>.<span class="t-fn">Fill</span>();
+  <span class="t-id">nvg</span>.<span class="t-fn">StrokeColor</span>(<span class="t-fn">RGB</span>(<span class="t-num">255</span>, <span class="t-num">255</span>, <span class="t-num">255</span>));
+  <span class="t-id">nvg</span>.<span class="t-fn">StrokeWidth</span>(<span class="t-num">3</span>);
+  <span class="t-id">nvg</span>.<span class="t-fn">Stroke</span>();
+
+  <span class="t-id">nvg</span>.<span class="t-fn">EndFrame</span>();
+  <span class="t-id">win</span>.<span class="t-fn">swapBuffers</span>();
+  <span class="t-id">glfw</span>.<span class="t-fn">poll</span>();
+}
+
+<span class="t-fn">DeleteGL3</span>(<span class="t-id">nvg</span>);</code></pre></div>
+<p>Run it with <code>qjsm script.js</code>, not plain <code>qjs</code>: <code>qjs</code> lacks the globals these scripts use and swallows uncaught errors in module mode.</p>
+<h2 id="api"><a class="anchor" href="#api" aria-hidden="true">#</a>API</h2>
+<p>The complete reference, generated from the exports in <code>nvgjs-module.c</code>, is <a href="docs/api.html">doc/api-documentation.md</a>. In short:</p>
+<div class="tablewrap"><table><thead><tr><th>Area</th><th>Where</th></tr></thead><tbody><tr><td><code>CreateGL3</code>, <code>DeleteGL3</code>, framebuffers, <code>ReadPixels</code>, image handle interop</td><td>free functions</td></tr><tr><td><code>RGB</code>, <code>RGBA</code>, <code>RGBf</code>, <code>RGBAf</code>, <code>LerpRGBA</code>, <code>TransRGBA</code>, <code>HSL</code>, <code>HSLA</code>, <code>DegToRad</code>, <code>RadToDeg</code></td><td>free functions; colors are <code>Float32Array</code>-backed <code>Color</code> values</td></tr><tr><td>Frame, state, paths, fill and stroke, gradients and paints, scissor, transforms, images, fonts and text</td><td>methods on the context returned by <code>CreateGL3</code></td></tr><tr><td><code>Transform</code></td><td>static helpers and chainable instance methods on a 6-float <code>Float32Array</code></td></tr><tr><td>Constants such as <code>ANTIALIAS</code>, <code>ALIGN_LEFT</code>, <code>CCW</code>, <code>IMAGE_REPEATX</code></td><td>module exports, without the <code>NVG_</code> prefix</td></tr></tbody></table></div>
+<p>Vector arguments are flexible: a <code>Float32Array</code>, a plain array, an iterable, or separate scalar arguments are all accepted where a vector is expected.</p>
+<h2 id="examples"><a class="anchor" href="#examples" aria-hidden="true">#</a>Examples</h2>
+<div class="tablewrap"><table><thead><tr><th>File</th><th>What it is</th></tr></thead><tbody><tr><td><code>examples/planets.js</code></td><td>Animated orbits with transforms, save/restore and image patterns. The quickest check that the module works.</td></tr><tr><td><code>examples/curve-editor.js</code></td><td>Interactive editor for lines, quadratic and cubic Béziers, with text buttons.</td></tr><tr><td><code>examples/polyline-editor.js</code></td><td>Interactive polyline editor.</td></tr><tr><td><code>examples/forex.js</code></td><td>Candlestick chart driven by a simulated price feed.</td></tr><tr><td><code>examples/emerald-run/</code></td><td>A small tile-based dungeon crawler built on <code>engine2d.js</code> (<code>qjsm --std emerald.js</code>).</td></tr></tbody></table></div>
+<div class="codeblock" data-lang="sh"><pre><code class="language-sh"><span class="t-id">qjsm</span> <span class="t-id">examples</span>/<span class="t-id">planets.js</span></code></pre></div>
+<p><code>lib/canvas2d.js</code> is a thin <code>CanvasRenderingContext2D</code> emulation on top of <code>nanovg</code>, <code>glfw</code> and <code>dom</code>, so scripts written for the browser canvas can run under <code>qjsm</code>. Its header lists the known gaps.</p>
+<h2 id="browser-version"><a class="anchor" href="#browser-version" aria-hidden="true">#</a>Browser version</h2>
+<p>The same API also runs in the browser: NanoVG compiled to WebAssembly with Emscripten, drawing on WebGL2. It has its own documentation and a live demo, see <a href="docs/web.html">web/README.md</a>.</p>
+<h2 id="source-layout"><a class="anchor" href="#source-layout" aria-hidden="true">#</a>Source layout</h2>
+<div class="tablewrap"><table><thead><tr><th>File</th><th>Role</th></tr></thead><tbody><tr><td><code>nvgjs-module.c</code>, <code>nvgjs-module.h</code></td><td>The whole binding: classes, methods, free functions, constants, module init.</td></tr><tr><td><code>nvgjs-utils.c</code>, <code>nvgjs-utils.h</code></td><td>Argument marshalling helpers (vector or scalar arguments, typed-array output).</td></tr><tr><td><code>nanovg/</code></td><td>The NanoVG fork (submodule); its <code>nanovg.c</code> is compiled in.</td></tr><tr><td><code>lib/canvas2d.js</code></td><td>Canvas2D emulation, installed next to <code>nanovg.so</code>.</td></tr><tr><td><code>examples/</code></td><td>Runnable scripts.</td></tr><tr><td><code>doc/</code></td><td>API reference.</td></tr><tr><td><code>web/</code></td><td>Browser build.</td></tr><tr><td><code>BUGS</code>, <code>TODO.md</code></td><td>Known bugs; NanoVG functions not yet bound.</td></tr></tbody></table></div>
+<p>C code follows the repo's <code>.clang-format</code>.</p>
+<h2 id="license"><a class="anchor" href="#license" aria-hidden="true">#</a>License</h2>
+<p>MIT, see <a href="https://github.com/rsenn/qjs-nanovg/blob/main/LICENSE" target="_blank" rel="noopener">LICENSE</a>. NanoVG itself is under the zlib license, see <code>nanovg/LICENSE.txt</code>.</p></article>
+<p class="editlink"><a href="https://github.com/rsenn/qjs-nanovg/blob/main/README.md">Edit this page on GitHub →</a></p>
+</main>
+<nav class="toc"><h3>On this page</h3><ul><li class="lvl2"><a href="#requirements">Requirements</a></li><li class="lvl2"><a href="#build-and-install">Build and install</a></li><li class="lvl2"><a href="#usage">Usage</a></li><li class="lvl2"><a href="#api">API</a></li><li class="lvl2"><a href="#examples">Examples</a></li><li class="lvl2"><a href="#browser-version">Browser version</a></li><li class="lvl2"><a href="#source-layout">Source layout</a></li><li class="lvl2"><a href="#license">License</a></li></ul></nav>
+</div>
+<footer class="sitefoot">
+  <p>qjs-nanovg — MIT. Built from the repo's own markdown by
+     <a href="https://github.com/rsenn/rsenn/tree/main/tools/site">rsenn/rsenn tools/site</a>.</p>
+</footer>
+<script src="assets/search-index.js"></script>
+<script src="assets/search.js"></script>
+<script>
+document.querySelector('.themetoggle').addEventListener('click', function () {
+  var d = document.documentElement;
+  var dark = d.dataset.theme ? d.dataset.theme === 'dark'
+    : matchMedia('(prefers-color-scheme: dark)').matches;
+  d.dataset.theme = dark ? 'light' : 'dark';
+  try { localStorage.setItem('theme', d.dataset.theme); } catch (e) {}
+});
+</script>
+</body>
+</html>

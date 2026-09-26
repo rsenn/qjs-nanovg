@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>qjs-nanovg API Documentation — qjs-nanovg</title>
-<meta name="description" content="qjs-nanovg — Canvas-style 2D vector graphics for QuickJS. NanoVG antialiased OpenGL vector graphics as a loadable QuickJS module: paths, gradients, text, images, framebuffers.">
+<meta name="description" content="qjs-nanovg — Canvas-style 2D vector graphics for QuickJS. NanoVG antialiased OpenGL vector graphics as a loadable QuickJS module: paths, gradients, text, images, framebuffers. Also builds to WebAssembly for the browser.">
 <link rel="stylesheet" href="../assets/base.css">
 <link rel="stylesheet" href="../assets/theme.css">
 <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
@@ -21,6 +21,7 @@
   </div>
   <nav class="topnav">
     <a href="../docs/api.html">API</a>
+    <a href="../docs/web.html">Browser</a>
     <a href="../canvas2d.html">Canvas2D</a>
     <a href="../examples.html">Examples</a>
     <a href="https://github.com/rsenn/qjs-nanovg" target="_blank" rel="noopener">GitHub</a>
@@ -28,13 +29,12 @@
   <button class="themetoggle" type="button" aria-label="Toggle colour scheme">◐</button>
 </header>
 <div class="layout">
-<aside class="sidebar"><div class="navgroup"><h3>Reference</h3><ul><li><a href="api.html" class="here">API reference</a></li></ul></div><div class="navgroup"><h3>Examples</h3><ul><li><a href="../examples.html">Examples</a></li></ul></div></aside>
+<aside class="sidebar"><div class="navgroup"><h3>Start here</h3><ul><li><a href="../getting-started.html">Getting started</a></li></ul></div><div class="navgroup"><h3>Reference</h3><ul><li><a href="api.html" class="here">API reference</a></li></ul></div><div class="navgroup"><h3>Browser</h3><ul><li><a href="web.html">Browser version</a></li></ul></div><div class="navgroup"><h3>Examples</h3><ul><li><a href="../examples.html">Examples</a></li></ul></div></aside>
 <main class="doc">
 <article><h1 id="qjs-nanovg-api-documentation"><a class="anchor" href="#qjs-nanovg-api-documentation" aria-hidden="true">#</a>qjs-nanovg API Documentation</h1>
 <p>JavaScript bindings for <a href="https://github.com/memononen/nanovg" target="_blank" rel="noopener">NanoVG</a> exposed as the QuickJS
 native module <code>nanovg</code>. This document is generated from the actual exports in
-<code>nvgjs-module.c</code> — it is the authoritative reference for names and signatures (the top-level
-<code>README.md</code> documents an older, lowercase API that does <strong>not</strong> match the code).</p>
+<code>nvgjs-module.c</code> — it is the authoritative reference for names and signatures.</p>
 <div class="codeblock" data-lang="js"><pre><code class="language-js"><span class="t-kw">import</span> {
   <span class="t-type">CreateGL3</span>, <span class="t-type">DeleteGL3</span>, <span class="t-type">RGB</span>, <span class="t-type">RGBA</span>, <span class="t-type">ANTIALIAS</span>, <span class="t-type">STENCIL_STROKES</span>, <span class="t-type">Transform</span>,
 } <span class="t-kw">from</span> <span class="t-str">'nanovg'</span>;</code></pre></div>
