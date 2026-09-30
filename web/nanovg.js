@@ -501,6 +501,11 @@ const SPEC = {
   CreateFont: [2, 'ss'],
   CreateFontAtIndex: [3, 'ssi'],
   FindFont: [1, 's'],
+  AddFallbackFont: [2, 'ss'],
+  AddFallbackFontId: [2, 'ii'],
+  ResetFallbackFonts: [1, 's'],
+  ResetFallbackFontsId: [1, 'i'],
+  FontFaceId: [1, 'i'],
   BeginFrame: [3, 'fff'],
   CancelFrame: [0, ''],
   EndFrame: [0, ''],
@@ -670,6 +675,96 @@ def(Context.prototype, 'TextBounds2', 3, function(...args) {
     });
   } finally {
     m._free(adv);
+  }
+});
+
+// nvgCreateFontMem(freeData=1) takes ownership of the malloc'd copy, so it must not be freed here.
+const createFontMem = (c, name, data, ...extra) => {
+  const bytes = bytesOf(data);
+  const ptr = m._malloc(bytes.length);
+  m.HEAPU8.set(bytes, ptr);
+  return withString(String(name), p => (extra.length ? m._nvgw_CreateFontMemAtIndex(c, p, ptr, bytes.length, extra[0] | 0) : m._nvgw_CreateFontMem(c, p, ptr, bytes.length)));
+};
+
+def(Context.prototype, 'CreateFontMem', 2, function(...args) {
+  const c = ptrOf(this);
+  need(args, 2);
+  return createFontMem(c, args[0], args[1]);
+});
+
+def(Context.prototype, 'CreateFontMemAtIndex', 3, function(...args) {
+  const c = ptrOf(this);
+  need(args, 3);
+  return createFontMem(c, args[0], args[1], args[2]);
+});
+
+def(Context.prototype, 'TextMetrics', 0, function() {
+  const v = f32(m._nvgw_TextMetrics(ptrOf(this)), 3);
+  return { ascender: v[0], descender: v[1], lineh: v[2] };
+});
+
+// Counts code points in the UTF-8 bytes [from, to).
+const charIndex = (from, to) => {
+  let n = 0;
+  for(let i = from; i < to; i++) if((m.HEAPU8[i] & 0xc0) != 0x80) n++;
+  return n;
+};
+
+def(Context.prototype, 'TextGlyphPositions', 3, function(...args) {
+  const c = ptrOf(this);
+  need(args, 3);
+  const str = String(args[2]);
+  const max = args[4] === undefined ? 1024 : args[4] | 0;
+  if(max <= 0) return [];
+  // NVGglyphPosition is {char* str; float x, minx, maxx}: four 32-bit words.
+  const buf = m._malloc(max * 16);
+  try {
+    return withString(str, p => {
+      const n = m._nvgw_TextGlyphPositions(c, +args[0], +args[1], p, endOf(str, args[3]), buf, max);
+      const u = new Uint32Array(m.HEAPU8.buffer, buf, n * 4);
+      const f = new Float32Array(m.HEAPU8.buffer, buf, n * 4);
+      return Array.from({ length: n }, (_, i) => ({ index: charIndex(p, u[i * 4]), x: f[i * 4 + 1], minx: f[i * 4 + 2], maxx: f[i * 4 + 3] }));
+    });
+  } finally {
+    m._free(buf);
+  }
+});
+
+def(Context.prototype, 'TextBreakLines', 3, function(...args) {
+  const c = ptrOf(this);
+  need(args, 3);
+  const str = String(args[0]);
+  const width = +args[2];
+  const max = args[3] === undefined ? 0x7fffffff : args[3] | 0;
+  const chunk = 32;
+  // NVGtextRow is {char *start, *end, *next; float width, minx, maxx}: six 32-bit words.
+  const buf = m._malloc(chunk * 24);
+  try {
+    return withString(str, p => {
+      const end = args[1] === undefined || args[1] === null ? 0 : p + byteOffset(str, args[1] | 0);
+      const rows = [];
+
+      for(let cur = p; cur && rows.length < max; ) {
+        const n = m._nvgw_TextBreakLines(c, cur, end, width, buf, Math.min(chunk, max - rows.length));
+        if(n <= 0) break;
+
+        const u = new Uint32Array(m.HEAPU8.buffer, buf, n * 6);
+        const f = new Float32Array(m.HEAPU8.buffer, buf, n * 6);
+        for(let i = 0; i < n; i++)
+          rows.push({
+            start: charIndex(p, u[i * 6]),
+            end: charIndex(p, u[i * 6 + 1]),
+            next: charIndex(p, u[i * 6 + 2]),
+            width: f[i * 6 + 3],
+            minx: f[i * 6 + 4],
+            maxx: f[i * 6 + 5],
+          });
+        cur = u[(n - 1) * 6 + 2];
+      }
+      return rows;
+    });
+  } finally {
+    m._free(buf);
   }
 });
 

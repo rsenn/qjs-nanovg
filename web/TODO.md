@@ -16,8 +16,10 @@ Ran `compat-native.js` (qjsm, `build/x86_64-linux-gnu/nanovg.so`, built 2026-09-
 | Rendering, text metrics, image ids               | GL3 backend   | GLES3 backend | not compared (see Unverified)            |
 
 - Not bound in either build (unchanged scripts fail the same way): the functions listed in `../TODO.md`
-  (fallback fonts, `CreateFontMem*`, `FontFaceId`, `GlobalComposite*`, `TextBreakLines`,
-  `TextGlyphPositions`, `TextMetrics`, ...).
+  (`GlobalComposite*`, `DebugDumpPathCache`).
+- The text/font bindings (`CreateFontMem*`, fallback fonts, `FontFaceId`, `TextMetrics`,
+  `TextGlyphPositions`, `TextBreakLines`) were added to `nanovg.js` and `nanovg-web.c` without rebuilding
+  `nanovg-web.wasm` (no `emcc` here): run `build.sh`, then `compat-diff.js`, before relying on them.
 - The harness only exercises code that needs no GL context, so "identical" covers the API shape and
   the pure math, not drawing.
 - Unchanged scripts also run natively: `browser-emu.js` plus the `web/nanovg.js` alias in
@@ -50,8 +52,7 @@ What has not been verified or is deliberately different:
 
 - `Color`, `Paint` and `Context` are constructible in the web build (plain non-callable objects
   natively); `CreateImageMem`/`CreateImageRGBA` also accept typed arrays; `writeFile` is web-only.
-- `StrokePaint` with a non-paint throws a `TypeError`; natively it returns an exception without a
-  message (`JS_GetOpaque` instead of `JS_GetOpaque2` in `nvgjs_Context_StrokePaint`).
+- `CreateFontMem*` also accept typed arrays, like `CreateImageMem`.
 - Float math runs in doubles and is stored as float32, so the last bit can differ from C.
 - Error messages that come from the JS engine itself (V8 vs QuickJS) are not matched.
 

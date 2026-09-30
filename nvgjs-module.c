@@ -1019,6 +1019,143 @@ NVGJS_DECL(Context, FindFont) {
   return JS_NewInt32(ctx, ret);
 }
 
+static int
+nvgjs_createfontmem(JSContext* ctx, NVGcontext* nvg, int argc, JSValueConst* argv, int index) {
+  size_t len;
+  uint8_t *ptr, *copy;
+  const char* name;
+  int ret;
+
+  if(!(name = JS_ToCString(ctx, argv[0])))
+    return -2;
+
+  if(!(ptr = JS_GetArrayBuffer(ctx, &len, argv[1]))) {
+    JS_FreeCString(ctx, name);
+    return -2;
+  }
+
+  /* fontstash takes ownership of the buffer (freeData=1) and free()s it, so it must be a private copy */
+  if(!(copy = malloc(len))) {
+    JS_FreeCString(ctx, name);
+    JS_ThrowOutOfMemory(ctx);
+    return -2;
+  }
+  memcpy(copy, ptr, len);
+
+  ret = index >= 0 ? nvgCreateFontMemAtIndex(nvg, name, copy, len, 1, index) : nvgCreateFontMem(nvg, name, copy, len, 1);
+
+  JS_FreeCString(ctx, name);
+  return ret;
+}
+
+NVGJS_DECL(Context, CreateFontMem) {
+  NVGJS_CONTEXT(this_obj);
+
+  if(argc < 2)
+    return JS_ThrowInternalError(ctx, "need 2 arguments");
+
+  int ret = nvgjs_createfontmem(ctx, nvg, argc, argv, -1);
+  return ret == -2 ? JS_EXCEPTION : JS_NewInt32(ctx, ret);
+}
+
+NVGJS_DECL(Context, CreateFontMemAtIndex) {
+  NVGJS_CONTEXT(this_obj);
+
+  int32_t index;
+
+  if(argc < 3)
+    return JS_ThrowInternalError(ctx, "need 3 arguments");
+
+  if(JS_ToInt32(ctx, &index, argv[2]))
+    return JS_EXCEPTION;
+
+  int ret = nvgjs_createfontmem(ctx, nvg, argc, argv, index);
+  return ret == -2 ? JS_EXCEPTION : JS_NewInt32(ctx, ret);
+}
+
+NVGJS_DECL(Context, AddFallbackFont) {
+  NVGJS_CONTEXT(this_obj);
+
+  if(argc < 2)
+    return JS_ThrowInternalError(ctx, "need 2 arguments");
+
+  const char* base = JS_ToCString(ctx, argv[0]);
+  if(!base)
+    return JS_EXCEPTION;
+
+  const char* fallback = JS_ToCString(ctx, argv[1]);
+  if(!fallback) {
+    JS_FreeCString(ctx, base);
+    return JS_EXCEPTION;
+  }
+
+  int ret = nvgAddFallbackFont(nvg, base, fallback);
+
+  JS_FreeCString(ctx, base);
+  JS_FreeCString(ctx, fallback);
+  return JS_NewInt32(ctx, ret);
+}
+
+NVGJS_DECL(Context, AddFallbackFontId) {
+  NVGJS_CONTEXT(this_obj);
+
+  int32_t base, fallback;
+
+  if(argc < 2)
+    return JS_ThrowInternalError(ctx, "need 2 arguments");
+
+  if(JS_ToInt32(ctx, &base, argv[0]) || JS_ToInt32(ctx, &fallback, argv[1]))
+    return JS_EXCEPTION;
+
+  return JS_NewInt32(ctx, nvgAddFallbackFontId(nvg, base, fallback));
+}
+
+NVGJS_DECL(Context, ResetFallbackFonts) {
+  NVGJS_CONTEXT(this_obj);
+
+  if(argc < 1)
+    return JS_ThrowInternalError(ctx, "need 1 arguments");
+
+  const char* base = JS_ToCString(ctx, argv[0]);
+  if(!base)
+    return JS_EXCEPTION;
+
+  nvgResetFallbackFonts(nvg, base);
+
+  JS_FreeCString(ctx, base);
+  return JS_UNDEFINED;
+}
+
+NVGJS_DECL(Context, ResetFallbackFontsId) {
+  NVGJS_CONTEXT(this_obj);
+
+  int32_t base;
+
+  if(argc < 1)
+    return JS_ThrowInternalError(ctx, "need 1 arguments");
+
+  if(JS_ToInt32(ctx, &base, argv[0]))
+    return JS_EXCEPTION;
+
+  nvgResetFallbackFontsId(nvg, base);
+  return JS_UNDEFINED;
+}
+
+NVGJS_DECL(Context, FontFaceId) {
+  NVGJS_CONTEXT(this_obj);
+
+  int32_t font;
+
+  if(argc < 1)
+    return JS_ThrowInternalError(ctx, "need 1 arguments");
+
+  if(JS_ToInt32(ctx, &font, argv[0]))
+    return JS_EXCEPTION;
+
+  nvgFontFaceId(nvg, font);
+  return JS_UNDEFINED;
+}
+
 NVGJS_DECL(Context, BeginFrame) {
   NVGJS_CONTEXT(this_obj);
 
@@ -1480,7 +1617,7 @@ NVGJS_DECL(Context, StrokePaint) {
   if(argc < 1)
     return JS_ThrowInternalError(ctx, "need 1 arguments");
 
-  if(!(paint = JS_GetOpaque(argv[0], nvgjs_paint_class_id)))
+  if(!(paint = JS_GetOpaque2(ctx, argv[0], nvgjs_paint_class_id)))
     return JS_EXCEPTION;
 
   nvgStrokePaint(nvg, *paint);
@@ -1751,6 +1888,145 @@ NVGJS_DECL(Context, TextBounds2) {
   JS_DefinePropertyValueStr(ctx, e, "width", JS_NewFloat64(ctx, tw), JS_PROP_C_W_E);
   JS_DefinePropertyValueStr(ctx, e, "height", JS_NewFloat64(ctx, bounds[3] - bounds[1]), JS_PROP_C_W_E);
   return e;
+}
+
+static int
+nvgjs_charindex(const char* str, const char* pos) {
+  const uint8_t *p = (const uint8_t*)str, *e = (const uint8_t*)pos;
+  int i = 0;
+
+  for(; p < e; i++)
+    if(unicode_from_utf8(p, e - p, &p) == -1)
+      break;
+
+  return i;
+}
+
+NVGJS_DECL(Context, TextMetrics) {
+  NVGJS_CONTEXT(this_obj);
+
+  float ascender, descender, lineh;
+
+  nvgTextMetrics(nvg, &ascender, &descender, &lineh);
+
+  JSValue ret = JS_NewObject(ctx);
+  JS_DefinePropertyValueStr(ctx, ret, "ascender", JS_NewFloat64(ctx, ascender), JS_PROP_C_W_E);
+  JS_DefinePropertyValueStr(ctx, ret, "descender", JS_NewFloat64(ctx, descender), JS_PROP_C_W_E);
+  JS_DefinePropertyValueStr(ctx, ret, "lineh", JS_NewFloat64(ctx, lineh), JS_PROP_C_W_E);
+  return ret;
+}
+
+NVGJS_DECL(Context, TextGlyphPositions) {
+  NVGJS_CONTEXT(this_obj);
+
+  double x, y;
+  const char *str, *end = 0;
+  size_t len;
+  int32_t max = 1024;
+
+  if(argc < 3)
+    return JS_ThrowInternalError(ctx, "need 3 arguments");
+
+  if(JS_ToFloat64(ctx, &x, argv[0]) || JS_ToFloat64(ctx, &y, argv[1]))
+    return JS_EXCEPTION;
+
+  if(!(str = JS_ToCStringLen(ctx, &len, argv[2])))
+    return JS_EXCEPTION;
+
+  if(argc > 3 && !JS_IsUndefined(argv[3]) && !JS_IsNull(argv[3])) {
+    int32_t pos;
+
+    if(JS_ToInt32(ctx, &pos, argv[3])) {
+      JS_FreeCString(ctx, str);
+      return JS_EXCEPTION;
+    }
+    end = str + nvgjs_utf8offset(str, len, pos);
+  }
+
+  if(argc > 4 && !JS_IsUndefined(argv[4]) && JS_ToInt32(ctx, &max, argv[4])) {
+    JS_FreeCString(ctx, str);
+    return JS_EXCEPTION;
+  }
+
+  NVGglyphPosition* positions = max > 0 ? js_malloc(ctx, max * sizeof(NVGglyphPosition)) : 0;
+  if(max > 0 && !positions) {
+    JS_FreeCString(ctx, str);
+    return JS_EXCEPTION;
+  }
+
+  int n = max > 0 ? nvgTextGlyphPositions(nvg, x, y, str, end, positions, max) : 0;
+
+  JSValue ret = JS_NewArray(ctx);
+  for(int i = 0; i < n; i++) {
+    JSValue obj = JS_NewObject(ctx);
+    JS_DefinePropertyValueStr(ctx, obj, "index", JS_NewInt32(ctx, nvgjs_charindex(str, positions[i].str)), JS_PROP_C_W_E);
+    JS_DefinePropertyValueStr(ctx, obj, "x", JS_NewFloat64(ctx, positions[i].x), JS_PROP_C_W_E);
+    JS_DefinePropertyValueStr(ctx, obj, "minx", JS_NewFloat64(ctx, positions[i].minx), JS_PROP_C_W_E);
+    JS_DefinePropertyValueStr(ctx, obj, "maxx", JS_NewFloat64(ctx, positions[i].maxx), JS_PROP_C_W_E);
+    JS_SetPropertyUint32(ctx, ret, i, obj);
+  }
+
+  js_free(ctx, positions);
+  JS_FreeCString(ctx, str);
+  return ret;
+}
+
+NVGJS_DECL(Context, TextBreakLines) {
+  NVGJS_CONTEXT(this_obj);
+
+  double breakRowWidth;
+  const char *str, *end = 0, *p;
+  size_t len;
+  int32_t max = INT32_MAX;
+  NVGtextRow rows[32];
+  uint32_t count = 0;
+
+  if(argc < 3)
+    return JS_ThrowInternalError(ctx, "need 3 arguments");
+
+  if(!(str = JS_ToCStringLen(ctx, &len, argv[0])))
+    return JS_EXCEPTION;
+
+  if(!JS_IsUndefined(argv[1]) && !JS_IsNull(argv[1])) {
+    int32_t pos;
+
+    if(JS_ToInt32(ctx, &pos, argv[1])) {
+      JS_FreeCString(ctx, str);
+      return JS_EXCEPTION;
+    }
+    end = str + nvgjs_utf8offset(str, len, pos);
+  }
+
+  if(JS_ToFloat64(ctx, &breakRowWidth, argv[2]) || (argc > 3 && !JS_IsUndefined(argv[3]) && JS_ToInt32(ctx, &max, argv[3]))) {
+    JS_FreeCString(ctx, str);
+    return JS_EXCEPTION;
+  }
+
+  JSValue ret = JS_NewArray(ctx);
+
+  for(p = str; p && (int32_t)count < max;) {
+    int want = max - (int32_t)count < (int)countof(rows) ? max - count : (int)countof(rows);
+    int n = nvgTextBreakLines(nvg, p, end, breakRowWidth, rows, want);
+
+    if(n <= 0)
+      break;
+
+    for(int i = 0; i < n; i++) {
+      JSValue obj = JS_NewObject(ctx);
+      JS_DefinePropertyValueStr(ctx, obj, "start", JS_NewInt32(ctx, nvgjs_charindex(str, rows[i].start)), JS_PROP_C_W_E);
+      JS_DefinePropertyValueStr(ctx, obj, "end", JS_NewInt32(ctx, nvgjs_charindex(str, rows[i].end)), JS_PROP_C_W_E);
+      JS_DefinePropertyValueStr(ctx, obj, "next", JS_NewInt32(ctx, nvgjs_charindex(str, rows[i].next)), JS_PROP_C_W_E);
+      JS_DefinePropertyValueStr(ctx, obj, "width", JS_NewFloat64(ctx, rows[i].width), JS_PROP_C_W_E);
+      JS_DefinePropertyValueStr(ctx, obj, "minx", JS_NewFloat64(ctx, rows[i].minx), JS_PROP_C_W_E);
+      JS_DefinePropertyValueStr(ctx, obj, "maxx", JS_NewFloat64(ctx, rows[i].maxx), JS_PROP_C_W_E);
+      JS_SetPropertyUint32(ctx, ret, count++, obj);
+    }
+
+    p = rows[n - 1].next;
+  }
+
+  JS_FreeCString(ctx, str);
+  return ret;
 }
 
 NVGJS_DECL(Context, StrokeWidth) {
@@ -2131,7 +2407,17 @@ static const JSCFunctionListEntry nvgjs_funcs[] = {
 static const JSCFunctionListEntry nvgjs_context_methods[] = {
  NVGJS_METHOD(Context, CreateFont, 2),
  NVGJS_METHOD(Context, CreateFontAtIndex, 3),
+ NVGJS_METHOD(Context, CreateFontMem, 2),
+ NVGJS_METHOD(Context, CreateFontMemAtIndex, 3),
  NVGJS_METHOD(Context, FindFont, 1),
+ NVGJS_METHOD(Context, AddFallbackFont, 2),
+ NVGJS_METHOD(Context, AddFallbackFontId, 2),
+ NVGJS_METHOD(Context, ResetFallbackFonts, 1),
+ NVGJS_METHOD(Context, ResetFallbackFontsId, 1),
+ NVGJS_METHOD(Context, FontFaceId, 1),
+ NVGJS_METHOD(Context, TextMetrics, 0),
+ NVGJS_METHOD(Context, TextGlyphPositions, 3),
+ NVGJS_METHOD(Context, TextBreakLines, 3),
  NVGJS_METHOD(Context, BeginFrame, 3),
  NVGJS_METHOD(Context, CancelFrame, 0),
  NVGJS_METHOD(Context, EndFrame, 0),

@@ -13,6 +13,7 @@ static EMSCRIPTEN_WEBGL_CONTEXT_HANDLE gl;
 static NVGpaint paint;
 static float xform[6];
 static float bounds[4];
+static float metrics[3];
 
 #define ENDPTR(str, end) ((end) < 0 ? NULL : (str) + (end))
 #define COLOR(n) nvgRGBAf(n##r, n##g, n##b, n##a)
@@ -120,6 +121,13 @@ EXPORT void nvgw_Stroke(CTX) { nvgStroke(c); }
 EXPORT int nvgw_CreateFont(CTX, const char* name, const char* file) { return nvgCreateFont(c, name, file); }
 EXPORT int nvgw_CreateFontAtIndex(CTX, const char* name, const char* file, int index) { return nvgCreateFontAtIndex(c, name, file, index); }
 EXPORT int nvgw_FindFont(CTX, const char* name) { return nvgFindFont(c, name); }
+EXPORT int nvgw_CreateFontMem(CTX, const char* name, unsigned char* data, int n) { return nvgCreateFontMem(c, name, data, n, 1); }
+EXPORT int nvgw_CreateFontMemAtIndex(CTX, const char* name, unsigned char* data, int n, int index) { return nvgCreateFontMemAtIndex(c, name, data, n, 1, index); }
+EXPORT int nvgw_AddFallbackFont(CTX, const char* base, const char* fallback) { return nvgAddFallbackFont(c, base, fallback); }
+EXPORT int nvgw_AddFallbackFontId(CTX, int base, int fallback) { return nvgAddFallbackFontId(c, base, fallback); }
+EXPORT void nvgw_ResetFallbackFonts(CTX, const char* base) { nvgResetFallbackFonts(c, base); }
+EXPORT void nvgw_ResetFallbackFontsId(CTX, int base) { nvgResetFallbackFontsId(c, base); }
+EXPORT void nvgw_FontFaceId(CTX, int font) { nvgFontFaceId(c, font); }
 EXPORT void nvgw_FontFace(CTX, const char* name) { nvgFontFace(c, name); }
 EXPORT void nvgw_FontSize(CTX, float v) { nvgFontSize(c, v); }
 EXPORT void nvgw_FontBlur(CTX, float v) { nvgFontBlur(c, v); }
@@ -137,6 +145,13 @@ EXPORT float* nvgw_TextBoxBounds(CTX, float x, float y, float width, const char*
   nvgTextBoxBounds(c, x, y, width, str, ENDPTR(str, end), bounds);
   return bounds;
 }
+
+EXPORT float* nvgw_TextMetrics(CTX) {
+  nvgTextMetrics(c, &metrics[0], &metrics[1], &metrics[2]);
+  return metrics;
+}
+EXPORT int nvgw_TextGlyphPositions(CTX, float x, float y, const char* str, int end, NVGglyphPosition* out, int max) { return nvgTextGlyphPositions(c, x, y, str, ENDPTR(str, end), out, max); }
+EXPORT int nvgw_TextBreakLines(CTX, const char* str, const char* end, float width, NVGtextRow* rows, int max) { return nvgTextBreakLines(c, str, end, width, rows, max); }
 
 EXPORT int nvgw_CreateImage(CTX, const char* file, int flags) { return nvgCreateImage(c, file, flags); }
 EXPORT int nvgw_CreateImageMem(CTX, int flags, unsigned char* data, int n) { return nvgCreateImageMem(c, flags, data, n); }
