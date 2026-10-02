@@ -1,10 +1,27 @@
-/* qjs-nanovg — imprint. Override tokens once with light-dark(light, dark);
-   see tools/site/README.md "Theming" for the full token and hook list. */
+/* qjs-nanovg — vector graphics. Soft yellow on warm paper, rounded corners,
+   a field of dots behind the hero. */
 :root {
-  --accent:      light-dark(#2e7d32, #8cb88e);
-  --accent-fg:   light-dark(#ffffff, #0d1114);
-  --accent-soft: light-dark(#e6efe6, #162417);
+  --bg:          light-dark(#fcfcfa, #171710);
+  --bg-raised:   light-dark(#ffffff, #212116);
+  --bg-sunken:   light-dark(#f4f4ee, #13130c);
+  --bg-code:     light-dark(#f7f7f2, #212116);
+  --fg:          light-dark(#212118, #eeeee3);
+  --fg-muted:    light-dark(#666655, #aeae96);
+  --fg-faint:    light-dark(#959584, #808062);
+  --line:        light-dark(#e8e8dd, #30301f);
+  --line-strong: light-dark(#d6d6c5, #47472f);
+  --accent:      light-dark(#6e6e1c, #ffffba);
+  --accent-fg:   light-dark(#ffffff, #111107);
+  --accent-soft: light-dark(#f2f2df, #313112);
 
-  /* --bg / --fg / --line ... tint the neutrals toward the accent hue */
-  /* --radius: 8px;  --font-display: var(--sans);  --hero-bg: none; */
+  --radius: 12px;
+  --mark-fg: var(--accent);
+  --hero-bg: radial-gradient(circle at 1px 1px, color-mix(in srgb, var(--accent) 28%, transparent) 1.2px, transparent 1.6px) 0 0 / 22px 22px,
+             radial-gradient(48rem 20rem at 85% -20%, var(--accent-soft), transparent 70%);
+  --card-shadow: 0 10px 30px -22px color-mix(in srgb, var(--accent) 70%, transparent);
+  --h2-rule: 0;
 }
+
+.doc h2 { padding-top: 0; }
+.doc h2::after { content: ""; display: block; width: 2.5rem; height: 3px; margin-top: 0.5rem; border-radius: 3px; background: var(--accent); }
+.hero { border-radius: 20px; padding-left: 2rem; padding-right: 2rem; margin-top: 1rem; }
