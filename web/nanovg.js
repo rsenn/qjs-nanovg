@@ -521,6 +521,10 @@ const SPEC = {
   LineCap: [1, 'i', 0],
   LineJoin: [1, 'i', 0],
   GlobalAlpha: [1, 'f', 0],
+  GlobalCompositeOperation: [1, 'i'],
+  GlobalCompositeBlendFunc: [2, 'ii'],
+  GlobalCompositeBlendFuncSeparate: [4, 'iiii'],
+  DebugDumpPathCache: [0, ''],
   StrokeColor: [1, 'c'],
   StrokeWidth: [1, 'f'],
   StrokePaint: [1, 'p'],
@@ -600,6 +604,7 @@ for(const [name, [length, kinds, needed = length, result]] of Object.entries(SPE
         }
       }
 
+      if(!wasm) throw new InternalError(`${name} is missing from nanovg-web.wasm; rebuild it with web/build.sh`);
       const ret = wasm(...out);
       return result == 'paint' ? readPaint() : ret;
     } finally {

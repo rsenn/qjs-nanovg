@@ -1587,6 +1587,58 @@ NVGJS_DECL(Context, GlobalAlpha) {
   return JS_UNDEFINED;
 }
 
+NVGJS_DECL(Context, GlobalCompositeOperation) {
+  NVGJS_CONTEXT(this_obj);
+
+  int32_t op;
+
+  if(argc < 1)
+    return JS_ThrowInternalError(ctx, "need 1 arguments");
+
+  if(JS_ToInt32(ctx, &op, argv[0]))
+    return JS_EXCEPTION;
+
+  nvgGlobalCompositeOperation(nvg, op);
+  return JS_UNDEFINED;
+}
+
+NVGJS_DECL(Context, GlobalCompositeBlendFunc) {
+  NVGJS_CONTEXT(this_obj);
+
+  int32_t sfactor, dfactor;
+
+  if(argc < 2)
+    return JS_ThrowInternalError(ctx, "need 2 arguments");
+
+  if(JS_ToInt32(ctx, &sfactor, argv[0]) || JS_ToInt32(ctx, &dfactor, argv[1]))
+    return JS_EXCEPTION;
+
+  nvgGlobalCompositeBlendFunc(nvg, sfactor, dfactor);
+  return JS_UNDEFINED;
+}
+
+NVGJS_DECL(Context, GlobalCompositeBlendFuncSeparate) {
+  NVGJS_CONTEXT(this_obj);
+
+  int32_t srcRGB, dstRGB, srcAlpha, dstAlpha;
+
+  if(argc < 4)
+    return JS_ThrowInternalError(ctx, "need 4 arguments");
+
+  if(JS_ToInt32(ctx, &srcRGB, argv[0]) || JS_ToInt32(ctx, &dstRGB, argv[1]) || JS_ToInt32(ctx, &srcAlpha, argv[2]) || JS_ToInt32(ctx, &dstAlpha, argv[3]))
+    return JS_EXCEPTION;
+
+  nvgGlobalCompositeBlendFuncSeparate(nvg, srcRGB, dstRGB, srcAlpha, dstAlpha);
+  return JS_UNDEFINED;
+}
+
+NVGJS_DECL(Context, DebugDumpPathCache) {
+  NVGJS_CONTEXT(this_obj);
+
+  nvgDebugDumpPathCache(nvg);
+  return JS_UNDEFINED;
+}
+
 NVGJS_DECL(Context, StrokeColor) {
   NVGJS_CONTEXT(this_obj);
 
@@ -2434,6 +2486,10 @@ static const JSCFunctionListEntry nvgjs_context_methods[] = {
  NVGJS_METHOD(Context, LineCap, 1),
  NVGJS_METHOD(Context, LineJoin, 1),
  NVGJS_METHOD(Context, GlobalAlpha, 1),
+ NVGJS_METHOD(Context, GlobalCompositeOperation, 1),
+ NVGJS_METHOD(Context, GlobalCompositeBlendFunc, 2),
+ NVGJS_METHOD(Context, GlobalCompositeBlendFuncSeparate, 4),
+ NVGJS_METHOD(Context, DebugDumpPathCache, 0),
  NVGJS_METHOD(Context, StrokeColor, 1),
  NVGJS_METHOD(Context, StrokeWidth, 1),
  NVGJS_METHOD(Context, StrokePaint, 1),

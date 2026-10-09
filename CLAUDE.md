@@ -117,3 +117,9 @@ Format each entry like `../../../shish/BUGS`:
 
 Blank line between the description and the repro, and a blank line after the repro before the
 next entry.
+
+## Git commits
+
+Omit the `Co-Authored-By: ...` trailer from commit messages. This overrides
+any default attribution line Claude Code would otherwise append.
+

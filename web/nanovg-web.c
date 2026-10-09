@@ -68,6 +68,10 @@ EXPORT void nvgw_MiterLimit(CTX, float v) { nvgMiterLimit(c, v); }
 EXPORT void nvgw_LineCap(CTX, int v) { nvgLineCap(c, v); }
 EXPORT void nvgw_LineJoin(CTX, int v) { nvgLineJoin(c, v); }
 EXPORT void nvgw_GlobalAlpha(CTX, float v) { nvgGlobalAlpha(c, v); }
+EXPORT void nvgw_GlobalCompositeOperation(CTX, int op) { nvgGlobalCompositeOperation(c, op); }
+EXPORT void nvgw_GlobalCompositeBlendFunc(CTX, int s, int d) { nvgGlobalCompositeBlendFunc(c, s, d); }
+EXPORT void nvgw_GlobalCompositeBlendFuncSeparate(CTX, int sr, int dr, int sa, int da) { nvgGlobalCompositeBlendFuncSeparate(c, sr, dr, sa, da); }
+EXPORT void nvgw_DebugDumpPathCache(CTX) { nvgDebugDumpPathCache(c); }
 EXPORT void nvgw_StrokeWidth(CTX, float v) { nvgStrokeWidth(c, v); }
 EXPORT void nvgw_StrokeColor(CTX, float r, float g, float b, float a) { nvgStrokeColor(c, nvgRGBAf(r, g, b, a)); }
 EXPORT void nvgw_FillColor(CTX, float r, float g, float b, float a) { nvgFillColor(c, nvgRGBAf(r, g, b, a)); }
