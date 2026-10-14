@@ -12,7 +12,11 @@ if(NOT PKG_CONFIG_FOUND)
 endif(NOT PKG_CONFIG_FOUND)
 
 include(CheckCCompilerFlag)
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/Functions.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/Compat.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindQuickJS.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/QuickJSModule.cmake)
+quickjs_module_options(SHARED_DEFAULT ON STATIC_DEFAULT ON)
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindGLEW.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindGLFW.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/UseMultiArch.cmake)
@@ -33,59 +37,27 @@ configure_quickjs()
 include_directories(${GLEW_INCLUDE_DIR} ${GLFW_INCLUDE_DIR} ${QUICKJS_INCLUDE_DIR})
 link_directories(${GLEW_LIBRARY_DIR} ${GLFW_LIBRARY_DIR} ${QUICKJS_LIBRARY_DIR})
 
-add_library(
-  qjs-nanovg SHARED
+# qjs-nanovg (nanovg.so, BUILD_SHARED) and qjs-nanovg-static (quickjs-nanovg.a plus
+# quickjs-nanovg.module.cmake, BUILD_STATIC) from make_module().
+set(nanovg_LIBRARIES ${GLEW_LIBRARY} OpenGL::GL)
+# the static module's link line is exported to other configures: plain paths, no imported targets
+set(nanovg_LIBRARIES_static ${GLEW_LIBRARY} ${OPENGL_LIBRARIES})
+
+make_module(
+  nanovg
   nvgjs-utils.h nvgjs-utils.c nvgjs-module.h nvgjs-module.c
   nanovg/src/nanovg.c
   nanovg/src/nanovg.h
   nanovg/src/nanovg_gl.h)
 
-set_target_properties(
-  qjs-nanovg PROPERTIES OUTPUT_NAME nanovg PREFIX "" COMPILE_FLAGS
-                                                     "${MODULE_COMPILE_FLAGS} -DJS_SHARED_LIBRARY")
-
-target_include_directories(qjs-nanovg PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/nanovg/src
-                                              ${QUICKJS_INCLUDE_DIR})
-target_link_libraries(qjs-nanovg PRIVATE #${GLFW_LIBRARY}
-                                         ${GLEW_LIBRARY} OpenGL::GL ${QUICKJS_LIBRARY})
-target_compile_definitions(qjs-nanovg PRIVATE JS_SHARED_LIBRARY=1 NANOVG_GLEW=1
-                                              NANOVG_GL3_IMPLEMENTATION=1)
-
-if(NOT CMAKE_INSTALL_LIBDIR)
-  set(CMAKE_INSTALL_LIBDIR lib)
-endif(NOT CMAKE_INSTALL_LIBDIR)
-if(NOT QUICKJS_C_MODULE_DIR)
-  set(QUICKJS_C_MODULE_DIR "${CMAKE_INSTALL_LIBDIR}/quickjs")
-endif(NOT QUICKJS_C_MODULE_DIR)
-
-install(TARGETS qjs-nanovg DESTINATION "${QUICKJS_C_MODULE_DIR}"
-        PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ
-                    WORLD_EXECUTE)
+foreach(_t qjs-nanovg qjs-nanovg-static)
+  if(TARGET ${_t})
+    target_include_directories(${_t} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/nanovg/src ${QUICKJS_INCLUDE_DIR})
+    target_compile_definitions(${_t} PRIVATE NANOVG_GLEW=1 NANOVG_GL3_IMPLEMENTATION=1)
+  endif(TARGET ${_t})
+endforeach(_t)
 
 install(FILES lib/canvas2d.js DESTINATION "${QUICKJS_C_MODULE_DIR}")
-
-# Static counterpart for embedders that want nanovg linked directly into their own
-# interpreter binary (e.g. qjsm's EXTERNAL_MODULES) instead of dlopen'd at runtime.
-# Without JS_SHARED_LIBRARY, nvgjs-module.c's nvgjs_init_module macro expands to
-# js_init_module_nanovg, matching the js_init_module_<name> convention EXTERNAL_MODULES
-# expects.
-option(BUILD_STATIC "Also build qjs-nanovg-static, a static library for linking nanovg into another interpreter binary" ON)
-if(BUILD_STATIC)
-  add_library(
-    qjs-nanovg-static STATIC
-    nvgjs-utils.h nvgjs-utils.c nvgjs-module.h nvgjs-module.c
-    nanovg/src/nanovg.c
-    nanovg/src/nanovg.h
-    nanovg/src/nanovg_gl.h)
-
-  set_target_properties(qjs-nanovg-static PROPERTIES OUTPUT_NAME nanovg POSITION_INDEPENDENT_CODE ON
-                                                       COMPILE_FLAGS "${MODULE_COMPILE_FLAGS}")
-
-  target_include_directories(qjs-nanovg-static PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/nanovg/src
-                                                ${QUICKJS_INCLUDE_DIR})
-  target_link_libraries(qjs-nanovg-static PUBLIC ${GLEW_LIBRARY} OpenGL::GL ${QUICKJS_LIBRARY})
-  target_compile_definitions(qjs-nanovg-static PRIVATE NANOVG_GLEW=1 NANOVG_GL3_IMPLEMENTATION=1)
-endif(BUILD_STATIC)
 
 # Browser build of the same bindings (NanoVG on WebGL2 through Emscripten). The output lands in
 # web/ beside the JS API that wraps it, so web/ is runnable straight after a normal build.
