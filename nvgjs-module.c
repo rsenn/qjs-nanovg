@@ -1042,7 +1042,8 @@ nvgjs_createfontmem(JSContext* ctx, NVGcontext* nvg, int argc, JSValueConst* arg
   }
   memcpy(copy, ptr, len);
 
-  ret = index >= 0 ? nvgCreateFontMemAtIndex(nvg, name, copy, len, 1, index) : nvgCreateFontMem(nvg, name, copy, len, 1);
+  ret =
+   index >= 0 ? nvgCreateFontMemAtIndex(nvg, name, copy, len, 1, index) : nvgCreateFontMem(nvg, name, copy, len, 1);
 
   JS_FreeCString(ctx, name);
   return ret;
@@ -1625,7 +1626,8 @@ NVGJS_DECL(Context, GlobalCompositeBlendFuncSeparate) {
   if(argc < 4)
     return JS_ThrowInternalError(ctx, "need 4 arguments");
 
-  if(JS_ToInt32(ctx, &srcRGB, argv[0]) || JS_ToInt32(ctx, &dstRGB, argv[1]) || JS_ToInt32(ctx, &srcAlpha, argv[2]) || JS_ToInt32(ctx, &dstAlpha, argv[3]))
+  if(JS_ToInt32(ctx, &srcRGB, argv[0]) || JS_ToInt32(ctx, &dstRGB, argv[1]) || JS_ToInt32(ctx, &srcAlpha, argv[2]) ||
+     JS_ToInt32(ctx, &dstAlpha, argv[3]))
     return JS_EXCEPTION;
 
   nvgGlobalCompositeBlendFuncSeparate(nvg, srcRGB, dstRGB, srcAlpha, dstAlpha);
@@ -2011,7 +2013,11 @@ NVGJS_DECL(Context, TextGlyphPositions) {
   JSValue ret = JS_NewArray(ctx);
   for(int i = 0; i < n; i++) {
     JSValue obj = JS_NewObject(ctx);
-    JS_DefinePropertyValueStr(ctx, obj, "index", JS_NewInt32(ctx, nvgjs_charindex(str, positions[i].str)), JS_PROP_C_W_E);
+    JS_DefinePropertyValueStr(ctx,
+                              obj,
+                              "index",
+                              JS_NewInt32(ctx, nvgjs_charindex(str, positions[i].str)),
+                              JS_PROP_C_W_E);
     JS_DefinePropertyValueStr(ctx, obj, "x", JS_NewFloat64(ctx, positions[i].x), JS_PROP_C_W_E);
     JS_DefinePropertyValueStr(ctx, obj, "minx", JS_NewFloat64(ctx, positions[i].minx), JS_PROP_C_W_E);
     JS_DefinePropertyValueStr(ctx, obj, "maxx", JS_NewFloat64(ctx, positions[i].maxx), JS_PROP_C_W_E);
@@ -2049,7 +2055,8 @@ NVGJS_DECL(Context, TextBreakLines) {
     end = str + nvgjs_utf8offset(str, len, pos);
   }
 
-  if(JS_ToFloat64(ctx, &breakRowWidth, argv[2]) || (argc > 3 && !JS_IsUndefined(argv[3]) && JS_ToInt32(ctx, &max, argv[3]))) {
+  if(JS_ToFloat64(ctx, &breakRowWidth, argv[2]) ||
+     (argc > 3 && !JS_IsUndefined(argv[3]) && JS_ToInt32(ctx, &max, argv[3]))) {
     JS_FreeCString(ctx, str);
     return JS_EXCEPTION;
   }
@@ -2065,7 +2072,11 @@ NVGJS_DECL(Context, TextBreakLines) {
 
     for(int i = 0; i < n; i++) {
       JSValue obj = JS_NewObject(ctx);
-      JS_DefinePropertyValueStr(ctx, obj, "start", JS_NewInt32(ctx, nvgjs_charindex(str, rows[i].start)), JS_PROP_C_W_E);
+      JS_DefinePropertyValueStr(ctx,
+                                obj,
+                                "start",
+                                JS_NewInt32(ctx, nvgjs_charindex(str, rows[i].start)),
+                                JS_PROP_C_W_E);
       JS_DefinePropertyValueStr(ctx, obj, "end", JS_NewInt32(ctx, nvgjs_charindex(str, rows[i].end)), JS_PROP_C_W_E);
       JS_DefinePropertyValueStr(ctx, obj, "next", JS_NewInt32(ctx, nvgjs_charindex(str, rows[i].next)), JS_PROP_C_W_E);
       JS_DefinePropertyValueStr(ctx, obj, "width", JS_NewFloat64(ctx, rows[i].width), JS_PROP_C_W_E);
