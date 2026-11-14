@@ -266,7 +266,7 @@ nvgjs_copyarray(JSContext* ctx, JSValueConst value, const float vec[], int len) 
 }
 
 int
-nvgjs_arguments(JSContext* ctx, float vec[2], int vlen, int argc, JSValueConst argv[]) {
+nvgjs_arguments(JSContext* ctx, float vec[], int vlen, int argc, JSValueConst argv[]) {
   if(argc >= 1 && JS_IsObject(argv[0]) && !nvgjs_inputarray(ctx, vec, vlen, argv[0]))
     return 1;
 

@@ -1,6 +1,8 @@
 # Find GLEW library and include paths for CMU462 This defines the following:
 #
 # GLEW_FOUND             If GLEW is found GLEW_LIBRARY           GLEW libraries GLEW_INCLUDE_DIR GLEW include directories GLEW_LIBRARY_DIR       GLEW library directories
+include(${CMAKE_CURRENT_LIST_DIR}/BuildGLEW.cmake)
+
 macro(find_glew)
   if(UNIX)
     set(GLEW_INC_NAMES glew.h)
@@ -9,11 +11,15 @@ macro(find_glew)
       set(GLEW_LIB_NAMES libglew_osx.a)
     endif(APPLE)
   endif(UNIX)
+  if(WIN32)
+    set(GLEW_INC_NAMES GL/glew.h)
+    set(GLEW_LIB_NAMES glew32 libglew32.dll.a libglew32.a)
+  endif(WIN32)
 
   # GLEW static library
   find_library(GLEW_LIBRARY NAMES ${GLEW_LIB_NAMES} DOC "GLEW library" CMAKE_FIND_ROOT_PATH_BOTH)
 
-  if(NOT GLEW_LIBRARY)
+  if(NOT GLEW_LIBRARY AND NOT WIN32)
     if(NOT PKG_CONFIG_FOUND)
       include(FindPkgConfig)
     endif(NOT PKG_CONFIG_FOUND)
@@ -22,6 +28,11 @@ macro(find_glew)
 
     set(GLEW_LIBRARY "${GLEW_LINK_LIBRARIES}")
     set(GLEW_INCLUDE_DIR "${GLEW_INCLUDE_DIRS}")
+  endif(NOT GLEW_LIBRARY AND NOT WIN32)
+
+  # not installed for this target: build it
+  if(NOT GLEW_LIBRARY)
+    build_glew()
   endif(NOT GLEW_LIBRARY)
 
   # GLEW library dir

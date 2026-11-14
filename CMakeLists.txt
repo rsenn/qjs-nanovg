@@ -34,14 +34,23 @@ find_glfw()
 find_quickjs()
 configure_quickjs()
 
-include_directories(${GLEW_INCLUDE_DIR} ${GLFW_INCLUDE_DIR} ${QUICKJS_INCLUDE_DIR})
-link_directories(${GLEW_LIBRARY_DIR} ${GLFW_LIBRARY_DIR} ${QUICKJS_LIBRARY_DIR})
+include_directories(${GLEW_INCLUDE_DIR} ${QUICKJS_INCLUDE_DIR})
+link_directories(${GLEW_LIBRARY_DIR} ${QUICKJS_LIBRARY_DIR})
 
 # qjs-nanovg (nanovg.so, BUILD_SHARED) and qjs-nanovg-static (quickjs-nanovg.a plus
 # quickjs-nanovg.module.cmake, BUILD_STATIC) from make_module().
-set(nanovg_LIBRARIES ${GLEW_LIBRARY} OpenGL::GL)
+if(WIN32)
+  # never the host's pkg-config GLEW (-lGL -lX11 -lGLU): use the MinGW sysroot's glew32 + opengl32
+  set(nanovg_LIBRARIES ${GLEW_LIBRARY} opengl32)
+else(WIN32)
+  set(nanovg_LIBRARIES ${GLEW_LIBRARY} OpenGL::GL)
+endif(WIN32)
 # the static module's link line is exported to other configures: plain paths, no imported targets
-set(nanovg_LIBRARIES_static ${GLEW_LIBRARY} ${OPENGL_LIBRARIES})
+if(WIN32)
+  set(nanovg_LIBRARIES_static ${GLEW_LIBRARY} opengl32)
+else(WIN32)
+  set(nanovg_LIBRARIES_static ${GLEW_LIBRARY} ${OPENGL_LIBRARIES})
+endif(WIN32)
 
 make_module(
   nanovg
@@ -54,6 +63,9 @@ foreach(_t qjs-nanovg qjs-nanovg-static)
   if(TARGET ${_t})
     target_include_directories(${_t} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/nanovg/src ${QUICKJS_INCLUDE_DIR})
     target_compile_definitions(${_t} PRIVATE NANOVG_GLEW=1 NANOVG_GL3_IMPLEMENTATION=1)
+    if(GLEW_BUILT_STATIC)
+      target_compile_definitions(${_t} PRIVATE GLEW_STATIC)
+    endif(GLEW_BUILT_STATIC)
   endif(TARGET ${_t})
 endforeach(_t)
 
