@@ -1,8 +1,8 @@
 /**
- * @file js-utils.h
+ * @file nvgjs-utils.h
  */
-#ifndef JS_UTILS_H
-#define JS_UTILS_H
+#ifndef NVGJS_UTILS_H
+#define NVGJS_UTILS_H
 
 #include <quickjs.h>
 #include <cutils.h>
@@ -13,7 +13,7 @@
  *
  * Used when a NanoVG function needs to write results directly into a JS-owned
  * typed array. Throws a TypeError on the QuickJS context if @p value is not a
- * Float32Array.
+ * Float32Array (other typed arrays, even with 4-byte elements, are rejected).
  *
  * @param      ctx      QuickJS context (for exceptions).
  * @param[out] plength  Receives the array length in elements (floats).
@@ -27,13 +27,13 @@ float* nvgjs_outputarray(JSContext*, int* plength, JSValueConst);
  *
  * Convenience wrapper used as an output buffer for functions that produce a
  * fixed number of floats; only returns the pointer if the array is large
- * enough.
+ * enough. Throws a TypeError if not a Float32Array, a RangeError if too short.
  *
  * @param ctx         QuickJS context (for exceptions).
  * @param min_length  Minimum number of float elements required.
  * @param value       The JS value, expected to be a Float32Array.
- * @return Pointer to the float data, or NULL if not a Float32Array or too
- * short.
+ * @return Pointer to the float data, or NULL (exception thrown) if not a
+ * Float32Array or too short.
  */
 float* nvgjs_output(JSContext*, int min_length, JSValueConst);
 
@@ -43,7 +43,8 @@ float* nvgjs_output(JSContext*, int min_length, JSValueConst);
  * If @p vector is a Float32Array it returns a direct (zero-copy) pointer into
  * its storage; otherwise it reads the values out of a plain Array or any
  * iterable into the caller-supplied scratch buffer @p vec and returns that.
- * Used for arguments NanoVG both reads and may write back.
+ * Only the Float32Array path is zero-copy; the @p vec fallback is a copy that this
+ * function never writes back, the caller does (nvgjs_copyarray()).
  *
  * @param      ctx         QuickJS context (for exceptions).
  * @param[out] vec         Caller-provided fallback buffer (used for non-typed
@@ -147,14 +148,17 @@ void nvgjs_copyarray(JSContext*, JSValueConst, const float[], int len);
  *
  * If the first argument is an object it is read as a vector (via
  * nvgjs_inputarray); otherwise @p vlen scalar arguments are converted. Handles
- * the common overload "fn(x, y)" vs "fn([x, y])".
+ * the common overload "fn(x, y)" vs "fn([x, y])". A failed object read leaves
+ * no exception pending when the scalar form is then tried.
  *
  * @param      ctx   QuickJS context (for exceptions).
  * @param[out] vec   Destination buffer (sized for the vector, e.g. 2 floats).
  * @param      vlen  Number of floats the vector holds.
  * @param      argc  Argument count as passed to the JS function.
  * @param      argv  Argument values as passed to the JS function.
- * @return Number of elements filled (the vector length), or 0 if none matched.
+ * @return Number of arguments consumed: 1 for the object form, @p vlen for the
+ * scalar form; 0 if none matched (an exception is pending only if a scalar
+ * conversion failed).
  */
 int nvgjs_arguments(JSContext*, float[], int, int, JSValueConst[]);
 
@@ -192,7 +196,7 @@ nvgjs_tofloat32(JSContext* ctx, float* pres, JSValueConst val) {
  * @param charpos  Target character (code point) index.
  * @return Byte offset of the @p charpos-th character (clamped to @p len).
  */
-static size_t
+static inline size_t
 nvgjs_utf8offset(const void* str, size_t len, int charpos) {
   const uint8_t *p = (const uint8_t*)str, *e = p + len;
 
@@ -218,4 +222,4 @@ nvgjs_same_object(JSValueConst a, JSValueConst b) {
   return JS_IsObject(a) && JS_IsObject(b) && JS_VALUE_GET_PTR(a) == JS_VALUE_GET_PTR(b);
 }
 
-#endif /* defined JS_UTILS_H */
+#endif /* defined NVGJS_UTILS_H */

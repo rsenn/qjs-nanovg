@@ -36,21 +36,53 @@ nvgjs_typedarray(JSContext* ctx, JSValueConst obj, int* plength, int* pbytes_per
   return ptr;
 }
 
+/* Returns a new reference to the Symbol.iterator atom, to be released with
+ * JS_FreeAtom(). Atoms belong to a runtime, so it is looked up on every call
+ * instead of being cached in a static. */
 static JSAtom
 nvgjs_iterator(JSContext* ctx) {
-  static JSAtom iterator;
+  JSValue global = JS_GetGlobalObject(ctx);
+  JSValue ctor = JS_GetPropertyStr(ctx, global, "Symbol");
+  JS_FreeValue(ctx, global);
+  JSValue sym = JS_GetPropertyStr(ctx, ctor, "iterator");
+  JS_FreeValue(ctx, ctor);
+  JSAtom atom = JS_ValueToAtom(ctx, sym);
+  JS_FreeValue(ctx, sym);
+  return atom;
+}
 
-  if(!iterator) {
-    JSValue global = JS_GetGlobalObject(ctx);
-    JSValue ctor = JS_GetPropertyStr(ctx, global, "Symbol");
-    JS_FreeValue(ctx, global);
-    JSValue sym = JS_GetPropertyStr(ctx, ctor, "iterator");
-    JS_FreeValue(ctx, ctor);
-    iterator = JS_ValueToAtom(ctx, sym);
-    JS_FreeValue(ctx, sym);
+static BOOL
+nvgjs_isiterable(JSContext* ctx, JSValueConst obj) {
+  JSAtom atom = nvgjs_iterator(ctx);
+  BOOL ret = FALSE;
+
+  if(atom != JS_ATOM_NULL) {
+    ret = JS_HasProperty(ctx, obj, atom) > 0;
+    JS_FreeAtom(ctx, atom);
   }
 
-  return iterator;
+  return ret;
+}
+
+/* True if obj is a Float32Array (or a subclass); the class id of a builtin
+ * class is the same in every runtime, so it can be cached. */
+static BOOL
+nvgjs_isfloat32array(JSContext* ctx, JSValueConst obj) {
+  static JSClassID float32_class_id;
+
+  if(!float32_class_id) {
+    JSValue len = JS_NewInt32(ctx, 0);
+    JSValue probe = JS_NewTypedArray(ctx, 1, &len, JS_TYPED_ARRAY_FLOAT32);
+
+    if(JS_IsException(probe))
+      JS_FreeValue(ctx, JS_GetException(ctx));
+    else
+      float32_class_id = JS_GetClassID(probe);
+
+    JS_FreeValue(ctx, probe);
+  }
+
+  return float32_class_id && JS_GetClassID(obj) == float32_class_id;
 }
 
 static JSValue
@@ -83,8 +115,8 @@ nvgjs_outputarray(JSContext* ctx, int* plength, JSValueConst value) {
   int bytes_per_element = 0;
   float* ptr;
 
-  if((ptr = nvgjs_typedarray(ctx, value, plength, &bytes_per_element)))
-    if(bytes_per_element == sizeof(float))
+  if(nvgjs_isfloat32array(ctx, value))
+    if((ptr = nvgjs_typedarray(ctx, value, plength, &bytes_per_element)))
       return ptr;
 
   JS_ThrowTypeError(ctx, "expecting a Float32Array");
@@ -96,11 +128,15 @@ nvgjs_output(JSContext* ctx, int min_length, JSValueConst value) {
   int len;
   float* ptr;
 
-  if((ptr = nvgjs_outputarray(ctx, &len, value)))
-    if(len >= min_length)
-      return ptr;
+  if(!(ptr = nvgjs_outputarray(ctx, &len, value)))
+    return 0;
 
-  return 0;
+  if(len < min_length) {
+    JS_ThrowRangeError(ctx, "Float32Array must have at least %i elements (has %i)", min_length, len);
+    return 0;
+  }
+
+  return ptr;
 }
 
 float*
@@ -125,7 +161,7 @@ nvgjs_inputoutputarray(JSContext* ctx, float vec[], int min_length, JSValueConst
 
   JS_FreeValue(ctx, JS_GetException(ctx));
 
-  if(JS_HasProperty(ctx, vector, nvgjs_iterator(ctx)))
+  if(nvgjs_isiterable(ctx, vector))
     if(!nvgjs_inputiterator(ctx, vec, min_length, vector))
       return vec;
 
@@ -191,7 +227,10 @@ nvgjs_inputarray(JSContext* ctx, float vec[], int min_length, JSValueConst vecto
 
 int
 nvgjs_inputiterator(JSContext* ctx, float vec[], int min_length, JSValueConst vector) {
-  JSValue iter = JS_Invoke(ctx, vector, nvgjs_iterator(ctx), 0, 0);
+  JSAtom atom = nvgjs_iterator(ctx);
+  JSValue iter = atom == JS_ATOM_NULL ? JS_EXCEPTION : JS_Invoke(ctx, vector, atom, 0, 0);
+
+  JS_FreeAtom(ctx, atom);
 
   if(JS_IsException(iter)) {
     JS_ThrowTypeError(ctx, "object must be iterable");
@@ -236,7 +275,7 @@ nvgjs_input(JSContext* ctx, float vec[], int len, const char* const prop_map[], 
 
   JS_FreeValue(ctx, JS_GetException(ctx));
 
-  if(JS_HasProperty(ctx, vector, nvgjs_iterator(ctx)))
+  if(nvgjs_isiterable(ctx, vector))
     if(!nvgjs_inputiterator(ctx, vec, len, vector))
       return 0;
 
@@ -267,8 +306,13 @@ nvgjs_copyarray(JSContext* ctx, JSValueConst value, const float vec[], int len) 
 
 int
 nvgjs_arguments(JSContext* ctx, float vec[], int vlen, int argc, JSValueConst argv[]) {
-  if(argc >= 1 && JS_IsObject(argv[0]) && !nvgjs_inputarray(ctx, vec, vlen, argv[0]))
-    return 1;
+  if(argc >= 1 && JS_IsObject(argv[0])) {
+    if(!nvgjs_inputarray(ctx, vec, vlen, argv[0]))
+      return 1;
+
+    /* not a usable vector object: discard the probe's exception, try scalars */
+    JS_FreeValue(ctx, JS_GetException(ctx));
+  }
 
   if(argc >= vlen) {
     for(int i = 0; i < vlen; i++)

@@ -42,7 +42,13 @@ nvgjs_transform_output(JSContext* ctx, JSValueConst value) {
   if(nvgjs_same_object(value, transform_ctor))
     return 0;
 
-  return nvgjs_output(ctx, 6, value);
+  float* ptr = nvgjs_output(ctx, 6, value);
+
+  /* NULL means "not a Transform, use the static form": drop the probe's exception */
+  if(!ptr)
+    JS_FreeValue(ctx, JS_GetException(ctx));
+
+  return ptr;
 }
 
 static const char* const nvgjs_transform_keys[] = {"a", "b", "c", "d", "e", "f"};
@@ -128,6 +134,18 @@ nvgjs_transform_set(JSContext* ctx, JSValueConst this_val, JSValueConst value, i
   return JS_UNDEFINED;
 }
 
+/* optional matrix argument: on failure the probe exception is cleared so the
+   caller can fall back to its scratch buffer */
+static float*
+nvgjs_optionalmatrix(JSContext* ctx, float tmp[6], JSValueConst v) {
+  float* mat;
+
+  if(!(mat = nvgjs_inputoutputarray(ctx, tmp, 6, v)))
+    JS_FreeValue(ctx, JS_GetException(ctx));
+
+  return mat;
+}
+
 NVGJS_DECL(Transform, Identity) {
   float tmp[6], *mat;
   int i = 0;
@@ -154,7 +172,7 @@ NVGJS_DECL(Transform, Translate) {
   int i = 0;
 
   if(!(mat = nvgjs_transform_output(ctx, this_obj))) {
-    if(argc > 1 && JS_IsObject(argv[0]) && (mat = nvgjs_inputoutputarray(ctx, tmp, 6, argv[0])))
+    if(argc > 1 && JS_IsObject(argv[0]) && (mat = nvgjs_optionalmatrix(ctx, tmp, argv[0])))
       i++;
     else
       mat = tmp;
@@ -176,7 +194,7 @@ NVGJS_DECL(Transform, Scale) {
   int i = 0;
 
   if(!(mat = nvgjs_transform_output(ctx, this_obj))) {
-    if(argc > 1 && JS_IsObject(argv[0]) && (mat = nvgjs_inputoutputarray(ctx, tmp, 6, argv[0])))
+    if(argc > 1 && JS_IsObject(argv[0]) && (mat = nvgjs_optionalmatrix(ctx, tmp, argv[0])))
       i++;
     else
       mat = tmp;
@@ -199,7 +217,7 @@ NVGJS_DECL(Transform, Rotate) {
   int i = 0;
 
   if(!(mat = nvgjs_transform_output(ctx, this_obj))) {
-    if(argc > 1 && JS_IsObject(argv[0]) && (mat = nvgjs_inputoutputarray(ctx, tmp, 6, argv[0])))
+    if(argc > 1 && JS_IsObject(argv[0]) && (mat = nvgjs_optionalmatrix(ctx, tmp, argv[0])))
       i++;
     else
       mat = tmp;
@@ -225,7 +243,7 @@ NVGJS_DECL(Transform, SkewX) {
   int i = 0;
 
   if(!(mat = nvgjs_transform_output(ctx, this_obj))) {
-    if(argc > 1 && JS_IsObject(argv[0]) && (mat = nvgjs_inputoutputarray(ctx, tmp, 6, argv[0])))
+    if(argc > 1 && JS_IsObject(argv[0]) && (mat = nvgjs_optionalmatrix(ctx, tmp, argv[0])))
       i++;
     else
       mat = tmp;
@@ -251,7 +269,7 @@ NVGJS_DECL(Transform, SkewY) {
   int i = 0;
 
   if(!(mat = nvgjs_transform_output(ctx, this_obj))) {
-    if(argc > 1 && JS_IsObject(argv[0]) && (mat = nvgjs_inputoutputarray(ctx, tmp, 6, argv[0])))
+    if(argc > 1 && JS_IsObject(argv[0]) && (mat = nvgjs_optionalmatrix(ctx, tmp, argv[0])))
       i++;
     else
       mat = tmp;
@@ -276,7 +294,7 @@ NVGJS_DECL(Transform, Multiply) {
   int n, i = 0;
 
   if(!(mat = nvgjs_transform_output(ctx, this_obj))) {
-    if(argc > 1 && (mat = nvgjs_inputoutputarray(ctx, tmp, 6, argv[0])))
+    if(argc > 1 && (mat = nvgjs_optionalmatrix(ctx, tmp, argv[0])))
       i++;
     else
       mat = tmp;
@@ -310,7 +328,7 @@ NVGJS_DECL(Transform, Premultiply) {
   int i = 0;
 
   if(!(mat = nvgjs_transform_output(ctx, this_obj))) {
-    if(argc > 1 && (mat = nvgjs_inputoutputarray(ctx, tmp, 6, argv[0])))
+    if(argc > 1 && (mat = nvgjs_optionalmatrix(ctx, tmp, argv[0])))
       i++;
     else
       mat = tmp;
@@ -342,7 +360,7 @@ NVGJS_DECL(Transform, Inverse) {
   int ret, i = 0;
 
   if(!(mat = nvgjs_transform_output(ctx, this_obj))) {
-    if(argc > 0 && (mat = nvgjs_inputoutputarray(ctx, tmp, 6, argv[0])))
+    if(argc > 0 && (mat = nvgjs_optionalmatrix(ctx, tmp, argv[0])))
       i++;
     else
       mat = tmp;
@@ -351,7 +369,8 @@ NVGJS_DECL(Transform, Inverse) {
   if(argc < 1 + i)
     return JS_ThrowInternalError(ctx, "need %d arguments", 1 + i);
 
-  nvgjs_inputarray(ctx, src, 6, argv[i]);
+  if(nvgjs_inputarray(ctx, src, 6, argv[i]))
+    return JS_EXCEPTION;
 
   if(!(ret = nvgTransformInverse(mat, src)))
     return JS_ThrowInternalError(ctx, "nvgTransformInverse failed");
@@ -374,55 +393,75 @@ enum {
   TRANSFORM_POINT,
 };
 
+/* argument i, or undefined (which converts to NaN, as in the web build) */
+#define NVGJS_ARG(i) ((i) < argc ? argv[i] : JS_UNDEFINED)
+
 static JSValue
 nvgjs_transform_function(JSContext* ctx, JSValueConst this_obj, int argc, JSValueConst argv[], int magic) {
-
   float *mat = nvgjs_transform_output(ctx, this_obj), tmp[6];
+
+  if(!mat)
+    return JS_ThrowTypeError(ctx, "expecting a Float32Array");
 
   switch(magic) {
     case TRANSFORM_TRANSLATE: {
       float x, y;
-      nvgjs_tofloat32(ctx, &x, argv[0]);
-      nvgjs_tofloat32(ctx, &y, argv[1]);
+
+      if(nvgjs_tofloat32(ctx, &x, NVGJS_ARG(0)) || nvgjs_tofloat32(ctx, &y, NVGJS_ARG(1)))
+        return JS_EXCEPTION;
+
       nvgTransformTranslate(tmp, x, y);
       break;
     }
     case TRANSFORM_SCALE: {
-      float x, y;
-      if(argc > 0)
-        nvgjs_tofloat32(ctx, &x, argv[0]);
-      else
-        x = 1;
-      if(argc > 1)
-        nvgjs_tofloat32(ctx, &y, argv[1]);
-      else
-        y = x;
+      float x = 1, y;
+
+      if(argc > 0 && nvgjs_tofloat32(ctx, &x, argv[0]))
+        return JS_EXCEPTION;
+
+      y = x;
+
+      if(argc > 1 && nvgjs_tofloat32(ctx, &y, argv[1]))
+        return JS_EXCEPTION;
 
       nvgTransformScale(tmp, x, y);
       break;
     }
     case TRANSFORM_ROTATE: {
       float a;
-      nvgjs_tofloat32(ctx, &a, argv[0]);
+
+      if(nvgjs_tofloat32(ctx, &a, NVGJS_ARG(0)))
+        return JS_EXCEPTION;
+
       nvgTransformRotate(tmp, a);
       break;
     }
     case TRANSFORM_SKEWX: {
       float a;
-      nvgjs_tofloat32(ctx, &a, argv[0]);
+
+      if(nvgjs_tofloat32(ctx, &a, NVGJS_ARG(0)))
+        return JS_EXCEPTION;
+
       nvgTransformSkewX(tmp, a);
       break;
     }
     case TRANSFORM_SKEWY: {
       float a;
-      nvgjs_tofloat32(ctx, &a, argv[0]);
+
+      if(nvgjs_tofloat32(ctx, &a, NVGJS_ARG(0)))
+        return JS_EXCEPTION;
+
       nvgTransformSkewY(tmp, a);
       break;
     }
 
     case TRANSFORM_MULTIPLY: {
-      if(!nvgjs_arguments(ctx, tmp, 6, argc, argv))
+      if(!nvgjs_arguments(ctx, tmp, 6, argc, argv)) {
+        if(JS_HasException(ctx))
+          return JS_EXCEPTION;
+
         nvgTransformIdentity(tmp);
+      }
 
       nvgTransformMultiply(mat, tmp);
       nvgTransformIdentity(tmp); /* neutralise the tail Premultiply below */
@@ -430,8 +469,12 @@ nvgjs_transform_function(JSContext* ctx, JSValueConst this_obj, int argc, JSValu
     }
 
     case TRANSFORM_PREMULTIPLY: {
-      if(!nvgjs_arguments(ctx, tmp, 6, argc, argv))
+      if(!nvgjs_arguments(ctx, tmp, 6, argc, argv)) {
+        if(JS_HasException(ctx))
+          return JS_EXCEPTION;
+
         nvgTransformIdentity(tmp);
+      }
 
       nvgTransformPremultiply(mat, tmp);
       nvgTransformIdentity(tmp);
@@ -446,8 +489,10 @@ nvgjs_transform_function(JSContext* ctx, JSValueConst this_obj, int argc, JSValu
     }
 
     case TRANSFORM_POINT: {
-      float in[2], out[2];
-      nvgjs_arguments(ctx, in, 2, argc, argv);
+      float in[2] = {0, 0}, out[2];
+
+      if(!nvgjs_arguments(ctx, in, 2, argc, argv) && JS_HasException(ctx))
+        return JS_EXCEPTION;
 
       nvgTransformPoint(&out[0], &out[1], mat, in[0], in[1]);
 
