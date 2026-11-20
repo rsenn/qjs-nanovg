@@ -1,1 +1,3 @@
 .tmp/
+web/nanovg-web.js
+web/nanovg-web.wasm
