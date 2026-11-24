@@ -32,7 +32,8 @@ cmake --install build      # may need sudo
 
 | Option | Default | Effect |
 |---|---|---|
-| `BUILD_STATIC_MODULES` | ON | Also builds `libnanovg.a` (`qjs-nanovg-static`), for linking nanovg into your own interpreter, for example through qjsm's `EXTERNAL_MODULES`. |
+| `BUILD_SHARED` | ON | Builds `nanovg.so` (`qjs-nanovg`), the module `qjsm` loads. |
+| `BUILD_STATIC` | ON | Also builds `libnanovg.a` and `quickjs-nanovg.module.cmake` (`qjs-nanovg-static`), for linking nanovg into your own interpreter, for example through qjsm's `EXTERNAL_MODULES`. |
 | `BUILD_WEB` | ON | Also builds the browser version in `web/` when `emcc` is found. See [web/README.md](web/README.md). |
 | `BUILD_EXAMPLE` | OFF | Builds the upstream C example, `nanovg_example`, and a `run_example` target. |
 
