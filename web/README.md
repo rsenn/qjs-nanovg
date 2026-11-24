@@ -29,7 +29,9 @@ cmake -B build -DEMCC=/path/to/emcc            # point at a specific emcc
 cmake -B build -DBUILD_WEB=OFF                 # skip it
 ```
 
-`emcc` is looked up on `PATH`, then under `$EMSDK/upstream/emscripten` and `$EMSCRIPTEN`. Without one, CMake prints a status message and builds everything else. The output is written into this directory, so `git status` shows the two artifacts as modified after a rebuild.
+`emcc` is looked up on `PATH`, then under `$EMSDK/upstream/emscripten` and `$EMSCRIPTEN`. Without one, CMake prints a status message and builds everything else. The output is written into this directory; `web/nanovg-web.js` and `web/nanovg-web.wasm` are git-ignored build products.
+
+If `emcc` stops with `cache directory ... is not writable` (an emsdk installed where your user cannot write), point it at a writable cache: `EM_CACHE=$HOME/.cache/emscripten cmake --build build`. The first build into an empty cache compiles Emscripten's system libraries and takes over 10 minutes.
 
 Without CMake:
 

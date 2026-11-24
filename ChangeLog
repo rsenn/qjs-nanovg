@@ -1,3 +1,21 @@
+2026-11-20  Roman Senn  <roman.l.senn@gmail.com>
+
+	Verified the BUILD_WEB option.
+
+	* CMakeLists.txt (BUILD_WEB):
+	Already present (default ON, runs web/build.sh through emcc, target
+	qjs-nanovg-web). Verified with -DBUILD_WEB=ON in a scratch build
+	directory: configure exits 0, the build produces web/nanovg-web.js
+	(93 KB) and web/nanovg-web.wasm (195 KB). The outputs were not loaded
+	in a browser. With emsdk under /mnt/data/opt the build needs
+	EM_CACHE=<writable dir>, the install's own cache is not writable.
+
+	* .gitignore:
+	Ignore web/nanovg-web.js and web/nanovg-web.wasm (4bb53bd).
+
+	* doc/build-options.md [new], web/README.md, TODO.md:
+	Document the CMake options and the EM_CACHE caveat.
+
 2026-07-04  Roman Senn  <roman.l.senn@gmail.com>
 
 	Second-round bug-fix pass. Seven more defects found on a re-read of
